@@ -1,0 +1,26 @@
+
+1. Develop module to process raw data and generate the storage metrics
+1.1	   Cache the results of the metrics
+
+2. Check the different options to get the MAC adress of a nfs server  - Done , pin and arp is the simplest portable way for direct routing.
+2.1	Code to get the mac address of NFS server - From ping and a arp lookup
+
+3. Test the instrumentation of VM, Software Raid for all possible configurations4. Test for clusters
+
+5. Check for the possibility of a NFS identifier from the host - Done, Not possible from the RFC for NFS v2 and Mount RPC. STATFS for a filesystem is the best bet , but it provides just what df shows on the host.
+
+6. Check if the entire filesystem directory structure and size can be known from the hst for NFS - Done, Not Possible
+
+7. PL/SQL for reporsitory post processing
+
+8. SQL for db reporting
+
+9. Summary computation using repository metrics
+
+10. Windows NT porting
+
+11. Merge all c source code into one file
+
+12. Get the DB credentials from the target credentials file on the target
+
+13. Get the DB targets from the targets file on the target

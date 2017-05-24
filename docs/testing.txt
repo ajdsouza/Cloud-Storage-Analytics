@@ -1,0 +1,17 @@
+		TEST NOTES
+
+DISKS
+	- Make sure the results produce a unique key
+	These commands test the uniqueness of the key.  The result shows that each line has a unique key
+	# ./disks |cut -d'|' -f27|uniq|wc -l
+	     110
+	# ./disks |wc -l
+
+	- Verify the disk/slice sizes 
+
+	- ./disks |grep =DISK |grep -cv CHAR equals the number of disks according to /usr/sbin/format
+
+REPOSITORY
+	- Test for Different Oracle OEM Versions
+
+

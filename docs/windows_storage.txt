@@ -1,0 +1,22 @@
+Windows NT 
+----------
+
+1. Storage devices do not have explicit opertaing system paths.
+2. STorage devices are usually identified by their mount points eg . C:, D: etc.
+3. There can be 24 such lettered drives from c to Z , additional disks will have to be mounted on folders eg. c:\temp
+   The folders are required to be empty when mounting the disks
+
+4. Veritas provides a full featured Volume Manager for Windows NT. The other popular volume managers in use are
+   - Disk manager ( developed by Veritas and MS, its a less featured version of the veritas volume manager)
+   - Synology VM
+   etc.
+
+5. Disks on a windows NT box are either basic or dynamic disks. By default all disks are basic. A basic disk can only be directly mounted and cannot have a volume or RAID disk created from it.
+6. To have a volume created on it the disk needs to be explicity categorized as a dynamic disk.
+7. The full featured Veritas Volume manager creates a basic disk group by default, this disk group contains all the basic disks.
+8. Only Dynamic disks can be used in the Veritas volume manager for creating volumes.
+9. The created volumes can be mounted as drive letters or in folders
+10. Veritas supports DMP on Windows NT
+
+11. Disks in a windows NT environment are identified by strings as HArddisk0, Harddisk1
+    The Volumes created do not have OS paths either, they can be labeled with any unique string

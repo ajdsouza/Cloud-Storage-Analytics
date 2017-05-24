@@ -1,0 +1,45 @@
+***CURRENT ISSUES**************************************************************
+
+
+
+LINUX
+-------------------------------------------------------------------------------
+Problem:  pvdisplay needs root
+Description: The pvdisplay command is used to get info about physical disks
+	and subdisks for the Linux LVM Volume Manager.  It requires root access
+	to execute.  Setuid (runcmd) is not enough.  We need to find a way to 
+	properly run the commmand or get the information.
+-------------------------------------------------------------------------------
+<SOLVED>
+Problem: cciss arrays do not provide serial number
+Description: Compaq Smart Arrays that use the cciss driver do not seem to 
+	provide a serial number.
+-------------------------------------------------------------------------------
+NFS
+1. Inode 
+Filesystem ID, inode for nfs filesystems is not consistent. Files on a nfs filesystem do not have the filesystem if of the nfs filesysetm they are mounted on.
+stat doesnt seem to work for NFS, explore ustat,statvfs
+
+-----------------------------------------------------------------------------
+Analysis
+
+1.  Grouping disk keys with different attributes
+2.  Get MAX/MIN or AVG for shared storage ?
+3.  Auto txn in pl/sql
+4.  Cache for performance
+5.  Update raw size
+6.  Performance enhancements
+7.  Flag discrepencies in configuration of shared storage between hosts
+	as warnings
+8.  Disks W/O diskgoups in volumes, 
+    Disks as hotspares in raid managers and volumes
+9.  Weed out -ve values as issues
+10. Clustered index, hash indexing, temporary tables
+
+-----------------------------------------------------------------------------
+Oracle database metrics
+1. Add redo logs to the list of metrics
+2. Add archive logs  to the list of metrics
+
+-----------------------------------------------------------------------------
+

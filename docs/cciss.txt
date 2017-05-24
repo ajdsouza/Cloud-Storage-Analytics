@@ -1,0 +1,8 @@
+compiling ccissinfo.c requires the presence of /usr/include/linux/cciss_ioctl.h.
+
+Most linux distributions have this, but some do not.
+
+So far these distributions have been verified:
+	Redhat linux 7.2
+	Redhat Advanced Server 2.1
+	Suse 7.2

@@ -1,0 +1,92 @@
+10/10/03
+
+Release 
+-------
+git_100903
+
+Bug fixes
+---------
+#3171705 - VOLUME METRICS - POOR PERFORMACE FETCHING VOLUME METRICS ON LARGE SYSTEMS
+	 Cache properties for all volumes and sub disk elements of a volume in a hash and look up hash each time
+
+#3171746 - WAIT FOR REPOSITOTRY DATABASE CONNECTIONS AND TIMEOUT 
+	 Connect to the database after fetching the metrics
+	 Add function for any database connection Utilites::dbconnect
+	 Add retry database connections with a waitime in case connection fails
+	 Reduce insert time by doing a bulk insert thru a server pl/sql package.
+	 Reduce delete time by deleting thru a server pl/sql package
+	 
+#3171776 - LOG DOES NOT INDICATE THE JOB TYPE
+	 Add job and target identification to the log
+	 Indication repository db connection attempt
+
+#3189668 - SCSIINQ FAILS FOR SOLARIS DISKS WITH PRIVILEGE OF 600 OR LESS.
+	 effective uid restored for solaris before all ioctl operations in scsiinquiry
+
+#3108243 - QUERY FOR FETCHING FREE SPACE IN TABLESPACES TAKES INORDINATE AMOUNT OF TIME
+	 Switched to a better tuned query.
+
+Enhancements
+------------
+Add metric column storage_filesystems_mount_options in metric storage_filesystem metrics
+Add sub routine getNFSFilesystems to the filesystem module Filesystem.pm, registered this sub in Storage.pm as getNFSFilesystemMetric 
+    - Returns only the nfs filesystems from the already cached filesystem metrics
+
+List of modified files
+----------------------
+git/oem/storage/stormon
+git/oem/storage/c-source/scsiinq.c
+git/perl-addon/Monitor/Upload.pm
+git/perl-addon/Monitor/Utilities.pm
+git/perl-addon/Monitor/Storage.pm
+git/perl-addon/Monitor/OS/App.pm
+git/perl-addon/Monitor/OS/Filesystem.pm
+git/perl-addon/Monitor/OS/Veritas.pm
+git/perl-addon/Monitor/OS/Linux.pm
+
+------------------------------------------------------------------------------------
+03/15/03
+
+Release 
+-------
+git_031503
+
+Bug fixes
+---------
+- Create log file in alternate locations.
+- Continue loading metrics in the event of failure to log
+- Increase timeout for disk discovery to 10 Mins, 
+- Increase timeout for EMC discovery to 5 mins.
+- Increase the node limit in disk discovery to 25000. 
+- Restore effective userid when looking for OS executables.
+- Added support to collect database metrics for version 7 databases
+- Handle linux devices with more than 9 partitions, having devicenum > 26
+- Add metric column target_name for Oracle database metrics
+
+Enhancements
+------------
+- Port to support HPUX 
+- Identify the type of files in filesystem and database metrics
+- Added support for Solaris 2.9 
+
+List of modified files
+----------------------
+stormon/scripts/stormon
+stormon/scripts/testload
+stormon/csource/configure
+stormon/csource/configure.in
+stormon/csource/kdisks.c
+stormon/csource/run_pvdisplay.c
+stormon/csource/run_raw.c
+stormon/csource/run_sfdisk.c
+stormon/csource/run_vxprint.c
+stormon/csource/runcmd.c
+stormon/csource/scsiinq.c
+stormon/csource/syminfo.c
+stormon/perlmodules/Storage.pm
+stormon/perlmodules/App.pm
+stormon/perlmodules/Filesystem.pm
+stormon/perlmodules/Hpux.pm
+stormon/perlmodules/Linux.pm
+stormon/perlmodules/Solaris.pm
+stormon/perlmodules/Emc.pm

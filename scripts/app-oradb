@@ -1,0 +1,80 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved 
+#
+#  $Id: app-oradb,v 1.3 2002/05/23 00:00:24 ajdsouza Exp $ 
+#
+#  $Log: app-oradb,v $
+#  Revision 1.3  2002/05/23 00:00:24  ajdsouza
+#
+#  Modify on GIT feedback
+#  Call functions from Monitor::Storage to execute and print the metrics
+#
+#  Revision 1.2  2002/04/23 07:01:52  ajdsouza
+#  Changed Module directory to Monitor
+#
+#  Revision 1.1  2002/04/22 18:52:35  ajdsouza
+#  STDOUT metrics for all applications using storage on the host
+#  currently Oracle database is the only application supported
+#
+#  Revision 1.1  2002/04/19 22:49:37  ajdsouza
+#  Renamed from stormon_app_oradb.pl
+#
+#
+#
+# NAME  
+#	 app-oradb
+#
+# DESC 
+#  	list datafiles for a oracle database with used and free space and link inode#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#		For Oracle database database credentials are read from the environment
+#		Target address expected in the following format
+#		(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=dlsun1170)(PORT=1531))(CONNECT_DATA=(SID=emd)))
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/11/02 - Renamed from stormon_app_oradb.pl
+#			   Changes to be in line with GIT requirements
+# ajdsouza	04/03/02 - MOved print functions to stormon_utilities, pass ref to print function
+# ajdsouza	04/02/02 - Switch between 9I and Mozart print formats on ENV 
+#			   variable EMD_PRINT_ENV, added function printList
+# ajdsouza	10/03/02 - Modified to be in line with other scripts
+# pshivasw      02/22/02 - Creation
+#
+#
+#
+# Metric Name	storage_applications
+#
+#	  Metric Column 					Description
+#	  ---------------------------------------------------------------------------------------------
+#	  storage_applications_type				Type of application 	
+#									eg. ORACLE_DATABASE etc.  
+#         storage_applications_name				application Name 	
+#									eg. dbname for Oracle database
+#         storage_applications_id				application instance Id eg. Oracle sid 
+#         storage_applications_file				file name 
+#         storage_applications_inode				Link Inode# 
+#         storage_applications_size				Size (bytes) 
+#         storage_applications_used				Used (bytes) 
+#	  storage_applications_free				Free (bytes )
+#	  storage_applications_shared				Clustered Application (Y/N)
+#	  storage_applications_cluster_id			Cluster Id 
+#	  storage_applications_oracle_database_tablespace	Tablespace name for a Oracle Database 
+#	  storage_applications_key				Key for the EMD agent/repository
+#
+
+require v5.6.1;
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+apps();
+
+exit 0;

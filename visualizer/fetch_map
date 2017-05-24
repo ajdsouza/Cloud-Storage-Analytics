@@ -1,0 +1,360 @@
+#!/usr/local/git/perl/bin/perl
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+use Monitor::Utilities;
+
+
+my %mgmt_storage_data;
+my %top_nodes;
+my %bottom_nodes;
+my $target_array_ref;
+my %nodes_with_host_unique_id;
+
+# Test repository connection
+$ENV{'UPLOAD_DB_USER'}='em_4';
+$ENV{'UPLOAD_DB_PASSWORD'}='em_4';
+$ENV{'UPLOAD_DB_TNS'}="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))";
+
+my $sql0 = "SELECT target_guid, target_name, comments  FROM MGMT_TARGETS";
+my $sql1 = "SELECT target_guid, storage_layer, name, em_query_flag, entity_type, key_value, sizeb, usedb, freeb  FROM MGMT_STORAGE_DATA";
+my $sql2 = "SELECT target_guid, key_value, parent_key_value FROM  MGMT_STORAGE_KEYS";
+
+my %dbh = dbconnect( $ENV{UPLOAD_DB_USER}, $ENV{UPLOAD_DB_PASSWORD}, $ENV{UPLOAD_DB_TNS}, 10, 3, 30) or warn "\nERROR: Failed to get a connection to the repository. aborting job \n" ;
+$dbh{dbh}->{FetchHashKeyName} = 'NAME_lc';
+
+my $sth0 = $dbh{dbh}->prepare($sql0) or die "Failed to prepare statement $sql0";
+my $sth1 = $dbh{dbh}->prepare($sql1) or die "Failed to prepare statement $sql1";
+my $sth2 = $dbh{dbh}->prepare($sql2) or die "Failed to prepare statement sql2";
+
+
+# fetch the target master from MGMT_TARGETS
+
+$sth0->execute or die "Failed to execute $sql0";
+
+$target_array_ref = $sth0->fetchall_hashref('target_guid');
+
+warn "ERROR : $sql0 fetch :: ".$sth0->errstr."\n" and return if $sth0->err;
+
+warn "ERROR : No rows found for $sql0 \n" and return if not $sth0->rows or not $target_array_ref;
+
+$sth0->finish;
+
+
+
+# Fetch usage data from MGMT_STORAGE_DATA
+
+$sth1->execute or die "Failed to execute $sql1";
+
+my $array_ref1 = $sth1->fetchall_arrayref( {target_guid=>1,storage_layer=>1,name=>1,em_query_flag=>1,entity_type=>1,key_value=>1,sizeb=>1,usedb=>1,freeb=>1} );
+
+warn "ERROR : $sql1 fetch :: ".$sth1->errstr."\n" and return if $sth1->err;
+
+warn "ERROR : No rows found for $sql1 \n" and return if not $sth1->rows or not $array_ref1;
+
+
+for my $row (  @$array_ref1 ) {
+
+    $mgmt_storage_data{$row->{target_guid}}{$row->{key_value}} = $row;
+
+}
+
+$sth1->finish;
+
+
+# Fetch the key map data from MGMT_STORAGE_KEYS
+
+$sth2->execute or die "Failed to execute $sql2";
+
+my $array_ref2 = $sth2->fetchall_arrayref( {target_guid=>1,key_value=>1,parent_key_value=>1} );
+
+warn "ERROR : $sql2 fetch :: ".$sth2->errstr."\n" and return if $sth2->err;
+
+warn "ERROR : NO rows found for $sql2 \n" and return if not $sth2->rows or not $array_ref2;
+
+for my $row (  @$array_ref2 ) {
+    
+    # ERROR If there is NO entry in key master for node
+    die "key_value cannot be null in key map " and exit unless $row->{key_value};
+
+     # ERROR If there is NO entry in key master for node
+    die "parent key_value cannot be null in key map " and exit unless $row->{parent_key_value};
+
+   # ERROR If there is NO entry in key master for node
+    die "Unable to find the entry in key master for key map $row->{target_guid} $row->{key_value} " and exit unless $mgmt_storage_data{$row->{target_guid}}{$row->{key_value}};
+    
+    # If there is no parent node then this is a top node
+    push @{$top_nodes{$row->{target_guid}}->{child_node_list}}, $mgmt_storage_data{$row->{target_guid}}{$row->{key_value}} and next if $row->{key_value} eq $row->{parent_key_value};
+    
+    # ERROR If there is a parent node and if there is NO entry in key master for parent node
+    die " Unable to find the entry in key master for parent node $row->{target_guid} $row->{parent_key_value} " and exit unless defined $mgmt_storage_data{$row->{target_guid}}{$row->{parent_key_value}};
+    
+    # Keep the parent to child relationship between the parent node and child node for top down traversal
+    push @{$mgmt_storage_data{$row->{target_guid}}{$row->{parent_key_value}}->{child_node_list}}, $mgmt_storage_data{$row->{target_guid}}{$row->{key_value}};
+    
+    # Keep the child to parent relationship between the parent node and child node for bottom up traversal
+    push @{$mgmt_storage_data{$row->{target_guid}}{$row->{key_value}}->{parent_node_list}}, $mgmt_storage_data{$row->{target_guid}}{$row->{parent_key_value}};
+    
+    # Keep the peer to peer horizontal relationship between entities which have the same host unique id
+    next unless  $mgmt_storage_data{$row->{target_guid}}{$row->{key_value}}->{host_unique_id};
+    
+    push @{$nodes_with_host_unique_id{$row->{target_guid}}{$mgmt_storage_data{$row->{target_guid}}{$row->{key_value}}->{host_unique_id}}} , $mgmt_storage_data{$row->{target_guid}}{$row->{key_value}};
+    
+}
+
+$sth2->finish;
+
+$dbh{dbh}->rollback and $dbh{dbh}->disconnect or die "ERROR: Failed while disconnection from Maaster database !!\n" ;
+
+# From the node List get the nodes which are the bottom ones, ones with no children
+for my $target_guid ( keys %mgmt_storage_data ) {
+    		    
+    for my $key_value ( keys %{$mgmt_storage_data{$target_guid}} ) {
+	    
+	my $node = $mgmt_storage_data{$target_guid}{$key_value};
+	    
+	push @{$bottom_nodes{$node->{target_guid}}->{parent_node_list}}, $node  unless defined $node->{child_node_list} and $node->{child_node_list} and @{$node->{child_node_list}};
+	    
+    }
+	
+}
+
+
+
+#-----------------------------------------------------------------------------------------------------------
+# TRAVERSAL ROUTINES
+#-----------------------------------------------------------------------------------------------------------
+
+my %indent_hash;
+
+sub print_node_data ( $ ){
+
+    my ( $node ) = @_;
+    
+    my %prefix = ( sizeb=>'(s', usedb=>'u', freeb=>'f');
+    my %suffix = ( freeb=>')');
+
+    for ( qw ( storage_layer entity_type key_value sizeb usedb freeb ) )
+    {	
+
+	next unless defined $node->{$_};
+
+	print " $prefix{$_}$node->{$_}$suffix{$_}" and next if $prefix{$_} and $suffix{$_};	
+
+	print " $prefix{$_}$node->{$_}" and next if $prefix{$_};	
+	print " $node->{$_}$suffix{$_}" and next if $suffix{$_};	
+	print " $node->{$_}";	
+    }
+    
+}
+
+
+sub print_master_data( $ ){
+
+    my ( $mgmt_storage_data_ref ) = @_;
+        
+    for my $target ( keys %{$mgmt_storage_data_ref} ) {
+	for my $key_value ( keys %{$mgmt_storage_data_ref->{$target}} ) {
+	    
+	    print_node_data $mgmt_storage_data_ref->{$target}{$key_value};
+	    
+	    print "\n";			    
+	}
+	
+    }    
+}
+
+
+# Print the tree chain based on the children yet to be dislayed on a node
+sub print_indent_tree($){
+
+    my ( $indent ) = @_;
+    
+    for ( 1..$indent )
+    {
+	print "|  " and next if $_ < $indent and $indent_hash{$_} and $indent_hash{$_} > 0;
+	print "   " and next if $_ < $indent;	
+    }
+}
+
+# Traverse the tree based on the start and tag passed
+sub node_traverse( $$$ ){
+    
+    my ($node, $indent, $traverse_tag) = @_;
+   
+    print_indent_tree($indent);	
+	   
+    print "|--->" if $node and $node->{storage_layer};
+        
+    print_node_data $node if $node and $node->{storage_layer};
+
+    print "\n" if $node and $node->{storage_layer};
+
+    print_indent_tree $indent  unless defined $node->{$traverse_tag} and $node->{$traverse_tag} and @{$node->{$traverse_tag}};
+    print "\n" and return unless defined $node->{$traverse_tag} and $node->{$traverse_tag} and @{$node->{$traverse_tag}};
+    
+    my $node_count = @{$node->{$traverse_tag}};
+
+    for my $i ( 1..$node_count ){
+
+	my $next_node = @{$node->{$traverse_tag}}[$i-1];
+
+	next unless $next_node;
+	bless $next_node;
+
+	$indent_hash{$indent+1} = $node_count-$i;
+	node_traverse $next_node $indent+1 , $traverse_tag; 
+
+    }
+    
+}
+
+
+# Traverse the node top down to the bottom of the tree
+sub top_down_node_traverse( $$ ){
+    
+    my ( $node, $indent ) = @_;
+    
+    node_traverse $node ,$indent ,'child_node_list';
+    
+}
+
+
+# Traverse the bottom up to the top of the tree
+sub bottom_up_node_traverse( $$ ){
+    
+    my ( $node, $indent ) = @_;
+   
+    node_traverse $node ,$indent ,'parent_node_list';
+
+}
+
+
+
+#Get the input entities in each layer
+sub get_input_entities ( $ ) {
+    
+    my ( $target_guid ) = @_;
+    
+    my $sql =  "SELECT key_value FROM mgmt\$storage_report_entities WHERE target_guid = :1 AND em_query_flag IN ('BOTTOM','TOP_AND_BOTTOM') ORDER BY storage_layer ";
+    
+    my %dbh = dbconnect( $ENV{UPLOAD_DB_USER}, $ENV{UPLOAD_DB_PASSWORD}, $ENV{UPLOAD_DB_TNS}, 10, 3, 30) or warn "\nERROR: Failed to get a connection to the repository. aborting job \n" ;
+    
+    $dbh{dbh}->{FetchHashKeyName} = 'NAME_lc';
+    
+    my $sth = $dbh{dbh}->prepare($sql) or die "Failed to prepare statement $sql";
+    
+    print "\tHost $target_guid - Input Storage Entities \n\n";
+    
+    $sth->execute( $target_guid ) or die "Failed to execute $sql";
+    
+    my $array_ref = $sth->fetchall_arrayref( {key_value=>1} );
+    
+    warn "ERROR : $sql fetch :: ".$sth->errstr."\n" and return if $sth->err;
+    
+    warn "ERROR : No rows found for $sql \n" and return if not $sth->rows or not $target_array_ref;
+    
+    $sth->finish;
+    
+    for my $row (  @$array_ref ) {
+	
+	bottom_up_node_traverse( $mgmt_storage_data{$target_guid}{$row->{key_value}}, 1);
+	
+    }
+    
+    $dbh{dbh}->rollback and $dbh{dbh}->disconnect or die "ERROR: Failed while disconnection from Maaster database !!\n" ;
+    
+    print "\n\n";
+    
+}
+
+
+#Get the output entities in each layer
+sub get_output_entities ( $ )  {
+    
+    my ( $target_guid ) = @_;
+    
+    my $sql =  "SELECT key_value FROM mgmt\$storage_report_entities WHERE target_guid = :1 AND em_query_flag IN ('TOP','TOP_AND_BOTTOM') ORDER BY storage_layer ";
+    
+    my %dbh = dbconnect( $ENV{UPLOAD_DB_USER}, $ENV{UPLOAD_DB_PASSWORD}, $ENV{UPLOAD_DB_TNS}, 10, 3, 30) or warn "\nERROR: Failed to get a connection to the repository. aborting job \n" ;
+    
+    $dbh{dbh}->{FetchHashKeyName} = 'NAME_lc';
+    
+    my $sth = $dbh{dbh}->prepare($sql) or die "Failed to prepare statement $sql";
+    
+    print "\tHost $target_guid - Output Entities\n\n";
+    
+    $sth->execute($target_guid) or die "Failed to execute $sql";
+    
+    my $array_ref = $sth->fetchall_arrayref( {key_value=>1} );
+    
+    warn "ERROR : $sql fetch :: ".$sth->errstr."\n" and return if $sth->err;
+    
+    warn "ERROR : No rows found for $sql \n" and return if not $sth->rows or not $target_array_ref;
+    
+    $sth->finish;
+    
+    for my $row (  @$array_ref ) {
+	
+	top_down_node_traverse( $mgmt_storage_data{$target_guid}{$row->{key_value}}, 1);
+	
+    }
+    
+    $dbh{dbh}->rollback and $dbh{dbh}->disconnect or die "ERROR: Failed while disconnection from Maaster database !!\n" ;
+    
+    print "\n\n";
+    
+}
+
+#Fetch the storage map top down
+sub nodes_with_host_unique_id ( $ ){
+    
+    my ($target_guid) = @_;
+    
+    for ( $nodes_with_host_unique_id{$target_guid} ){
+	
+	
+    }
+    
+}
+
+
+
+
+
+
+for my $target_guid ( sort keys %mgmt_storage_data ) {
+    
+
+    print "Host $target_array_ref->{$target_guid}->{target_name} - $target_array_ref->{$target_guid}->{comments}\n";
+    print "-----------------------------------------------------------------------------------------------------\n\n";
+    
+    # Top down traverse
+    print "Top Down Traverse \n\n";
+    
+    print "Host $target_guid \n";
+    
+    top_down_node_traverse $top_nodes{$target_guid},1;
+        
+    #print "    Input entities to each storage layer \n\n";
+    #get_input_entities $target_guid ;
+    
+    #nodes_with_host_unique_id $target_guid;
+    
+    #Bottom up traverse
+    print "Bottom Up  Traverse \n\n";
+    
+    print "Host $target_guid \n";
+    
+    bottom_up_node_traverse $bottom_nodes{$target_guid},1;
+	            
+    #print "    Output entities from each storage layer \n\n";
+    #get_output_entities $target_guid ;
+    
+    print "\n\n";
+    
+}
+
+

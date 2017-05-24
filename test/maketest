@@ -1,0 +1,176 @@
+#!/bin/sh
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+# Author: Vijay Swamidass
+#
+#  $Id: maketest,v 1.11 2002/07/25 20:52:29 vswamida Exp $
+#
+#  $Log: maketest,v $
+#  Revision 1.11  2002/07/25 20:52:29  vswamida
+#  Modified 'cut' operation for disks to remove multipath inode for EMC disks.
+#  Changed location for disks,files,volumes,swraid to user home directory.
+#
+#  Revision 1.10  2002/07/03 00:09:20  vswamida
+#  For repdir, we now place the output in the 'input' directory.
+#
+#  Revision 1.9  2002/07/01 18:43:33  vswamida
+#  Changed diskinq to scsiinq.  Changed 'export' commands to be solaris /bin/sh compatible.
+#
+#  Revision 1.8  2002/06/28 20:49:07  vswamida
+#  Tar the testfiles at the end.
+#
+#  Revision 1.7  2002/06/28 19:43:24  vswamida
+#  Made modifications to allow tests to be stored in user's home directory instead of /usr/local/git/oem/test
+#
+#  Revision 1.6  2002/06/27 20:35:46  vswamida
+#  Added Usage statement.  Changed 'cut' operation for files.
+#
+#  Revision 1.5  2002/06/26 22:13:29  vswamida
+#  Fixed SYSFILE copying.
+#
+#  Revision 1.4  2002/06/26 20:36:41  vswamida
+#  Create gold files from 24kgold by using cut to remove fields that change.
+#  Added run time status indicators.
+#
+#  Revision 1.3  2002/06/26 18:13:37  vswamida
+#  Added run_sympd to list of commands.
+#
+#  Revision 1.2  2002/06/20 22:14:06  vswamida
+#  Cleaned up variable names and added "repdir" call to copy /dev and /devices directories.
+#
+#  Revision 1.1  2002/06/07 23:44:08  vswamida
+#  This script creates directories and links for storing the inputs to an
+#  execution of stormon for later testing.
+#
+
+# Set the Mode - either RUN or MAKE.  We export it because the pretender script
+# will use it below.
+MODE=MAKE
+export MODE
+
+if [ "$1" = "" ];
+then
+	echo "Usage: maketest testname [script]";
+	echo "'script' is a stormon script such as disks, files, volumes,etc.";
+	exit;
+fi
+TESTNAME=$1
+export TESTNAME
+
+GITDIR=/usr/local/git/oem
+TESTHOME=$HOME/oemtest
+TESTDIR=$TESTHOME/testfiles/$TESTNAME
+export TESTDIR
+SYSFILES="/proc/partitions /etc/raidtab /etc/mtab /etc/path_to_inst"
+
+commands="df sysdef scsiinq getdiskinfo vgdisplay lvdisplay pvdisplay diskinq run_prtvtoc run_vxprint run_sympd mount showmount ioscan"
+
+smoncmds="scsiinq getdiskinfo run_prtvtoc run_vxprint run_sympd"
+
+# Begin #################################
+
+#
+# Determine how to suppress newline with echo command.
+#
+N=
+C=
+if echo "\c" | grep c >/dev/null 2>&1; then
+    N='-n'
+else
+    C='\c'
+fi
+
+# Warn and exit if the testname has already been used.
+if [ -d "$TESTDIR" ];
+then
+	echo "That testname has already been used.";
+	echo $N "Do you want to replace it? (y/n)? $C";
+	read ans;
+	if [ "$ans" = "y" ];
+	then
+		echo $N "Removing existing test files...$C";
+		rm -rf $TESTDIR;
+		echo "done.";
+	else 
+		echo "Exitting."; 
+		exit;
+	fi
+fi
+
+echo $N "Building test directory...$C"
+# These are the directories that will store the data files for this test.
+mkdir -p $TESTDIR/input
+mkdir $TESTDIR/gold
+mkdir $TESTDIR/24kgold
+mkdir $TESTDIR/run
+mkdir $TESTDIR/etc
+mkdir $TESTDIR/proc
+
+# Copy the pretender script to the script directory and create the links
+# that will 'pretend' to be system commands.
+mkdir -p $TESTHOME/storage
+cp pretender $TESTHOME/storage
+cp disks $TESTHOME/storage
+cp volumes $TESTHOME/storage
+cp swraid $TESTHOME/storage
+cp files $TESTHOME/storage
+chmod 700 $TESTHOME/storage/pretender
+chmod 700 $TESTHOME/storage/swraid
+chmod 700 $TESTHOME/storage/disks
+chmod 700 $TESTHOME/storage/volumes
+chmod 700 $TESTHOME/storage/files
+for link in $commands
+do
+	ln -s $TESTHOME/storage/pretender $TESTHOME/storage/$link
+done
+echo "done."
+
+echo $N "Copying system files...$C"
+# These are specific files that are opened during the execution of stormon
+# We need to copy these for use in the chroot environment
+for file in $SYSFILES
+do
+	if [ -r "$file" ];
+	then
+        	cp $file ${TESTDIR}${file};
+	fi
+done
+./repdir /dev $TESTDIR/input
+
+if [ -d "/devices" ];
+then
+	./repdir /devices $TESTDIR/input
+fi
+echo "done."
+
+echo "Running stormon scripts..."
+# Execute the stormon script or scripts
+if [ "$2" = "" ];
+then
+	$TESTHOME/storage/disks > $TESTDIR/24kgold/disks
+	cut -d'|' -f 1-6,8-19,21-24 $TESTDIR/24kgold/disks > $TESTDIR/gold/disks
+	$TESTHOME/storage/swraid > $TESTDIR/24kgold/swraid
+	cut -d'|' -f 1-3,5-8 $TESTDIR/24kgold/swraid > $TESTDIR/gold/swraid
+	$TESTHOME/storage/volumes > $TESTDIR/24kgold/volumes
+	cut -d'|' -f 1-11,13,15,17-20 $TESTDIR/24kgold/volumes > $TESTDIR/gold/volumes
+	$TESTHOME/storage/files > $TESTDIR/24kgold/files
+	cut -d'|' -f 1-2,4-9,12-15 $TESTDIR/24kgold/files > $TESTDIR/gold/files
+else
+	$TESTHOME/storage/$2 > $TESTDIR/24kgold/$2;
+fi
+
+echo "done."
+
+echo $N "Cleaning up...$C" 
+# Remove the links we made for creating the test
+for link in $commands
+do
+	rm -f $TESTHOME/storage/$link
+done
+echo "done."
+
+echo $N "Creating tar file...$C" 
+cd $TESTHOME/testfiles
+tar cf $TESTNAME.tar $TESTNAME
+echo "done."
+exit

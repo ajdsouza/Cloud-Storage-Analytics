@@ -1,0 +1,58 @@
+
+# Entities in the storage layers
+#------------------------------------------
+
+# can a key be created 
+# Then how will mappin gbe shown
+# The issue with  using name or os name for key is that it can repeat for entities that are different E.g. The filesystem and the disk partition can have the same keys
+# WHat if block and character path are both in use, hypothetically
+#
+#
+									                   
+# key			storage_layer		entity		size	used	free		Global_UID	Start   End     Parent_key_value   Used OS (Default) path     Name
+#
+
+2 /u01/df1.dbf		ORACLE_DATABASE		Data-File	100	80	20		-		1       10      -                   /u01/df1.dbf
+2 /u02/df2.dbf		ORACLE_DATABASE		Data-File	100	80	20		-		1	10	-		    /u02/df2.dbf
+
+2 /u01			LOCAL_FILESYSTEM	mountpoint	200	200	0		-		-	-	-		    /u01
+2 /u02			LOCAL_FILESYSTEM	mountpoint	300	300	0		-		-	-	-		    /u02
+2 /dev/vx/dsk/v01	LOCAL_FILESYSTEM	filesystem	200	200	0		-		-	-	/u01		    /dev/vx/dsk/v01
+2 /dev/dsk/d71		LOCAL_FILESYSTEM	filesystem	300	300	0		-		-	-	/u02		    /dev/dsk/d71
+
+2 dg1-v01		VOLUME_MANAGER		Volume		200	200	0		-		-	 -	-		    /dev/vx/dsk/v01         v01
+2 dg1-v01-01		VOLUME_MANAGER		Plex		200	200	0		-		-	 -	dg1-v01		    -			    v01-01
+2 dg1-v01-02		VOLUME_MANAGER		Plex		200	200	0		-		-	 -	dg1-v01		    -			    v01-02
+2 dg1-disk1-01		VOLUME_MANAGER		Sub-Disk	200	200	0		-		1        10	dg1-v01-01	    -			    disk1-01
+2 dg1-disk2-01		VOLUME_MANAGER		Sub-Disk	100	100	0		-		1	 5	dg1-v01-02	    -			    disk2-01
+2 dg1-disk3-01		VOLUME_MANAGER		Sub-Disk	100	100	0		-		1	 5	dg1-v01-02	    -			    disk3-01
+2 dg1			VOLUME_MANAGER		Disk-Group	1400	1400	0		-		-	 -	-		    -			    dg1
+2 dg1-disk1		VOLUME_MANAGER		Volume-Disk	200	200	0		-		-	 -	dg1-disk1-01	   /dev/rdsk/d11	    
+2 dg1-disk2	        VOLUME_MANAGER		Volume-Disk	100	100	0		-		-	 -	dg1-disk2-01	   /dev/rdsk/d21
+2 dg1-disk3		VOLUME_MANAGER		Volume-Disk	100	100	0		-		-	 -	dg1-disk3-01	   /dev/rdsk/d22
+2 dg1-disk4		VOLUME_MANAGER		Volume-Disk	1000	1000	0		-		-	 -	dg1		   /dev/rdsk/d3 
+2 dg1-disk5	        VOLUME_MANAGER		Volume-Disk	1000	1000	0		-		-	 -	-		   /dev/rdsk/d4
+
+2 dg1-v01		VOLUME_MANAGER		Volume		200	200	0		-		-	 -	dg1		   /dev/vx/dsk/v01		   
+2 dg1-v01-01		VOLUME_MANAGER		Plex		200	200	0		-		-	 -	dg1
+2 dg1-v01-02		VOLUME_MANAGER		Plex		200	200	0		-		-	 -	dg1
+2 dg1-disk1-01		VOLUME_MANAGER		Sub-Disk	200	200	0		-		1        10	dg1	
+2 dg1-disk2-01		VOLUME_MANAGER		Sub-Disk	100	100	0		-		1	 5	dg1
+2 dg1-disk3-01	     	VOLUME_MANAGER		Sub-Disk	100	100	0		-		1	 5	dg1
+2 dg1-disk1	        VOLUME_MANAGER		Volume-Disk	200	200	0		-		-	 -	dg1                 /dev/rdsk/d11                    
+2 dg1-disk2	        VOLUME_MANAGER		Volume-Disk	100	100	0		-		-	 -	dg1		    /dev/rdsk/d21			 
+2 dg1-disk3	        VOLUME_MANAGER		Volume-Disk	100	100	0		-		-	 -	dg1		    /dev/rdsk/d22
+
+2 /dev/rdsk/d11		OS_DISK			Disk-Partition	200	200	0		-		1        20     -		    /dev/rdsk/d11	   d11    
+2 /dev/rdsk/d21	       	OS_DISK			Disk-Partition	100	100	0		-		1	 10	-		    /dev/rdsk/d21	   d21
+2 /dev/rdsk/d22		OS_DISK			Disk-Partition	100	100	0		-		11	 20	-		    /dev/rdsk/d22	   d22
+2 /dev/rdsk/d71		OS_DISK			Disk-Partition	300	300	0		-		1	 30     -		    /dev/rdsk/d71	   d71
+2 /dev/rdsk/d1 		OS_DISK			Disk		1000	300	700		2_/dev/rdsk/d1	-	 -	/dev/rdsk/d11	    /dev/rdsk/d1	   d1
+2 /dev/rdsk/d1 		OS_DISK			Disk		1000	300	700		2_/dev/rdsk/d1	-	 -	/dev/rdsk/d11	    /dev/dsk/d1		   d1
+2 /dev/rdsk/d2 		OS_DISK			Disk		1000	100	900		2_/dev/rdsk/d2	-	 -	/dev/rdsk/d21	    /dev/rdsk/d2	   d2
+2 /dev/rdsk/d2	       	OS_DISK			Disk		1000	100	900		2_/dev/rdsk/d2	-	 -	/dev/rdsk/d22	    /dev/rdsk/d2	   d2
+2 /dev/rdsk/d3	       	OS_DISK			Disk		1000	1000	0		2_/dev/rdsk/d3	-	 -	-		    /dev/rdsk/d3	   d3
+2 /dev/rdsk/d4	       	OS_DISK			Disk		1000	1000	0		2_/dev/rdsk/d4	-	 -	-		    /dev/rdsk/d4	   d4
+2 /dev/rdsk/d5	       	OS_DISK			Disk		1000	0	1000		2_/dev/rdsk/d5	-	 -	-		    /dev/rdsk/d5	   d5
+2 /dev/rdsk/d6	       	OS_DISK			Disk		1000	0	1000		2_/dev/rdsk/d6	-	 -	-		    /dev/rdsk/d6	   d6
+2 /dev/rdsk/d7	       	OS_DISK			Disk		1000	300	700		G_/dev/rdsk/d7	-	 -      /dev/rdsk/d71	    /dev/rdsk/d7	   d7

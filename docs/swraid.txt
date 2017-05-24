@@ -1,0 +1,18 @@
+	Notes for Stormon Softare RAID on Solaris - Solstice DiskSuite
+
+-The tool used to discover the Software RAID Configuration is 'metastat'
+This is sometimes located in /usr/sbin and sometime /usr/opt/SUNWmd/sbin.
+
+
+HOSTS USED FOR TESTING
+	otdasol2
+	otdasol4
+	dollars
+
+SOFTWARE RAID TYPES TESTED
+	Trans w/Logging
+	Mirror
+	RAID 5
+	Concat
+	Stripe
+	Hotspares

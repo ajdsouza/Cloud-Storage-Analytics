@@ -1,0 +1,32 @@
+#!/usr/local/git/perl/bin/perl
+
+use strict;
+use warnings;
+
+my %count;
+my %keylist;
+
+for (`dtst`){
+
+        chomp;
+
+        next unless $_ =~ /^em_result/;
+
+        my @results = split /\s*\|\s*/;
+
+        $count{$results[31]}++;
+
+	push @{$keylist{$results[31]}}, $results[5];
+
+}
+
+    for my $type ( keys %count){
+	
+	print "Key = $type\n";
+	
+	for ( @{$keylist{$type}} )
+	{
+		print "\t\t $_ \n";
+	}
+	    
+    }

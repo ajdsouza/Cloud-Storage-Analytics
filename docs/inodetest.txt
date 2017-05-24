@@ -1,0 +1,31 @@
+--- Testing inode behaviour for NFS Filesystems ---
+
+CREATED THE THE FOLLOWING PERL PROGRAM:
+#!/usr/local/git/perl/bin/perl
+my @st = stat($ARGV[0]);
+print "$st[0] $st[1]\n";
+exit;
+
+CREATE THE FOLLOWING FILESYSTEMS AND LINKS
+stnfs1:/vol/local mounted on /ntap
+stnfs1:/vol/local mounted on /ntap1
+/aix soft linked to /ntap/aix
+
+RUN THE PERL PROGRAM ON THE 'aix' DIRECTORY
+On Linux (raj):
+[root@raj /]# ./inode.pl /aix
+7 3770502
+[root@raj /]# ./inode.pl /ntap/aix
+7 3770502
+[root@raj /]# ./inode.pl /ntap1/aix
+8 3770502
+
+On Solaris (dlsun1170)
+su-2.05# ./inode.pl /aix
+75270842 3770502
+su-2.05# ./inode.pl /ntap/aix
+75270842 3770502
+su-2.05# ./inode.pl /ntap1/aix
+75270843 3770502
+
+The filesystem number is the same for /aix and /ntap/aix because they are both on the /ntap filesystem.  The inode is the same for all three because they are all the same directory on stnfs1.

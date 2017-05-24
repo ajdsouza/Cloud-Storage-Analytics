@@ -1,0 +1,370 @@
+SQL> desc mgmt_target
+PROCEDURE ADD_ASSOCIATED_TARGET
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_ASSOCIATION                  VARCHAR2                IN    
+ P_ASSOC_TARGET_NAME            VARCHAR2                IN    
+ P_ASSOC_TARGET_TYPE            VARCHAR2                IN    
+PROCEDURE ADD_GROUP
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_GROUP_NAME                   VARCHAR2                IN    
+ P_GROUP_TYPE                   VARCHAR2                IN    
+ P_MEMBER_TARGETS               SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+PROCEDURE ADD_MASTER_CHANGED_CALLBACK
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_TARGET_NAME                  VARCHAR2                IN    
+ V_TARGET_TYPE                  VARCHAR2                IN    
+ V_CALLBACK_NAME                VARCHAR2                IN    
+PROCEDURE ADD_METRIC_SEVERITY_DEPS
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC_DESC                  MGMT_METRIC_DESC        IN    
+ V_DEPENDENCY_LIST              MGMT_METRIC_DESC_ARRAY  IN    
+PROCEDURE ADD_METRIC_SEVERITY_DEPS
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC_INSTANCE              MGMT_METRIC_INSTANCE    IN    
+ V_DEPENDENCY_LIST              MGMT_METRIC_INSTANCE_ARRAY IN    
+PROCEDURE ADD_REPO_METRIC_COLLECTION
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC                       MGMT_METRIC_INSTANCE    IN    
+ V_EVAL_PROC                    VARCHAR2                IN    
+ V_DEP_METRICS                  MGMT_METRIC_INSTANCE_ARRAY IN    
+PROCEDURE ADD_TARGET
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_HOST_NAME                    VARCHAR2                IN    
+ P_PROPERTIES                   MGMT_TARGET_PROPERTY_LIST IN    
+ P_GROUPS                       SMP_EMD_NVPAIR_ARRAY    IN    
+ P_MEMBER_TARGETS               SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+ P_MONITORING_CREDENTIALS       SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+ P_TARGET_DISPLAY_NAME          VARCHAR2                IN     DEFAULT
+ P_AGENT_URL                    VARCHAR2                IN     DEFAULT
+ P_TZ_RGN                       VARCHAR2                IN     DEFAULT
+ P_MON_MODE                     NUMBER                  IN     DEFAULT
+ P_TYPE_META_VER                VARCHAR2                IN     DEFAULT
+ P_CATEGORY_PROP_1              VARCHAR2                IN     DEFAULT
+ P_CATEGORY_PROP_2              VARCHAR2                IN     DEFAULT
+ P_CATEGORY_PROP_3              VARCHAR2                IN     DEFAULT
+ P_CATEGORY_PROP_4              VARCHAR2                IN     DEFAULT
+ P_CATEGORY_PROP_5              VARCHAR2                IN     DEFAULT
+ P_REPOSITORY_ONLY_TARGET       NUMBER                  IN     DEFAULT
+PROCEDURE ADD_TARGET_TYPE_PROPERTIES
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE_IN               VARCHAR2                IN    
+ P_TYPE_PROPERTY_LIST_IN        SMP_EMD_NVPAIR_ARRAY    IN    
+PROCEDURE ADD_TARGET_TYPE_PROPERTY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE_IN               VARCHAR2                IN    
+ P_TYPE_PROPERTY_NAME_IN        VARCHAR2                IN    
+ P_TYPE_PROPERTY_VALUE_IN       VARCHAR2                IN    
+PROCEDURE ADD_TGT_RELOCATION_CALLBACK
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_CALLBACK_NAME                VARCHAR2                IN    
+ V_TARGET_NAME                  VARCHAR2                IN     DEFAULT
+ V_TARGET_TYPE                  VARCHAR2                IN     DEFAULT
+PROCEDURE CREATE_ASSOCIATION
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_TYPE_META_VER                VARCHAR2                IN    
+ P_ASSOCIATION                  VARCHAR2                IN    
+ P_ASSOC_TARGET_TYPE            VARCHAR2                IN    
+PROCEDURE DELETE_MASTER_CHANGED_CALLBACK
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_TARGET_NAME                  VARCHAR2                IN    
+ V_TARGET_TYPE                  VARCHAR2                IN    
+ V_CALLBACK_NAME                VARCHAR2                IN     DEFAULT
+PROCEDURE DELETE_METRIC_SEVERITY_DEPS
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC_DESC                  MGMT_METRIC_DESC        IN    
+PROCEDURE DELETE_METRIC_SEVERITY_DEPS
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC_INSTANCE              MGMT_METRIC_INSTANCE    IN    
+ V_DEPENDENCY_LIST              MGMT_METRIC_INSTANCE_ARRAY IN    
+PROCEDURE DELETE_REPO_METRIC_COLLECTION
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC                       MGMT_METRIC_INSTANCE    IN    
+PROCEDURE DELETE_TARGET_PROPERTY_DEF
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_TARGET_TYPE                  VARCHAR2                IN    
+ V_TYPE_META_VER                VARCHAR2                IN    
+ V_PROPERTY_NAME                VARCHAR2                IN    
+PROCEDURE DELETE_TARGET_TYPE
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE_IN               VARCHAR2                IN    
+PROCEDURE DELETE_TARGET_TYPE_PROPERTY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE_IN               VARCHAR2                IN    
+ P_TYPE_PROPERTY_NAME_IN        VARCHAR2                IN    
+PROCEDURE DELETE_TGT_RELOCATION_CALLBACK
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_CALLBACK_NAME                VARCHAR2                IN    
+ V_TARGET_NAME                  VARCHAR2                IN     DEFAULT
+ V_TARGET_TYPE                  VARCHAR2                IN     DEFAULT
+FUNCTION GENERATE_METRIC_COLUMN_GUID RETURNS RAW
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_METRIC_NAME                  VARCHAR2                IN    
+ P_METRIC_COLUMN                VARCHAR2                IN    
+FUNCTION GENERATE_METRIC_GUID RETURNS RAW
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_METRIC_NAME                  VARCHAR2                IN    
+FUNCTION GENERATE_TARGET_GUID RETURNS RAW
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+PROCEDURE GET_ALL_TARGETS_MNTR_SUMMARY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ SEARCH_TARGET_NAME_IN          VARCHAR2                IN     DEFAULT
+ SUMMARY_OUT                    REF CURSOR              OUT   
+FUNCTION GET_AVAIL_CURRENT_STATUS RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_GUID_IN                 RAW(16)                 IN    
+FUNCTION GET_AVAIL_PCT_VALUE RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN    
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ NUM_OF_DAYS_IN                 NUMBER                  IN    
+FUNCTION GET_AVAIL_PCT_VALUE RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_GUID_IN                 RAW(16)                 IN    
+ NUM_OF_DAYS_IN                 NUMBER                  IN    
+FUNCTION GET_AVAIL_PCT_VALUE RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN    
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ TARGET_TZ_DELTA_IN             NUMBER                  IN    
+ NUM_OF_DAYS_IN                 NUMBER                  IN    
+FUNCTION GET_AVAIL_PCT_VALUE RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_GUID_IN                 RAW(16)                 IN    
+ TARGET_TZ_DELTA_IN             NUMBER                  IN    
+ NUM_OF_DAYS_IN                 NUMBER                  IN    
+FUNCTION GET_CURRENT_STATUS_TIMESTAMP RETURNS DATE
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_GUID_IN                 RAW(16)                 IN    
+PROCEDURE GET_DELETE_TARGET_INFO
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_BASIC_INFO_OUT               REF CURSOR              OUT   
+ P_PROPERTIES_OUT               REF CURSOR              OUT   
+ P_COMPOSITEINFO_OUT            REF CURSOR              OUT   
+ P_MEMBERINFO_OUT               REF CURSOR              OUT   
+ P_MEMBERINFODEL_OUT            REF CURSOR              OUT   
+ P_MONITOR_CREDS_OUT            REF CURSOR              OUT   
+ P_AGENT_URL_LIST_OUT           REF CURSOR              OUT   
+FUNCTION GET_MASTER_AGENT_URL RETURNS VARCHAR2
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+PROCEDURE GET_MEMBER_MONITORING_SUMMARY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN    
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ MEMBER_TARGET_TYPE_IN          VARCHAR2                IN    
+ TIMEPERIOD_IN                  NUMBER                  IN     DEFAULT
+ SUMMARY_OUT                    REF CURSOR              OUT   
+FUNCTION GET_METRIC_COLUMN_GUIDS RETURNS SMP_EMD_NVPAIR_ARRAY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ METRIC_NAME_IN                 VARCHAR2                IN    
+FUNCTION GET_METRIC_GUID RETURNS RAW(16)
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ METRIC_NAME_IN                 VARCHAR2                IN    
+ METRIC_COLUMN_IN               VARCHAR2                IN     DEFAULT
+PROCEDURE GET_REPO_METRIC_EVAL_PROC
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC                       MGMT_METRIC_INSTANCE    IN    
+ V_EVAL_PROC                    VARCHAR2                OUT   
+FUNCTION GET_TARGET_GUID RETURNS RAW(16)
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN    
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+PROCEDURE GET_TARGET_INFO
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_BASIC_INFO_OUT               REF CURSOR              OUT   
+ P_PROPERTIES_OUT               REF CURSOR              OUT   
+ P_UDTP_DEFS_OUT                REF CURSOR              OUT   
+ P_COMPOSITEINFO_OUT            REF CURSOR              OUT   
+ P_MEMBERINFO_OUT               REF CURSOR              OUT   
+ P_MONITOR_CREDS_OUT            REF CURSOR              OUT   
+PROCEDURE GET_TARGET_INFO
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_BASIC_INFO_OUT               REF CURSOR              OUT   
+ P_PROPERTIES_OUT               REF CURSOR              OUT   
+ P_COMPOSITEINFO_OUT            REF CURSOR              OUT   
+ P_MEMBERINFO_OUT               REF CURSOR              OUT   
+ P_MONITOR_CREDS_OUT            REF CURSOR              OUT   
+PROCEDURE GET_TARGET_LIST_VIEW_SUMMARY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGETS_IN                     MGMT_GUID_ARRAY         IN    
+ LIST_MODE_IN                   NUMBER                  IN    
+ SEARCH_TARGET_NAME_IN          VARCHAR2                IN     DEFAULT
+ TIMEPERIOD_IN                  NUMBER                  IN     DEFAULT
+ SUMMARY_OUT                    REF CURSOR              OUT   
+FUNCTION GET_TARGET_MAX_SEVERITY RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN    
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+FUNCTION GET_TARGET_MAX_SEVERITY RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_GUID_IN                 RAW(16)                 IN    
+PROCEDURE GET_TARGET_MONITORING_SUMMARY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN     DEFAULT
+ TARGET_TYPE_IN                 VARCHAR2                IN     DEFAULT
+ SEARCH_TARGET_NAME_IN          VARCHAR2                IN     DEFAULT
+ TIMEPERIOD_IN                  NUMBER                  IN     DEFAULT
+ SUMMARY_OUT                    REF CURSOR              OUT   
+FUNCTION GET_TARGET_NUM_SEVERITY RETURNS NUMBER(38)
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_GUID_IN                 RAW(16)                 IN    
+PROCEDURE GET_TARGET_SUBTAB_SUMMARY
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ TARGETS_IN                     MGMT_GUID_ARRAY         IN    
+ SEARCH_TARGET_NAME_IN          VARCHAR2                IN     DEFAULT
+ TIMEPERIOD_IN                  NUMBER                  IN     DEFAULT
+ SUMMARY_OUT                    REF CURSOR              OUT   
+FUNCTION GET_TIME_DIFFERENCE RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TIMEPERIOD_IN                  NUMBER                  IN     DEFAULT
+PROCEDURE GET_TRAFFIC_LIGHT_INFO
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ TARGET_NAME_IN                 VARCHAR2                IN    
+ TARGET_TYPE_IN                 VARCHAR2                IN    
+ TIMEPERIOD_IN                  NUMBER                  IN     DEFAULT
+ AVAIL_PCT_OUT                  NUMBER                  OUT   
+ CURRENT_STATUS_OUT             NUMBER                  OUT   
+PROCEDURE GET_TYPE_UDTP
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_TYPE_META_VER                VARCHAR2                IN    
+ P_UDTP_DEFS_OUT                REF CURSOR              OUT   
+FUNCTION IS_MULTI_AGENT_TARGET RETURNS NUMBER
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+PROCEDURE MODIFY_GROUP
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_GROUP_NAME                   VARCHAR2                IN    
+ P_GROUP_TYPE                   VARCHAR2                IN    
+ P_TARGETS_TO_ADD               SMP_EMD_NVPAIR_ARRAY    IN    
+ P_TARGETS_TO_REMOVE            SMP_EMD_NVPAIR_ARRAY    IN    
+PROCEDURE MODIFY_REPO_METRIC_COLLECTION
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC                       MGMT_METRIC_INSTANCE    IN    
+ V_EVAL_PROC                    VARCHAR2                IN    
+ V_DEP_METRICS                  MGMT_METRIC_INSTANCE_ARRAY IN    
+PROCEDURE MODIFY_REPO_METRIC_DEPS
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC                       MGMT_METRIC_INSTANCE    IN    
+ V_DEP_METRICS_TO_ADD           MGMT_METRIC_INSTANCE_ARRAY IN    
+ V_DEP_METRICS_TO_DEL           MGMT_METRIC_INSTANCE_ARRAY IN    
+PROCEDURE MODIFY_TARGET
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_PROPERTIES                   MGMT_TARGET_PROPERTY_LIST IN    
+ P_MEMBER_TARGETS_TO_ADD        SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+ P_MEMBER_TARGETS_TO_REMOVE     SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+ P_MONITORING_CREDENTIALS       SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+ P_TARGET_DISPLAY_NAME          VARCHAR2                IN     DEFAULT
+ P_PROPAGATE_TO_AGENT           NUMBER                  IN     DEFAULT
+PROCEDURE MOVE_TARGET
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_NAME                  VARCHAR2                IN    
+ P_TARGET_TYPE                  VARCHAR2                IN    
+ P_NEW_EMD_URL                  VARCHAR2                IN    
+PROCEDURE REGISTER_TARGET_TYPE
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ P_TARGET_TYPE_IN               VARCHAR2                IN    
+ P_TYPE_DISPLAY_NAME_IN         VARCHAR2                IN     DEFAULT
+ P_TYPE_DISPLAY_NLSID_IN        VARCHAR2                IN     DEFAULT
+ P_TYPE_PROPERTY_LIST_IN        SMP_EMD_NVPAIR_ARRAY    IN     DEFAULT
+ P_TYPE_RESOURCE_BUNDLE_IN      VARCHAR2                IN     DEFAULT
+PROCEDURE SET_REPO_METRIC_EVAL_PROC
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_METRIC                       MGMT_METRIC_INSTANCE    IN    
+ V_EVAL_PROC                    VARCHAR2                IN    
+PROCEDURE UPSERT_TARGET_PROPERTY_DEF
+ Argument Name                  Type                    In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ V_TARGET_TYPE                  VARCHAR2                IN    
+ V_TYPE_META_VER                VARCHAR2                IN    
+ V_PROPERTY_NAME                VARCHAR2                IN    
+ V_PROPERTY_TYPE                VARCHAR2                IN    
+ V_PROPERTY_DISPLAY_NAME        VARCHAR2                IN    
+ V_PROPERTY_DISPLAY_NLSID       VARCHAR2                IN     DEFAULT
+ V_REQUIRED_FLAG                NUMBER                  IN     DEFAULT
+ V_CREDENTIAL_FLAG              NUMBER                  IN     DEFAULT
+ V_DEFAULT_VALUE                VARCHAR2                IN     DEFAULT
+ V_COMPUTED_FLAG                NUMBER                  IN     DEFAULT
+ V_SYSTEM_FLAG                  NUMBER                  IN     DEFAULT
+ V_ALL_VERSIONS                 NUMBER                  IN     DEFAULT
+ V_READ_ONLY_FLAG               NUMBER                  IN     DEFAULT
+ V_HIDDEN_FLAG                  NUMBER                  IN     DEFAULT
+
+SQL> spool off

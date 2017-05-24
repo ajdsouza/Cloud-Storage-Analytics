@@ -1,0 +1,182 @@
+
+
+I	How does stormon work
+	---------------------
+
+	(1) The SA needs to install the stormon EPM package on the system 
+
+	    $/usr/local/git/bin/package-update stormon
+
+	(2) OMS schedules a daily job to execute stormon. The Job executes stormon periodically once in 24 Hours. The job instruments the storage metrics and loads the metrics to the stormon repository.
+
+	(3) The data in the repository is summarized by the stormon analysis job. The analysis job generates the storage report for a host. 
+	    - The stormon analysis job summarizes hosts serially. This may result in a phase lag between the collection of data and the computation of summary for a host. Under normal conditions you should see a summary for the collected metrics within two hours of its loading.
+
+	(4) The summarized data is reported at the oemip reporting site.
+    
+	(5) The outsourcing customer report at oemip displays the summarized data only for the hosts belonging to the outsourcing customers.
+
+
+
+II	stormon URLs
+	------------
+
+	Storage report for outsourcing customers		http://oemip.oraclecorp.com/oemip/page?_pageid=2855&_dad=oemip&_schema=IMETRICS
+	Storage summary lookup for a host			http://oemip.oraclecorp.com/oemip/page?_pageid=1878,1880&_dad=oemip&_schema=IMETRICS&183323
+	On demand computation of storage summary for a host	<TBD - Rajesh.x.kumar>
+	Stormon health report					<TBD - Rajesh.x.kumar>	
+	Latest version of the stormon EPM			http://software.us.oracle.com/software/GIT/
+
+
+
+III	Troubleshooting stormon
+	-----------------------
+
+	Follow this process for troubleshooting any issues you may have with the storage reports
+
+
+	(1)  Does the Host have the stormon EPM installed ?
+	     If a stormon EPM is installed , is it the current version of stormon EPM ?
+
+	     HOW TO CHECK ?     
+		    If you have access to the system , execute /usr/local/git/bin/package-update -t on the system to view the list of packages with versions installed.
+		    If you do not have access to the system, Lookup the stormon health report to know the current version of stormon EPM installed on your system. Refer to section II for the URL for the stormon health report.
+		    The latest version of the stormon EPM is at the GIT EPM website. Refer to section II for the URL for the GIT EPM.
+
+	     HOW DO I INSTALL THE CURRENT VERSION OF EPM ?
+		   If you have the SA privilege to install packages on the system execute the following to install the latest version of stormon.
+		      $/usr/local/git/bin/package-update stormon  
+		      
+		   If you do not have the privilege to install packages on the system, Contact GIT for having the right version installed from the URL listed in Section II. 
+		   Refer to section IV for escalation procedure of stormon issues to GIT.		
+
+
+	     
+        (2)  The current version of EPM package is installed on the host, but NO job has been scheduled for collection of stormon data from the host.
+		
+	     HOW TO CHECK ?
+		 Look up the stormon health report at to know if a job has been scheduled for the host. For the URL for the stormon health report refer to section II.
+
+
+	     HOW DO I SCHEDULE A JOB FOR COLLECTION OF STORAGE DATA ?
+	     
+	     OEM Job submission is automated  by TOOLS team on all Hosted systems.
+	     This automatic registration fails if oemmon password on the host is not a standard one or HW Assets entries for this host are incorrect.
+	     
+	     Verify if the host is listed at the following URL
+	     http://rmsun11.us.oracle.com:3339/em/OEMGenerationServlet?reportName=EM_MISSING_NODE_JOBS_OCOM_ALL
+	     If it is listed there, reset oemmon password to standard one. Then job will be automatically submitted in the next 1 hour.
+
+	     If the host is not listed there, make sure following HW Assets entries for this host are entered properly.
+
+	     a) Active = Yes
+	     b) Support Type starts with "Server"
+	     c) Support Type does not contain the word 'no_oem'
+	     d) Escalation Group = OMS DELIVERY SERVICES
+	     e) Customer Number <> 0
+			 
+             Also make sure agent is up and in-sync with OMS (refresh node is successful).
+
+	     If you still have any issues contact your OEM rep. Refer to section IV for escalation procedure of stormon issues to GIT.
+	
+
+
+	(3)  A stormon job is scheduled for the host , but the job is not executing successfully.
+
+	       HOW TO CHECK ?
+			Look up the stormon health report to know if the job has been executing successfully on the host. The job should not have a failure status.
+			For the URL for the stormon health report refer to section II.
+	     
+	       WHAT TO DO ?
+	      	Contact your OEM rep to resolve his issue. Refer to section IV for escalation procedure of stormon issues to GIT.	
+
+
+
+	(4)  The EPM is fine and the job is executing fine, but the metrics fail to load to the stormon repository.
+
+	       HOW TO CHECK ?
+			 Look for the latest log file named storagelog_<day_of_week> in your trace directory. You should see a successful load being logged.
+
+			      The trace directory may be one of the following in this order
+				  -   /u01/app/oracle/product/oemagent/network/agent/om/trac2
+				  -   /oem/app/oracle/product/oemagent/network/agent/om/trace
+				  -   $HOME/.stormon_trace
+
+			      No error should be logged after the following lines in the latest load in the log file
+
+				   DEBUG:    Connecting to the repository to upload the collected metrics for target <>
+				   DEBUG:    Loading metric data to the repository				  
+	
+		WHAT TO DO  ?
+			Execute /usr/local/git/oem/storage/teststdout to check if the stormon metrics are being instrumented successfully on the host
+			Execute /usr/local/git/oem/storage/testload to check if the instrumented metrics are being successfully loaded to the test repository.
+
+			Contact GIT with the details of the error you notice in the storagelog_<day_of_week> file. Refer to section IV for process to escalate stormon issues with GIT.
+			GIT will analyze the issue and log a bug with SMP if necessary for resolution of the issue.
+			Refer to section VII on the process to file a bug with SMP for stormon.
+
+
+	   			   
+	(5)  The stormon metrics loaded successfully to the repository, but the host has no summary or the summary is old or invalid.
+
+	     HOW TO CHECK ?
+
+	     - View the storage summary for a single host. Refer to section II for the URL for the lookup of storage summary report for a host.
+	     - The host should have a valid storage summary report.
+	     - The timestamp of the summary should be as current as the timestamp of the host when the collection was made.
+	      ( The timestamp in the report is in the same time zone as the host )
+
+	     WHAT TO DO ?
+		Make sure you have waited for at least up to 2 hours after loading the metrics. This will provide adequate time for the stormon analysis job in the repository compute the summary for the newly loaded metrics for the host.
+		If you want an immediate computation of summary, then please go to section VI for the process to compute an on demand storage summary.
+	       	       
+		If the summary is still invalid or old then escalate the issue to GIT. Refer to section IV for process to escalate stormon issues with GIT.
+		GIT will analyze the issue and log a bug with SMP if necessary for resolution of the issue.
+		Refer to section VII on the process to file a bug with SMP for stormon.
+
+
+
+	(6) The metrics are loading fine, and the summary is computing fine, but the storage report at the outsourcing customer URL is not accurate.
+
+	    HOW TO CHECK ?
+		Go to the outsourcing customer storage report to view the storage reports by customer. The report lets you drill down to view summary for any host belonging to a customer. 
+		Refer to section II for the URL for the oemip customer storage report.
+
+	    WHAT TO DO ?
+		Escalate this to the oemip team in GIT. Refer to section V for escalation procedure to the oemip team.
+
+
+IV	Escalation procedure to GIT for stormon issues
+	----------------------------------------------
+	For Job execution issues (Job is submitted but errors reported in stormon log), Stormon summary computation issues (Job is submitted and no errors reported in stormon log file but no data on oemip) please log a P2 SR to IT:GDCOPS TOOLS.
+
+
+V	Escalation procedure to oemip reports( TBD - Rajesh.x.kumar)
+	------------------------------------------------------------
+
+
+
+VI	On demand generation of the storage report for a host or group of hosts
+	-----------------------------------------------------------------------
+	  (1} Request your OEM rep. for an immediate execution of the collection of stormon metrics on the list of hosts you require. Make sure the job executed and the metrics were loaded successfully.
+
+	  (2) Go to the on demand storage summary computation web site. Refer to section II for the URL for this site.
+
+		Enter in your complete host name e.g. auohsredh18.us.oracle.com
+		Click on go to compute an on demand summary for this host.
+	
+
+
+VII	Process for logging the bug
+	---------------------------
+
+	Product id :  1373
+	Product Name : System Extensions to EM
+	Component : STORMON 
+					
+	1. Load the following files to ess30 using anonymous ftp, create the sub dir <bug#> and ftp the files into this subdir.
+		- All storage log files in storage trace directory
+		- Output from teststdout as teststdout.txt
+	2.  In the bug text provide information if testload did work.
+
+	Refer bug.us.oracle.com for more details on how to file a bug.				

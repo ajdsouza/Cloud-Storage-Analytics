@@ -1,0 +1,50 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+#
+#  $Id: testload,v 1.23 2003/10/21 23:49:52 ajdsouza Exp $ 
+#
+# NAME  
+#	testload
+#
+# DESC 
+#
+# Testload data into tge mgmt_metrics table for 9i oem
+#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/04/02 - Test script will load host data from any host - for testing
+# ajdsouza	04/04/03 - call stormon.sh instead of stormon_oradb.sh for db applications
+# ajdsouza	04/03/02 - Created
+
+
+use strict;
+use warnings;
+
+$ENV{'PATH'} = "/usr/bin:/usr/sbin:/etc:$ENV{PATH}" 
+    if $ENV{PATH} !~ m|/usr/bin|;
+	
+#A case where target_name is different from .us.oracle.com
+my %hosts = ("rmdc-oem01.us.oracle.com"=>"rmdc-oem01.us.oracle.com");
+
+
+# Test repository connection
+$ENV{'UPLOAD_DB_USER'}='storage_rep';
+$ENV{'UPLOAD_DB_PASSWORD'}='storage_rep';
+$ENV{'UPLOAD_DB_TNS'}="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))";
+
+chop(my $hostname = `hostname 2>/dev/null` || `uname -n 2>/dev/null`);
+
+$hostname .= ".us.oracle.com" if $hostname !~ /\.com$/;
+$hostname =  $hosts{$hostname} if defined $hosts{$hostname};
+
+$ENV{'EM_TARGET_NAME'}=$hostname;
+$ENV{'EM_TARGET_TYPE'}='oracle_sysman_node';
+
+my $result = `/usr/local/git/oem/storage/stormon`;

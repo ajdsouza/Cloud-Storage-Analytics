@@ -1,0 +1,720 @@
+
+Storage Resource Management
+
+1. Introduction
+
+Storage related metrics at the following levels will be collected and analyzed to summarize the storage utilization.
+
+- Application eg. Oracle database
+- File system 
+- Volume Manager
+- Disk devices on the host
+- The exteral storage system attached to the Host. SAN, SCSI or LAN attached.
+
+Metrics will be collected periodically from the target hosts . They will be stored in the EMD repository. 
+Storage summary for each target host will be computed in the EMD repository. 
+
+
+2.	Storage Summary 
+
+
+	Storage summary will be computed on the most current snapshot of storage metrics in the repository. 
+	The table mgmt_current_metrics in the EMD repository will have the current snapshot of metrics.
+
+	The prototype implementation for computing storage summary uses a PL/SQL stored procedure. The stored procedure is scheduled to execute 
+	at regular time intervals by the Oracle scheduler package DBMS_JOB.It calculates the storage summary for each target host.
+	The computed summary metric is inserted into the mgmt_metrics_raw table with the collection timestamp of the metrics 
+	from which it is computed.The summary metric for a target is computed only once for a given collection timestamp.
+
+	Actual implementation will have to be in line with the infrastructure provided by the EMD framework for repository metrics 
+	.It is proposed to use the EMD metric_type of REPOSITORY_METRIC with an PL/SQL eval_func .
+
+
+2.1	Metrics
+
+	2.1.1 Special Requirements
+
+	-	Multipathing of a disk device
+		A LUN may be multipathed and visible to the Host OS on more than one controller. Such multipathed devices may have 
+		pseudo disk devices map to them.Any of the multipathed devces or the pseudo device mapped to them may be used in 
+		the volume manager, filesystem or application.
+
+	-	Sharing of storage resources across multiple hosts
+		A LUN , volume or filesystem may be shared between multiple hosts in clustered environments.
+
+	-  	Symbolic links
+		Symbolic links to disk devices or volumes are sometimes used in volume Manager , filesystem or applications.
+
+	-	No multiple counting of multipathed, shared or NFS storage in storage summary reports for a host as well as a group of hosts
+
+	-  	NFS storage cross mounted from other hosts should be reported seperately from storage provided by designated NFS servers.
+
+
+
+	The following sections outline the metrics to be collected at each level in the storage hierarchy. 
+
+
+	2.1.2 Application Metrics	
+
+
+	hostApplications = { type, name, id, file , Link Inode#, size, used, free, application_specific_data ,shared , cluster Id}
+
+
+	2.1.23 Filesystem Metrics
+
+
+	filesystems = { localFilesystem , clusteredFilesystem, networkedFilesystem }
+
+	localFilesystem = { y | y is for all local file systems on the host }
+
+	networkedFilesystem = { y, nfs_related_data | y is for all NFS mounted file systems on the host }
+
+	clusteredFilesystem = { y, cluster_related_data| y is for all Clustered filesystems mounted on the host }
+
+
+	y = {type, filesystem, inode#, mount point, size, used, free}
+
+	nfs_related_data = { filesystem server, filesystem volume, server-vendor, server-product, privilege}
+
+	cluster_related_data = { cluster Id } 				// For clustered Filesystems
+
+	type = (ufs, vxfs, nfs,...)
+
+
+	2.1.4 Volume Manager Metrics
+
+
+	volumesMetric = { volume , volumeToDiskMap , volumeDisk}
+	
+	volume = { x, cluster_related_data | x is all volumes provided by the volume manager on the host }
+	
+	volumeDisk = { x | x is all disks used by the volume manager }
+	
+	volumeToDiskMap = { x | mapping levels from volumes to the disk }	// Mapping from a volume to a disk slice
+	
+	x = {Vendor, Type , Name, Size, Parent Name, Inode#, Block Inode#, Disk Group }
+
+	cluster_related_data = {sharedVolume , cluster Id} 			// For volumes shared in a cluster
+
+	Type = (VOLUME,MIRROR,DISKSLICE,DISK)
+
+
+
+	volumeSlice = { volumeToDiskMap | volumeToDiskMap{type=DISKSLICE} } 	// Disk slices used by volumes
+
+
+	2.1.5 Disk Device Metrics
+
+
+	diskMetric = {a | a is all block and character disk partitions on the host}
+
+	a = {type, filetype, name, inode#, disk_key, slice_key, visible size, pseudo_parent, external_storage_system_data , total size } 
+
+	pseudo_parent = { pseudo_parent_device_name, pseudo_device inode#}
+
+	external_storage_system_data = { external_system_key, external_disk_device_id, external_disk_device_name, disk_configuration,.. }
+
+	external_system_key = { vendor, product, external_system_Id }		// uniquely identifies a storage system
+
+	type = (DISK, SLICE)
+	filetype = (CHARACTER, BLOCK)
+	slicekey = {disk_key,slice}		// uniquely identifies a slice
+	disk_key = {vendor,product,serial#}	// uniquely identifies a disk
+
+
+	2.1.6 External Storage System Metrics
+
+
+	storageSystemMetric = { external_system_key, name, Model, raw_storage , nfs_server_specifc} 
+
+	external_system_key = { vendor, product, external_system_Id }		// uniquely identifies a storage system
+
+	raw_storage = { total, allocated, free, overhead, spare } 		// in bytes
+
+	nfs_server_specific = { ip_address,... }  				// For nfs servers only
+
+
+	2.1.7 Storage Summary Metrics
+
+
+	Storage summary metrics will be computed in the EMD repository. It will be computed for each target host, cluster and external storage system.
+
+	storageSummaryHost = {applicationSummary,filesystemSummary,volumeManagerSummary,diskDeviceSummary, vendorStorageSummary }
+
+	storageSummaryCluster = {storageSummaryHost }
+
+
+	applicationSummary = { a }
+
+	filesystemSummary = { localFilesystemSummary, nfsSummary }
+
+	localFilesystemSummary = { a }
+
+	nfsSummary = { nfsFromServers, nfsOthers }
+
+	nfsFromServers = { a }
+	nfsOthers = { a }
+
+	localFilesystemSummary = { a }
+
+	volumeManagerSummary = { volumeSummary, volumeDiskSummary }
+
+	volumeSummary = { a }
+	volumeDiskSummary = { a }
+
+	a = { used , free } // in bytes
+
+	diskDeviceSummary = { totalStorage, totalVisibleStorage, unAllocatedDisks, freePartitions} // in bytes
+
+	vendorStorageSummary = { emcSummary, netappSummary, othersSummary }
+
+	emcSummary = { b }
+	netappSummary = { b }
+	othersSummary = { b }
+	
+	b = { hostside, storage side }  // in bytes
+
+
+	2.2 	Metric model for storage summary
+
+	Metric Name	storage_summary
+
+	  Metric Column 				Description
+	  ---------------------------------------------------------------------------------------------
+          storage_summary_key				Key 
+	  storage_summary_cluster_id			Cluster id, if host belongs to a cluster
+          storage_summary_application_size		Space taken by the application 
+	  storage_summary_application_free		Free space in the application
+          storage_summary_local_filesystem_size		Space alloted to local filesystems 
+          storage_summary_local_filesystem_free		Free space in local filesystems 
+          storage_summary_nfs_servers_size		size of NFS filesystems , from servers 
+	  storage_summary_nfs_servers_free		Free space in NFS filesystems, from servers free 
+          storage_summary_nfs_others_size		size of NFS filesystems cross mounts 
+	  storage_summary_nfs_others_free		free space in NFS filesystems cross mounts 
+	  storage_summary_volumemanager_size		Size of volumes provided by the volume manager 
+	  storage_summary_volumemanager_free		Free space in Volume manager 
+          storage_summary_ospartitions_free		OS partitions free 
+          storage_summary_disk_free			Unused disks 
+          storage_summary_total_free			Total free 
+          storage_summary_total_storage			Total storage 
+          storage_summary_host_visible			Host visible storage 
+          storage_summary_vendor_emc_host_side		EMC host side 
+          storage_summary_vendor_emc_storage_side	EMC storage side 
+          storage_summary_vendor_netapp_host_side	NFS storage provided by Network Appliance Filers  
+          storage_summary_vendor_others			All other storage 
+
+
+	2.3 Computation of Storage Summary 
+
+
+	The following steps outline the computation of storage summary from the storage metrics collected for a target host. 
+
+
+	nfs_from_servers = {networkedFilesystems | where networkedFilesystems{server-vendor} = NETAPP or EMC and networkedFilesystem{privilege} = WRITE}
+
+	nfs_from_others = networkedFilesystem - nfs_from_servers
+
+
+
+	rawdisks = {diskMetric | where rawDiskMetrics{type} = DISK and diskMetric{filetype}=CHARACTER }; 
+
+	unpartitionedDisks =  { rawDisks | diskMetric{disk_slice=rawDisks{disk_slice},type=SLICE} is {0} }
+
+
+
+        storage_summary_application_used = sum hostApplications{size}		
+
+        storage_summary_application_free = sum hostApplications{free}		
+
+       	storage_summary_local_filesystem_used = sum localFilesystems{size}
+
+       	storage_summary_local_filesystem_free = sum localFilesystems{free}
+
+       	storage_summary_nfs_servers_used = sum nfs_from_servers{size}
+
+       	storage_summary_nfs_servers_free = sum nfs_from_servers{free}
+
+       	storage_summary_nfs_others_used = sum nfs_from_others{size}
+
+       	storage_summary_nfs_others_free = sum nfs_from_others{free}
+ 	
+ 	storage_summary_volumemanager_used = sum volume{size}
+
+		unusedVolumes = { volume |  volume{raw inode# and block inode#} not in localFilesystems{inode#} and Application{inode#}}
+
+	storage_summary_volumemanager_free = sum unusedVolumes {size} + ( sum volumeDisk{size} - sum volumeSlice{size} )
+
+		usedInodes = {localFileSystems{inode#} union volumeDisks{inode#} union hostApplications{inode#}}
+ 
+
+	storage_summary_total_storage = sum rawDisks{disk_key, total_size}
+
+	storage_summary_host_visible = sum rawDisks{ disk_key, visible size}
+
+	usedDisks  =  { disk_key | diskMetric{inode#,parentinode#,type=DISK} intersection usedInodes }
+
+	usedSlices  =  { slice_key | diskMetric{inode#,parentinode#, type = SLICE} intersection usedInodes }
+
+        unusedPartitions = { rawMetrics{disk_key} - usedDisks{disk_key}} intersection {rawMetrics{slice_key} - usedSlices{slice_key}}
+
+	freeDisks = unusedPartitions{disk_key} intersection unpartitionedDisks{disk_key}
+
+	freePartitions = unusedPartitions{disk_key} - freeDisks{disk_key}
+	
+	storage_summary_disk_free = sum freeDisks{disk_key,size}
+
+	storage_summary_ospartitions_free = sum freePartitions{slice_key,size}
+
+	storage_summary_vendor_emc_host_side = sum rawDisks{disk_key, size | vendor = EMC }		
+
+	storage_summary_vendor_emc_storage_side = sum rawDisks{disk_key, total_size | vendor = EMC }		
+
+	storage_summary_vendor_netapp_host_side = sum nfs_from_servers{size | vendor = NETAPP }		
+
+
+
+
+3.	Disk device Metrics
+
+	The metrics instrumented for disk device will capture information about a disk device , all its partitions and psuedo 
+	parent devices .
+
+	Each LUN will have a unique identifier disk_key , the <Vendor>_<Product>_<Serial#> for a LUN is assumed to be unique 
+	and will form its unique disk_key.
+
+	Each partition on a LUN will have a unique identifier slice_key , the <Vendor>_<Product>_<Serial#>_<slice> for a partition is 
+	assumed to be unique , to form its unique slice_key.
+
+	The configuration information for a disk device will provide the configuration the configuration for the LUN in the 
+	external storage device or raid controller. In most cases this will be some kind of a RAID configuration.
+
+	All disk device paths will have to have a associated link Inode#. The link Inode# will be used for correlation. The link 
+	inode# will handle correlation even whem symbolic links are used.
+
+	3.1	
+
+	  Metric Name  	disk_devices
+
+	  Metric Column 			Description
+	  --------------------------------------------------
+          disk_devices_type			Type  eg. DISK, PARTITION, PSEUDOPARENT 
+          disk_devices_filetype			File Type eg. BLOCK, CHARCATER 
+          disk_devices_controller		Disk Controller 
+          disk_devices_physical_name		Disk physical path 
+          disk_devices_capacity			Disk/Parition size in bytes 
+          disk_devices_logical_name		Logical Path for the disk device/partition
+          disk_devices_inode			Link inode
+          disk_devices_vendor			Vendor 
+          disk_devices_product			Product 
+          disk_devices_serial_no		Serial#
+          disk_devices_storage_id		External storage system Id 
+          disk_devices_device_id		Device Id for this LUN in the external storage system
+          disk_devices_configuration		Configuration of the LUN in the external storage device eg. 3WAY Mirrored, RAID 0 
+          disk_devices_status			Device status
+          disk_devices_path_count		Number of paths to this LUN 
+          disk_devices_multipath_pseudo_parent	Path of the psuedo parent device , if one exists
+          disk_devices_multipath_inode		Link inode# for the psuedo parent device
+          disk_devices_path_backupslice		Backup slice eg slice c ,  /dev/rdsk/c0t0d0s2 on Solaris
+          disk_devices_slice_key		Slice Key, unique for a disk partition <Vendor>_<Product>_<Serial#>_<Slice>
+          disk_devices_dsk_key			Disk Key  , unique for  LUN <Vendor>_<Product>_<Serial#>
+          disk_devices_key			Key , to identify each record in EMD, logical name can be used for this
+
+	
+	3.2  Steps for generating metrics for disk devices on a target host
+
+	a) Accuately discover all the disk devices attached to the host .It may be required to use a system call for this purpose
+		eg. sysdef CLI or the libdevinfo library on Solaris 
+		    ioscan on HPUX
+		will enable discovery of all disk devices on the host
+
+	b) Obtain the SCSI information for each disk , SCSI inquiry will provide this information
+		- Vendor
+		- Product
+		- Serial Number
+
+	c) Get the capacity for each disk on the host.
+
+	d) Group disks based on the vendor and product
+
+	e) For vendor product combinations which recognized to be a external storage system ,obtain the configuration information 
+	   for the LUN from external storage system. Vendor specific programmin interface will be required to be used for this 
+	   purpose. 
+
+	   The following is the configuration required to be obtained from the external storage system.
+
+		- configuration for this LUN in the external storage system eg. RAID1,RAID0 etc.
+		- Extetnal Storage system Id
+		- device Id for this LUN in the external storage system
+		- Device status eg. RW,W , Backup device etc.
+
+	f) Generate the disk_key for each disk
+
+	g) Check for multipathed disk devices using the disk_key , if two or more disks have the same disk_key then they are assumed to 
+		be multipathed
+
+	h) For multipathed disk devices obtain the pseuso parent device if one exists
+
+	i) Get the partitions sliced from each disk
+
+	j) Generate a unique slice_key for each partition 
+
+	k) Obtain the BLOCK counterparts for each disk/partition
+
+	l) Obtain the link inode# for each disk/partition path
+	
+
+
+4.	Volume Manager
+
+	Volume Managers take one or more disks into disk groups and carve logical volumes from these disk groups. Different logical levels exist 
+	between the group of disks and the logical volumes . These differ in name and number by vendor. 
+
+	eg. In Veritas Volume Manager, Volumes are built on plexes, plexes have sub disks in them, sub disks in turn use slices of
+	disks etc.
+
+	The metric model for Volumes will list the least number of levels as are required to map a volume to the disks from which it is carved.
+	Each level will indicate the name of the parent of which it is a child. 
+
+	The generic metric model for Volume manager will be as follows
+
+	-	Logical volumes are the first level in the Volume metrics. They are identified by type VOLUME in the metric model.
+		The parent for a Volume is null, unless its a layered volume (RAID 10).
+
+	-	Logical volumes can have one or more mirrors in them.They are identified by type MIRROR in the metric model.The parent
+		for a mirror is a logical Volume.
+
+	-   	Mirrors in turn can have one or more disk slices in them. They are identified by type DISKSLICE in the metric model. 
+		The metric for a diskslice will indicate the disk which the slice is part of.The parent for a disk slice is either 
+		a mirror or a logical volume as the case may be. In case of a layered volume a mirror contains logical volumes.	
+
+	-	Each disk in the disk group is instrumented in the metric model. The metrics for the disk are identified by type DISK.
+		The metric for each disk will have the name of disk group and the logical disk name for that disk.
+
+ 	The following example for Veritas volume manager shows the metrics to be collected for a possible mapping between a 
+	mirored Volume V1 to the 2 disks D1 and D2 from which it is carved. A veritas Plex maps to type MIRROR.
+
+	Type		Name	 Size 	Inode#(Character) 	Inode#(Block) 	Configuration 	Diskgroup 	parent 	Physical Disk	
+	-------------------------------------------------------------------------------------------------------------------------------
+	VOLUME		V1	 8G	IC   			IB		MIRRORED        DG1		NULL
+	MIRROR		P1	 8G								DG1		V1
+	MIRROR		P2	 8G								DG1		V1
+	DISKSLICE	S1	 8G								DG1		P1	D1
+	DISKSLICE	S2	 8G								DG1		P2	D2
+	DISK		D1	 16G	I1							DG1		
+	DISK		D2	 16G	I2							DG1		
+
+
+	The following is a example for HP LVM.  The physical volume in HP LVM maps to type DISK.
+ 
+	Type		Name	 Size 	Inode#(Character) 	Inode#(Block) 	Configuration 	Diskgroup 	parent	Physical Disk
+	-------------------------------------------------------------------------------------------------------------------------------
+	VOLUME		LV1	 8G	IC   			IB		CONCATENATED    VG1		NULL
+	DISKSLICE	PS1	 4G								VG1		LV1	PV1
+	DISKSLICE	PS2	 4G								VG1		LV2	PV2
+	DISK		PV1	 8G	I1							VG1		S1
+	DISK		PV2	 8G	I2							VG1		S2
+
+
+	The Inode# for the Block as well as the Character counterparts of a Volume need to be listed as either the Block or 
+	Character counterparts of a volume may be in use.
+
+	Metric Name	storage_volume_layers
+
+
+	  Metric Column 			Description
+	  --------------------------------------------------
+          storage_volume_layers_vendor		Vendor  eg. VERITAS, HPLVM etc.
+          storage_volume_layers_type		Type of layer in the volume metric eg. VOLUME,PLEX,SUBDISK,DISK etc.
+          storage_volume_layers_name		Name 
+          storage_volume_layers_diskgroup	Disk Group
+          storage_volume_layers_size		Size 
+          storage_volume_layers_config		Configuration
+          storage_volume_layers_stripeconfig	Stripe Configuration 
+          storage_volume_layers_mirrors	 	Mirrors 
+          storage_volume_layers_parent	 	Parent 
+          storage_volume_layers_filesystem	Filesystem mounted on the Volume
+          storage_volume_layers_path		Volume Path (Block) 
+          storage_volume_layers_inode	 	Inode# for the Block Volume Path 
+          storage_volume_layers_path_raw	Volume Path (Character) 
+          storage_volume_layers_inode_raw	Inode# for the Character Volume Path
+          storage_volume_layers_disk_path	Disk Path 
+          storage_volume_layers_disk_inode	Disk Inode 
+          storage_volume_layers_shared		Is volume shared (Y/N) 
+          storage_volume_layers_cluster		Cluster id for shared volumes 
+          storage_volume_layers_key		Key 
+
+
+5.	Filesystems
+	
+	Metrics will be instrumented for local filesystems , networked file systems and clustered filesystems 
+	on the target host.
+
+	The following metrics will be collected for these filesystems. The metrics which apply 
+	to shared filesystems will be collected for nfs filesystems only.
+
+	Standard unix utilities df on Solaris and bfd on HPUX will provide the host specific information. 
+	NFS utilites showmount will provide the shared filesystem specific data.NFS Server data will have to be obtained
+	using vendore specific programmin interface. Access to vendor programmin interface will be required.
+	
+	Metric Name	storage_filesystems
+
+	  Metric Column 			Description
+	  --------------------------------------------------
+	  storage_filesystems_fstype		Type of filesystem eg. ufs,vxfs,nfs etc.  
+          storage_filesystems_filesystem	Filesystem Name
+          storage_filesystems_inode		Inode# of the file system on the host
+          storage_filesystems_mountpoint	Mount Point
+          storage_filesystems_size		Size of the filesystem (bytes)
+          storage_filesystems_used		Used (%) 
+	  storage_filesystems_free		Free space in the filesystem ( bytes )
+	  storage_filesystems_shared_server	Filesystem server for shared filesystems eg. nfs server for nfs
+	  storage_filesystems_shared_volume	Volume name (ID) on the filesystem server
+	  storage_filesystems_shared_vendor	Fileserver Vendor  eg. NETAPP, EMC 
+	  storage_filesystems_shared_product	Fileserver Product Model eg. CELERA,F800
+	  storage_filesystems_shared_privileges	Host access privileges to the shared file system eg. READ, WRITE etc.
+	  storage_filesystems_cluster_id	Cluster Name , for clustered flesystems 
+
+
+6.	Applications
+
+	The following metrics will be instrumented for any application.
+
+	hostApplications = { type, name, id, file , Link Inode#, size, used, free, shared ,cluster id, application_specific_data}
+
+
+	For a Oracle database application specific data will include tablespace information 
+	eg.
+
+	application_specific_data  = { tablespace name } // For Oracle database
+
+
+	The following is the metric model for applications
+	
+	Metric Name	storage_applications
+
+	  Metric Column 					Description
+	  ----------------------------------------------------------------------------------------------------------------------
+	  storage_applications_type				Type of application 	eg. ORACLE_DATABASE etc.  
+          storage_applications_name				application Name 	eg. dbname for Oracle database
+          storage_applications_id				application instance Id eg. Oracle sid 
+          storage_applications_file				file name 
+          storage_applications_inode				Link Inode# 
+          storage_applications_size				Size (bytes) 
+          storage_applications_used				Used (bytes) 
+	  storage_applications_free				Free (bytes )
+	  storage_applications_shared				Clustered Application (Y/N)
+	  storage_applications_cluster_id			Cluster Id 
+	  storage_applications_oracle_database_tablespace	Tablespace name for a Oracle Database 
+
+
+	An Oracle database application will be represented as below.
+
+	Application type is ORACLE_DATABASE, application name is the global dbname, Application Id is sid. 
+	Size, used and free will be at the tablesapce level and not file. 
+	
+	Type		Name 	Id	Tablespace 	File	Link Inode#	Size	Used	Free	Shared	Cluster	Id
+	--------------------------------------------------------------------------------------------------------------------
+	ORACLE_DATABASE	GITDB	GIT1	TBS1	   				X	Y	Z	Y	CLS1
+	ORACLE_DATABASE	GITDB	GIT1	TBS1		FS1	IN1					Y	CLS1
+	ORACLE_DATABASE	GITDB	GIT1	TBS1		FS2	IN2					Y	CLS1
+
+	Metrics for target type oracle_database are instrumented by the base EMD product . These metrics will be augmented to collect the 
+	additional metrics .
+	
+
+7.	External storage systems
+
+	The metric data will be collected from each external storage system or Raid controller . The external storage system can be SAN
+	, network or SCSI attached .This information will have to be collected using the vendors programming interface. Access to this
+	programming interface is required. 
+
+	eg. for EMC Symmetric access to SYMCLI/SYMAPI will be required
+
+	Metric Name	storage_system
+
+	  Metric Column 				Description
+	  ----------------------------------------------------------------------------------------------------------------------
+          storage_system_name				Storage system name   	 
+          storage_system_id				External storage systems ID eg symmterix ID for EMC storage 
+          storage_system_vendor				Vendor eg. SUN 
+          storage_system_product			Product   eg. T3
+          storage_system_model				Model 
+          storage_system_total_storage			Total Storage (bytes) 
+	  storage_system_allocated_storage		Allocated Storage (bytes )
+	  storage_system_free_storage			Unallocated Storage (bytes)
+	  storage_system_overhead_storage		Storage used by the storage system for its operation(bytes) eg For microcode,snapshot etc. 
+	  storage_system_spare_storage			Spare disks(bytes) 
+	  storage_system_nfs_ip				IP address for a nfs server 
+          storage_system_key				Key 
+
+	For computation of storage summary a single copy of this metric for a given storage system is sufficient. At present no 
+	mechanism for discovery of external storage systems is thought of . External storage systems will not be treated as a target in 
+	EMD. Metrics for external storage systems will be collected as part of the storage summary metrics on a host . Metrics for external
+	storage systems will be collected from every host to which the external storage system is visible.
+
+
+7.1	Software Raid
+	
+	Some operating systems have a software raid manager outside of the volume manager.On hosts having this feature metrics will be collected
+	for the software raid manager.The following metrics will be collected for the software raid manager.
+
+	Metric Name	storage_swraid
+
+	Metric Column					Description
+	-----------------------------------------------------------------------------------------------------------------------
+	storage_swraid_type				Type of data record eg. DISK, SLICE, SUBDISK
+	storage_swraid_filetype				File type eg. BLOCK or CHARACTER
+	storage_swraid_name				Logical Name for the Raid volume, slice or physical disk
+	storage_swraid_inode				Link inode# for the logical path
+	storage_swraid_size				Size in bytes
+
+	storage_swraid_diskkey				Key value for the disk, common for all slices of the disk , logical name of the backupslice can be the diskkey
+	storage_swraid_slicekey				Key value for the slice, common for the block and char counterparts od a slice, diskkey_slice can be the slice key. 
+
+	storage_swraid_key				Key for the mozart repository, can be the logical name of the disk
+
+	eg.
+	
+	type	filetype	name	inode	size   diskkey  slicekey
+
+	DISK    BLOCK 		db	ib1	a1      d	 s0
+	DISK    CHARACTER 	dc	ic1	a1      d	 s0
+	SLICE   BLOCK		sb1	ibs1	a2	d	 s1
+	SLICE   CHARACTER	sc1	ics2	a2	d	 s1
+	SLICE   BLOCK		sb2	ibs1	a3	d	 s2
+	SLICE   CHARACTER	sc2	ics2	a3	d	 s2
+	SUBDISK			sd1	isd1	a4	
+	SUBDISK			sd2	isd2	a5	
+		
+
+8.	Clusters
+
+	Multiple hosts share common storage in a clustered environment.Knowing clustered storage is important in group reports to prevent
+	multiple counting of this storage across clustered hosts.
+
+	The following metrics for a cluster will be collected from each host . The metrics will be collected if the host is a node in a cluster.
+
+	Metric Column					Description
+	----------------------------------------------------------------------------------------------------
+	storage_cluster_name				Cluster name , if target host is a node in the cluster	
+	storage_cluster_id				Cluster Id
+	storage_cluster_host_name			Host Name	
+	storage_cluster_host_id				Host Id	
+
+	Storage summary is calculated for the cluster . Only clustered storage ie. clustered applications , clustered File Systems, 
+	shared Volumes and disk devices visible across all the nodes of the cluster will be summarized for the cluster.
+
+	The group summary for clustered hosts will be computed as below.
+
+	storage_summary_host	= {storage_summary | storage summary for a host }
+
+	storage_summary_cluster = {storage_summary | For shared storage across all nodes in the cluster}
+
+	storage_summary for a group of clustered hosts  =  sum ( storage_summary_host - storage_summary_cluster) + storage_summary_cluster
+
+
+9. 	Partitioning Hosts
+
+	A single host may be partitioned with each partition running its own instance of the operating system. 
+	If the partitions dont share storage resources then each partition will be treated as a different target.
+
+	eg. Dynamic System Domains from SUN. Each partition is treated as a independent target, with its own set of
+	disks and CPU's.
+
+	Partitions share storage resources will not be supported.
+
+
+10. Open Issues
+
+	- NFS storage for a group of hosts in HISTORY group reports will not be available. 		
+
+	- Getting Inode# for each datafile using the EMD fetchlet framework (sp)
+
+	- Use REPOSITORY_METRIC with a eval function to calculate storage summary in the repository (sp)
+
+	- SUN storage programming interface 
+
+	- Discovery of external Storage systems as targets in the EMD framework
+
+	- How is cluster represented as a target in EMD, are clustered resources identified.
+
+
+11. PL/SQL
+
+Structure to be returned by PL/SQL for a host
+
+
+Name		DISK	SWRAID	VOLUME	FS	NFS	ORACLE_DB	APPLICATION
+Raw 		X	X	X
+Size		X	X	X	X	X	X		X
+Used				X	X	X	X		X
+Free		X	X	X	X	X	X		X
+FreeList[]
+  Name		Path	Path	Path	FS	NFS	datafile	file
+  Size		x	x	x	x	x	x		x
+  Used					x	x	x		x
+  Free		x	x	x	x	x	x		x
+  Vendor					x
+  App Name						x		x
+  Tablespace						x
+  
+x => Value exists
+							
+Name	      Raw-Size  Size	Used    Free	FreeList[]
+						<------------------------------->
+						      Name Size Used Free Appname TS
+------------------------------------------------------------------------------------
+DISK				NA			    	            NA 	  NA
+SWRAID				NA				            NA 	  NA
+VOLUME									    NA 	  NA
+FS		NA							    NA 	  NA
+NFS		NA							    NA 	  NA
+ORACLE_DB       NA							
+APPLICATION     NA							  	  NA
+VENDOR_EMC                      NA	NA	 NA	    
+VENDOR_NETAP                    NA	NA	 NA	    
+
+
+Eg.
+	Name		Raw	Size	Used	Free
+	--------------------------------------------
+	DISK		2000	1000		500	
+	SWRAID   	 300	 150		 50
+	VOLUME	 	 200	 100     50	 50 
+	FS			  50	 25	 25
+	NFS			 200	100	100
+	ORACLE_DB        	 100	 75	 25
+	APPLICATION		   0	  0       0 
+	VENDOR_EMC       800	 400	
+	VENDOR_NETAPP    100	 100	
+
+FreeList []
+
+		Name			Size	 Free	 Used   VENDOR  APPNAME	TS  
+----------------------------------------------------------------------------------
+DISK
+  	/dev/rdsk/c0t0d1s2     		18000	18000
+  	/dev/rdsk/c0t1d0s4     		 4000	 4000
+
+SWRAID
+	/dev/rdsk/sw01	       		 9000	 9000
+
+VOLUME
+	/dev/vx/rdsk/vg01/vol1		 8000    8000
+	/dev/rdsk/c0t0d0s3		16000    3000
+
+FS
+	/u01				5000	 3000	2000
+
+NFS
+	/u02			       10000	 5000	5000   NETAPP	
+
+ORACLE_DB
+	datafile1			500	  300	200    		DB1	TS1
+	datafile2			400	  200   200    		DB2 	TS1
+
+APPLICATION	
+	file1				600	  300   300    		APP1
+
+
+

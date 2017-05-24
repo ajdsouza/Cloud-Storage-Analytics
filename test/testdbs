@@ -1,0 +1,229 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+#
+#  $Id: testdbs,v 1.10 2003/10/13 18:18:51 ajdsouza Exp $ 
+#
+# NAME  
+#	testdbs
+#
+# DESC 
+#
+# Testload data into tge mgmt_metrics table for 9i oem
+#  for host metrics and oracle database metrics, for a list of predefined databases
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/03/02 - Created
+
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+#A list of databases to get metrics from
+my @databases = (  
+		   {
+		       hostname => 'dlsun1170.us.oracle.com',
+		       name =>"emd_dlsun1170",	
+		       username => "system", 
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = dlsun1170)(PORT = 1531)))(CONNECT_DATA=(SID=EMD)(SERVER=DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+			hostname => 'eagle1-pc.us.oracle.com',
+			version => "Oracle9i Enterprise Edition Release 9.0.1.4.0 - Production",
+			name => "iasem_eagle1-pc",	
+			username => "system", 
+			password=> "manager",
+			address=> "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))"
+		       },
+		   {
+		       hostname => 'dlsun1170.us.oracle.com',
+		       name =>"emd_dlsun1170",	
+		       username => "system", 
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = dlsun1170)(PORT = 1531)))(CONNECT_DATA=(SID=EMD)(SERVER=DEDICATED)))",
+		       status=>'inactive'
+		       },	
+		   {	
+		       hostname => 'rmdc-oem01.us.oracle.com',
+		       name=>"oemoltp_rmdc-oem01",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = rmdc-oem01)(PORT = 1521)))(CONNECT_DATA=(SID=oemoltp)(SERVER=DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'rmdc-oem01.us.oracle.com',
+		       name=>"emeiat_rmdc-oem01",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = rmdc-oem01)(PORT = 1521)))(CONNECT_DATA=(SID=emeiat)(SERVER=DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'labsun1.us.oracle.com',
+		       name=>"oemtest1_labsun1",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS = (PROTOCOL = TCP)(HOST = labsun1.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = oemtest1)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'labsun1.us.oracle.com',
+		       name=>"oemtest2_labsun1",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = labsun1.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = testoem2)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'sm2sun01.us.oracle.com',
+		       version => 'Oracle9i Enterprise Edition Release 9.0.1.3.0 - Production',
+		       name=>"smmdev_sm2sun01",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = sm2sun01.us.oracle.com)(PORT = 1522)))(CONNECT_DATA = (SID = smmdev)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"orcl9i_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = orcl9i)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db1_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db1)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db3_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db3)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db4_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db4)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db5_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db5)(SERVER = DEDICATED)))",
+		       status=>'inactive'
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"apps_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = apps)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'dbs10.us.oracle.com',
+		       version => 'Oracle7 Server Release 7.3.4.3.0 - Production',
+		       name=>"oasisap_dbs10",
+		       username=>"oemadm",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = dbs10.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = oasisap)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'dbs11-c.us.oracle.com',
+		       version => 'Oracle9i Enterprise Edition Release 9.2.0.2.0 - 64bit Production',
+		       name=>"ifsap_dbs11",
+		       username=>"oemadm",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = dbs11.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = ifsap)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'bcrd1.oraclebol.com',
+		       version => 'Oracle8i Enterprise Edition Release 8.1.7.4.0 - Production',
+		       name=>"PBCRDI_bcrd1",
+		       username=>"oemadm",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = bcrd1.oraclebol.com)(PORT = 1521)))(CONNECT_DATA = (SID = pbcrdi)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'pinnacle.us.oracle.com',
+		       version => 'OOracle9i Enterprise Edition Release 9.0.1.4.0 - Production',
+		       name=> "em40p_pinnacle",
+		       username=> "system",
+		       password=> "manager",
+		       address=> "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = pinnacle.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = em40p)(SERVER = DEDICATED)))"
+		       }
+		   );
+
+# Test repository connection
+$ENV{'UPLOAD_DB_USER'}='storage_rep';
+$ENV{'UPLOAD_DB_PASSWORD'}='storage_rep';
+$ENV{'UPLOAD_DB_TNS'}="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))";
+
+my $hostname;
+
+chop($hostname = `hostname 2>/dev/null` || `uname -n 2>/dev/null`);
+
+foreach ( @databases )
+{
+    my %dbinfo = %$_;
+    
+    print "************************************************************************************\n" and
+	warn "************************************************************************************\n";
+
+    # Do all hosts only from the development systems, else do only that specific host
+    warn " Skipping database target $dbinfo{name} , not on the current host $hostname \n" and next unless $hostname =~ /dlsun1170|ajdsouza-pc|ajdsouza-linux|eagle1-pc|usunrat26|pinnacle|agsidbs1|gede|lothar/i or $hostname =~ /$dbinfo{name}/i;
+    
+    print "Skipping database target $dbinfo{name} , status inactive\n" and
+	warn "Skipping database target $dbinfo{name} , status inactive \n" and
+	next if $dbinfo{status} and $dbinfo{status} =~ /inactive/i;
+
+    $ENV{'EM_TARGET_NAME'}=$dbinfo{name};
+    $ENV{'EM_TARGET_TYPE'}='oracle_sysman_database';
+    $ENV{'EM_TARGET_USERNAME'}=$dbinfo{username};
+    $ENV{'EM_TARGET_PASSWORD'}=$dbinfo{password};
+    $ENV{'EM_TARGET_ADDRESS'}=$dbinfo{address};
+   
+    print "$ENV{EM_TARGET_NAME} \n" and
+	warn "$ENV{EM_TARGET_NAME} \n";
+
+    print "$ENV{EM_TARGET_TYPE}\n" and
+	warn "$ENV{EM_TARGET_TYPE}\n";
+
+    print "$ENV{EM_TARGET_USERNAME}\n" and
+	warn "$ENV{EM_TARGET_USERNAME}\n";
+
+    print "$ENV{EM_TARGET_PASSWORD}\n" and
+	warn "$ENV{EM_TARGET_PASSWORD}\n";
+
+    print "$ENV{EM_TARGET_ADDRESS}\n" and
+	warn "$ENV{EM_TARGET_ADDRESS}\n";
+
+    print " Version = = $dbinfo{version} \n" and 
+	warn " Version = = $dbinfo{version} \n" 
+	if $dbinfo{version};
+    
+    apps();
+
+    my $result = `/usr/local/git/oem/storage/stormon`;
+
+}

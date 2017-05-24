@@ -1,0 +1,109 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT()
+
+dnl Checks for programs.
+AC_PROG_CC(gcc)
+
+dnl This is a list of locations to look for the Native Sun compiler
+ccs="/opt/SUNWspro/bin/cc /usr/bin/cc"
+
+dnl List of common locations for linux source
+srcs="/usr/src/linux /usr/src/linux-2.4"
+
+dnl Check how to disable newline for 'echo'
+N=
+C=
+if echo "\c" | grep c >/dev/null 2>&1; then
+    N='-n'
+else
+    C='\c'
+fi
+
+dnl Platform specific checks
+AC_CANONICAL_HOST
+case "$host_os" in
+*solaris*) 
+	AC_DEFINE(D_SOLARIS)
+	AC_CHECK_LIB(symapi43,SymList,,AC_MSG_ERROR(symapi library not found., 1))
+	AC_CHECK_LIB(kvm,kvm_open,,AC_MSG_ERROR(kvm library not found., 1) )
+
+	for x in $ccs
+	do
+		echo $N "checking for $x... $C"
+        	if test -f $x;
+        	then
+                	suncc=$x
+			echo " yes"
+			
+			dnl Run the compiler to check if it is a Sun Compiler
+			dnl If it is we are done and break the loop
+			dnl If not, we keep checking the other compilers in the list
+			echo $N "checking whether $suncc is really a Sun Compiler... $C"
+        		iswspro=`$suncc -V 2>&1 1>/dev/null| grep -i "Sun Workshop"`
+        		if test -z "$iswspro";
+        		then
+				echo " no"
+			else
+				echo " yes"
+				break
+        		fi
+		else
+                	suncc=
+			echo " no"
+		fi
+	done
+
+	if test -z "$suncc";
+	then
+		AC_MSG_ERROR(Native compiler not found. Exitting., 1)
+	fi
+
+	dnl Solaris 2.7 and 2.8 compile kdisks64
+	case "$host_os" in
+	*2.9*| *2.8* | *2.7*) 
+		executables='kdisks64 kdisks syminfo scsiinq run_vxprint runcmd';;
+	*) 
+		executables='kdisks scsiinq syminfo run_vxprint runcmd';;
+	esac
+	;;
+*linux*)
+	AC_DEFINE(D_LINUX)
+	dnl Check to see if the required headers from the linux source are on the system
+        for src in $srcs
+        do
+                echo $N "checking for headers in $src... $C"
+                if test -r $src/drivers/block/ida_ioctl.h && test -r $src/drivers/block/ida_cmd.h;
+                then
+			srcpath=${src}
+                        echo " yes"
+			break
+                else
+                        echo " no"
+                fi
+        done
+
+	if test -z "${srcpath}";
+	then
+		AC_MSG_ERROR(Linux source headers not found. Exitting., 1)
+	else
+		CPPFLAGS=-I${srcpath}
+	fi
+
+	executables='scsiinq ideinfo idainfo ccissinfo mdinfo run_raw run_sfdisk run_pvdisplay runcmd' 
+	;;
+*hpux*)
+	AC_DEFINE(D_HPUX)
+	executables='hpux_swapinfo scsiinq syminfo runcmd' 
+	AC_CHECK_LIB(symapi43,SymList,,AC_MSG_ERROR(symapi library not found., 1))
+esac
+
+CFLAGS=-Wall
+objects=stormon.o
+wkdir=`pwd`
+
+AC_SUBST(executables)
+AC_SUBST(objects)
+AC_SUBST(wkdir)
+AC_SUBST(suncc)
+
+AC_OUTPUT(Makefile)

@@ -1,0 +1,142 @@
+REM executing storage metrics live from /home/ajdsouza/stormon/emstmn/srchome/emagent/sysman/admin/scripts
+   +
+   |---> LOCAL_FILESYSTEM File /LOCAL_SWAP/swapfile1 LOCAL_FILESYSTEM_/LOCAL_SWAP/swapfile1 (s2097143808 u2097143808 f0 _UNALLOCATED_VIRTUAL_ ) 
+   |  |---> LOCAL_FILESYSTEM Mountpoint / LOCAL_FILESYSTEM_/ (s76490379264 u26965037056 f45639720960 _INTERMEDIATE____ ) 
+   |  |  |---> LOCAL_FILESYSTEM Filesystem /dev/hda3 LOCAL_FILESYSTEM_/dev/hda3 (s76490379264 u76490379264 f0 _BOTTOM____ ) 
+   |  |     |---> OS_DISK Disk Partition /dev/hda3 OS_DISK_-5JV17XRW-3 (s77712445440 u77712445440 f0 _TOP____ ) 
+   |  |        |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+   |  |           
+   |  |---> LOCAL_FILESYSTEM Mountpoint /net/stadb21/private LOCAL_FILESYSTEM_/net/stadb21/private (s76490379264 u26965037056 f45639720960 _TOP_UNALLOCATED_ ) 
+   |  |  |---> LOCAL_FILESYSTEM Directory /private LOCAL_FILESYSTEM_/private (s76490379264 u76490379264 f0 _INTERMEDIATE_ ) 
+   |  |     |---> LOCAL_FILESYSTEM Mountpoint / LOCAL_FILESYSTEM_/ (s76490379264 u26965037056 f45639720960 _INTERMEDIATE____ ) 
+   |  |     |  |---> LOCAL_FILESYSTEM Filesystem /dev/hda3 LOCAL_FILESYSTEM_/dev/hda3 (s76490379264 u76490379264 f0 _BOTTOM____ ) 
+   |  |     |     |---> OS_DISK Disk Partition /dev/hda3 OS_DISK_-5JV17XRW-3 (s77712445440 u77712445440 f0 _TOP____ ) 
+   |  |     |        |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+   |  |     |           
+   |  |     |---> LOCAL_FILESYSTEM Mountpoint /net/stadb21/scratch LOCAL_FILESYSTEM_/net/stadb21/scratch (s76490379264 u26965037056 f45639720960 _INTERMEDIATE__ ) 
+   |  |        |---> LOCAL_FILESYSTEM Directory /scratch LOCAL_FILESYSTEM_/scratch (s76490379264 u76490379264 f0 _INTERMEDIATE__ ) 
+   |  |           |---> LOCAL_FILESYSTEM Mountpoint / LOCAL_FILESYSTEM_/ (s76490379264 u26965037056 f45639720960 _INTERMEDIATE____ ) 
+   |  |              |---> LOCAL_FILESYSTEM Filesystem /dev/hda3 LOCAL_FILESYSTEM_/dev/hda3 (s76490379264 u76490379264 f0 _BOTTOM____ ) 
+   |  |                 |---> OS_DISK Disk Partition /dev/hda3 OS_DISK_-5JV17XRW-3 (s77712445440 u77712445440 f0 _TOP____ ) 
+   |  |                    |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+   |  |                       
+   |  |---> LOCAL_FILESYSTEM Mountpoint /net/stadb21/scratch LOCAL_FILESYSTEM_/net/stadb21/scratch (s76490379264 u26965037056 f45639720960 _INTERMEDIATE__ ) 
+   |     |---> LOCAL_FILESYSTEM Directory /scratch LOCAL_FILESYSTEM_/scratch (s76490379264 u76490379264 f0 _INTERMEDIATE__ ) 
+   |        |---> LOCAL_FILESYSTEM Mountpoint / LOCAL_FILESYSTEM_/ (s76490379264 u26965037056 f45639720960 _INTERMEDIATE____ ) 
+   |           |---> LOCAL_FILESYSTEM Filesystem /dev/hda3 LOCAL_FILESYSTEM_/dev/hda3 (s76490379264 u76490379264 f0 _BOTTOM____ ) 
+   |              |---> OS_DISK Disk Partition /dev/hda3 OS_DISK_-5JV17XRW-3 (s77712445440 u77712445440 f0 _TOP____ ) 
+   |                 |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+   |                    
+   |---> LOCAL_FILESYSTEM Mountpoint /boot LOCAL_FILESYSTEM_/boot (s199108608 u64239616 f124589056 _TOP_UNALLOCATED_ ) 
+   |  |---> LOCAL_FILESYSTEM Filesystem /dev/hda1 LOCAL_FILESYSTEM_/dev/hda1 (s199108608 u199108608 f0 _BOTTOM_ ) 
+   |     |---> OS_DISK Disk Partition /dev/hda1 OS_DISK_-5JV17XRW-1 (s205599744 u205599744 f0 _TOP_ ) 
+   |        |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+   |           
+   |---> LOCAL_FILESYSTEM Filesystem /dev/hda2 LOCAL_FILESYSTEM_/dev/hda2 (s2105663488 u2105663488 f0 _BOTTOM_TOP_UNALLOCATED_ ) 
+   |  |---> OS_DISK Disk Partition /dev/hda2 OS_DISK_-5JV17XRW-2 (s2105671680 u2105671680 f0 _TOP_ ) 
+   |     |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+   |        
+   |---> NFS Mountpoint /ade_autofs/ade_linux NFS_/ade_autofs/ade_linux (s1908566786048 u1503678201856 f404888584192 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stlinma1.us.oracle.com:/vol/ade_linux NFS_stlinma1.us.oracle.com:/vol/ade_linux (s1908566786048 u1908566786048 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /ade_autofs/nfsdo_linux NFS_/ade_autofs/nfsdo_linux (s1799505838080 u1257885335552 f541620502528 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stlinma2.us.oracle.com:/vol/nfsdo_linux NFS_stlinma2.us.oracle.com:/vol/nfsdo_linux (s1799505838080 u1799505838080 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /home/ajdsouza NFS_/home/ajdsouza (s528678895616 u391032422400 f137646473216 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stdmlina4:/vol/home1/ajdsouza NFS_stdmlina4:/vol/home1/ajdsouza (s528678895616 u528678895616 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /home/scgrover NFS_/home/scgrover (s528678895616 u391032553472 f137646342144 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stdmlina4:/vol/home1/scgrover NFS_stdmlina4:/vol/home1/scgrover (s528678895616 u528678895616 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /usr/local/redhat/OracleProd NFS_/usr/local/redhat/OracleProd (s230952632320 u206209351680 f24743280640 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stlinma2:/vol/local/linux/redhat/OracleProd NFS_stlinma2:/vol/local/linux/redhat/OracleProd (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /usr/local/redhat/packages NFS_/usr/local/redhat/packages (s230952632320 u206209351680 f24743280640 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stlinma2:/vol/local/linux/redhat/packages NFS_stlinma2:/vol/local/linux/redhat/packages (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /usr/local/remote/image NFS_/usr/local/remote/image (s230952632320 u206209351680 f24743280640 _TOP_UNALLOCATED_ ) 
+   |  |---> NFS Filesystem stlinma2:/vol/local/x86/redhat/30_prod/image NFS_stlinma2:/vol/local/x86/redhat/30_prod/image (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |     
+   |---> NFS Mountpoint /usr/local/remote/packages NFS_/usr/local/remote/packages (s230952632320 u206209286144 f24743346176 _TOP_UNALLOCATED_ ) 
+      |---> NFS Filesystem stlinma2:/vol/local/x86/redhat/30_prod/packages NFS_stlinma2:/vol/local/x86/redhat/30_prod/packages (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+         
+   +
+   |---> NFS Filesystem stdmlina4:/vol/home1/ajdsouza NFS_stdmlina4:/vol/home1/ajdsouza (s528678895616 u528678895616 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /home/ajdsouza NFS_/home/ajdsouza (s528678895616 u391032422400 f137646473216 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stdmlina4:/vol/home1/scgrover NFS_stdmlina4:/vol/home1/scgrover (s528678895616 u528678895616 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /home/scgrover NFS_/home/scgrover (s528678895616 u391032553472 f137646342144 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stlinma1.us.oracle.com:/vol/ade_linux NFS_stlinma1.us.oracle.com:/vol/ade_linux (s1908566786048 u1908566786048 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /ade_autofs/ade_linux NFS_/ade_autofs/ade_linux (s1908566786048 u1503678201856 f404888584192 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stlinma2.us.oracle.com:/vol/nfsdo_linux NFS_stlinma2.us.oracle.com:/vol/nfsdo_linux (s1799505838080 u1799505838080 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /ade_autofs/nfsdo_linux NFS_/ade_autofs/nfsdo_linux (s1799505838080 u1257885335552 f541620502528 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stlinma2:/vol/local/linux/redhat/OracleProd NFS_stlinma2:/vol/local/linux/redhat/OracleProd (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /usr/local/redhat/OracleProd NFS_/usr/local/redhat/OracleProd (s230952632320 u206209351680 f24743280640 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stlinma2:/vol/local/linux/redhat/packages NFS_stlinma2:/vol/local/linux/redhat/packages (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /usr/local/redhat/packages NFS_/usr/local/redhat/packages (s230952632320 u206209351680 f24743280640 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stlinma2:/vol/local/x86/redhat/30_prod/image NFS_stlinma2:/vol/local/x86/redhat/30_prod/image (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /usr/local/remote/image NFS_/usr/local/remote/image (s230952632320 u206209351680 f24743280640 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> NFS Filesystem stlinma2:/vol/local/x86/redhat/30_prod/packages NFS_stlinma2:/vol/local/x86/redhat/30_prod/packages (s230952632320 u230952632320 f0 _BOTTOM_ ) 
+   |  |---> NFS Mountpoint /usr/local/remote/packages NFS_/usr/local/remote/packages (s230952632320 u206209286144 f24743346176 _TOP_UNALLOCATED_ ) 
+   |     
+   |---> OS_DISK Disk /dev/hda OS_DISK_-5JV17XRW (s80026361856 u80023716864 f2644992 _BOTTOM______ ) 
+      |---> OS_DISK Disk Partition /dev/hda1 OS_DISK_-5JV17XRW-1 (s205599744 u205599744 f0 _TOP_ ) 
+      |  |---> LOCAL_FILESYSTEM Filesystem /dev/hda1 LOCAL_FILESYSTEM_/dev/hda1 (s199108608 u199108608 f0 _BOTTOM_ ) 
+      |     |---> LOCAL_FILESYSTEM Mountpoint /boot LOCAL_FILESYSTEM_/boot (s199108608 u64239616 f124589056 _TOP_UNALLOCATED_ ) 
+      |        
+      |---> OS_DISK Disk Partition /dev/hda2 OS_DISK_-5JV17XRW-2 (s2105671680 u2105671680 f0 _TOP_ ) 
+      |  |---> LOCAL_FILESYSTEM Filesystem /dev/hda2 LOCAL_FILESYSTEM_/dev/hda2 (s2105663488 u2105663488 f0 _BOTTOM_TOP_UNALLOCATED_ ) 
+      |     
+      |---> OS_DISK Disk Partition /dev/hda3 OS_DISK_-5JV17XRW-3 (s77712445440 u77712445440 f0 _TOP____ ) 
+         |---> LOCAL_FILESYSTEM Filesystem /dev/hda3 LOCAL_FILESYSTEM_/dev/hda3 (s76490379264 u76490379264 f0 _BOTTOM____ ) 
+            |---> LOCAL_FILESYSTEM Mountpoint / LOCAL_FILESYSTEM_/ (s76490379264 u26965037056 f45639720960 _INTERMEDIATE____ ) 
+               |---> LOCAL_FILESYSTEM File /LOCAL_SWAP/swapfile1 LOCAL_FILESYSTEM_/LOCAL_SWAP/swapfile1 (s2097143808 u2097143808 f0 _UNALLOCATED_VIRTUAL_ ) 
+               |  
+               |---> LOCAL_FILESYSTEM Directory /private LOCAL_FILESYSTEM_/private (s76490379264 u76490379264 f0 _INTERMEDIATE_ ) 
+               |  |---> LOCAL_FILESYSTEM Mountpoint /net/stadb21/private LOCAL_FILESYSTEM_/net/stadb21/private (s76490379264 u26965037056 f45639720960 _TOP_UNALLOCATED_ ) 
+               |     |---> LOCAL_FILESYSTEM File /LOCAL_SWAP/swapfile1 LOCAL_FILESYSTEM_/LOCAL_SWAP/swapfile1 (s2097143808 u2097143808 f0 _UNALLOCATED_VIRTUAL_ ) 
+               |        
+               |---> LOCAL_FILESYSTEM Directory /scratch LOCAL_FILESYSTEM_/scratch (s76490379264 u76490379264 f0 _INTERMEDIATE__ ) 
+                  |---> LOCAL_FILESYSTEM Mountpoint /net/stadb21/scratch LOCAL_FILESYSTEM_/net/stadb21/scratch (s76490379264 u26965037056 f45639720960 _INTERMEDIATE__ ) 
+                     |---> LOCAL_FILESYSTEM File /LOCAL_SWAP/swapfile1 LOCAL_FILESYSTEM_/LOCAL_SWAP/swapfile1 (s2097143808 u2097143808 f0 _UNALLOCATED_VIRTUAL_ ) 
+                     |  
+                     |---> LOCAL_FILESYSTEM Directory /private LOCAL_FILESYSTEM_/private (s76490379264 u76490379264 f0 _INTERMEDIATE_ ) 
+                        |---> LOCAL_FILESYSTEM Mountpoint /net/stadb21/private LOCAL_FILESYSTEM_/net/stadb21/private (s76490379264 u26965037056 f45639720960 _TOP_UNALLOCATED_ ) 
+                           |---> LOCAL_FILESYSTEM File /LOCAL_SWAP/swapfile1 LOCAL_FILESYSTEM_/LOCAL_SWAP/swapfile1 (s2097143808 u2097143808 f0 _UNALLOCATED_VIRTUAL_ ) 
+                              
+em_result=LOCAL_FILESYSTEM_/LOCAL_SWAP/swapfile1|-5JV17XRW_S4514265_E156296385|/LOCAL_SWAP/swapfile1|LOCAL_FILESYSTEM|_UNALLOCATED_VIRTUAL_|File|80026361856|2097143808|2097143808|0|swap|/LOCAL_SWAP/swapfile1||||||
+em_result=LOCAL_FILESYSTEM_/boot|-5JV17XRW_S63_E401625|/boot|LOCAL_FILESYSTEM|_TOP_UNALLOCATED_|Mountpoint|80026361856|199108608|64239616|124589056|ext3|/dev/hda1|/boot|||||
+em_result=LOCAL_FILESYSTEM_/dev/hda1|-5JV17XRW_S63_E401625|/dev/hda1|LOCAL_FILESYSTEM|_BOTTOM_|Filesystem|80026361856|199108608|199108608|0|ext3|/dev/hda1|/boot|||||
+em_result=LOCAL_FILESYSTEM_/dev/hda2|-5JV17XRW_S401625_E4514265|/dev/hda2|LOCAL_FILESYSTEM|_BOTTOM_TOP_UNALLOCATED_|Filesystem|80026361856|2105663488|2105663488|0|swap|/dev/hda2||||||
+em_result=LOCAL_FILESYSTEM_/dev/hda3|-5JV17XRW_S4514265_E156296385|/dev/hda3|LOCAL_FILESYSTEM|_BOTTOM____|Filesystem|80026361856|76490379264|76490379264|0|ext3|/dev/hda3|/|||||
+em_result=LOCAL_FILESYSTEM_/net/stadb21/private|-5JV17XRW_S4514265_E156296385|/net/stadb21/private|LOCAL_FILESYSTEM|_TOP_UNALLOCATED_|Mountpoint|80026361856|76490379264|26965037056|45639720960|none|/private|/net/stadb21/private|||||
+em_result=LOCAL_FILESYSTEM_/net/stadb21/scratch|-5JV17XRW_S4514265_E156296385|/net/stadb21/scratch|LOCAL_FILESYSTEM|_INTERMEDIATE__|Mountpoint|80026361856|76490379264|26965037056|45639720960|none|/scratch|/net/stadb21/scratch|||||
+em_result=LOCAL_FILESYSTEM_/private|-5JV17XRW_S4514265_E156296385|/private|LOCAL_FILESYSTEM|_INTERMEDIATE_|Directory|80026361856|76490379264|76490379264|0|none|/private|/net/stadb21/private|||||
+em_result=LOCAL_FILESYSTEM_/scratch|-5JV17XRW_S4514265_E156296385|/scratch|LOCAL_FILESYSTEM|_INTERMEDIATE__|Directory|80026361856|76490379264|76490379264|0|none|/scratch|/net/stadb21/scratch|||||
+em_result=LOCAL_FILESYSTEM_/|-5JV17XRW_S4514265_E156296385|/|LOCAL_FILESYSTEM|_INTERMEDIATE____|Mountpoint|80026361856|76490379264|26965037056|45639720960|ext3|/dev/hda3|/|||||
+em_result=NFS_/ade_autofs/ade_linux|144.20.224.52::stlinma1.us.oracle.com:/vol/ade_linux|/ade_autofs/ade_linux|NFS|_TOP_UNALLOCATED_|Mountpoint|1908566786048|1908566786048|1503678201856|404888584192||stlinma1.us.oracle.com|stlinma1.us.oracle.com:/vol/ade_linux|/ade_autofs/ade_linux|144.20.224.52|READ||/vol/ade_linux
+em_result=NFS_/ade_autofs/nfsdo_linux|144.20.224.62::stlinma2.us.oracle.com:/vol/nfsdo_linux|/ade_autofs/nfsdo_linux|NFS|_TOP_UNALLOCATED_|Mountpoint|1799505838080|1799505838080|1257885335552|541620502528||stlinma2.us.oracle.com|stlinma2.us.oracle.com:/vol/nfsdo_linux|/ade_autofs/nfsdo_linux|144.20.224.62|READ||/vol/nfsdo_linux
+em_result=NFS_/home/ajdsouza|144.20.224.58::stdmlina4:/vol/home1/ajdsouza|/home/ajdsouza|NFS|_TOP_UNALLOCATED_|Mountpoint|528678895616|528678895616|391032422400|137646473216||stdmlina4|stdmlina4:/vol/home1/ajdsouza|/home/ajdsouza|144.20.224.58|WRITE||/vol/home1/ajdsouza
+em_result=NFS_/home/scgrover|144.20.224.58::stdmlina4:/vol/home1/scgrover|/home/scgrover|NFS|_TOP_UNALLOCATED_|Mountpoint|528678895616|528678895616|391032553472|137646342144||stdmlina4|stdmlina4:/vol/home1/scgrover|/home/scgrover|144.20.224.58|WRITE||/vol/home1/scgrover
+em_result=NFS_/usr/local/redhat/OracleProd|144.20.224.62::stlinma2:/vol/local/linux/redhat/OracleProd|/usr/local/redhat/OracleProd|NFS|_TOP_UNALLOCATED_|Mountpoint|230952632320|230952632320|206209351680|24743280640||stlinma2|stlinma2:/vol/local/linux/redhat/OracleProd|/usr/local/redhat/OracleProd|144.20.224.62|READ||/vol/local/linux/redhat/OracleProd
+em_result=NFS_/usr/local/redhat/packages|144.20.224.62::stlinma2:/vol/local/linux/redhat/packages|/usr/local/redhat/packages|NFS|_TOP_UNALLOCATED_|Mountpoint|230952632320|230952632320|206209351680|24743280640||stlinma2|stlinma2:/vol/local/linux/redhat/packages|/usr/local/redhat/packages|144.20.224.62|READ||/vol/local/linux/redhat/packages
+em_result=NFS_/usr/local/remote/image|144.20.224.62::stlinma2:/vol/local/x86/redhat/30_prod/image|/usr/local/remote/image|NFS|_TOP_UNALLOCATED_|Mountpoint|230952632320|230952632320|206209351680|24743280640||stlinma2|stlinma2:/vol/local/x86/redhat/30_prod/image|/usr/local/remote/image|144.20.224.62|READ||/vol/local/x86/redhat/30_prod/image
+em_result=NFS_/usr/local/remote/packages|144.20.224.62::stlinma2:/vol/local/x86/redhat/30_prod/packages|/usr/local/remote/packages|NFS|_TOP_UNALLOCATED_|Mountpoint|230952632320|230952632320|206209286144|24743346176||stlinma2|stlinma2:/vol/local/x86/redhat/30_prod/packages|/usr/local/remote/packages|144.20.224.62|READ||/vol/local/x86/redhat/30_prod/packages
+em_result=NFS_stdmlina4:/vol/home1/ajdsouza|144.20.224.58::stdmlina4:/vol/home1/ajdsouza|stdmlina4:/vol/home1/ajdsouza|NFS|_BOTTOM_|Filesystem|528678895616|528678895616|528678895616|0||stdmlina4|stdmlina4:/vol/home1/ajdsouza|/home/ajdsouza|144.20.224.58|WRITE||/vol/home1/ajdsouza
+em_result=NFS_stdmlina4:/vol/home1/scgrover|144.20.224.58::stdmlina4:/vol/home1/scgrover|stdmlina4:/vol/home1/scgrover|NFS|_BOTTOM_|Filesystem|528678895616|528678895616|528678895616|0||stdmlina4|stdmlina4:/vol/home1/scgrover|/home/scgrover|144.20.224.58|WRITE||/vol/home1/scgrover
+em_result=NFS_stlinma1.us.oracle.com:/vol/ade_linux|144.20.224.52::stlinma1.us.oracle.com:/vol/ade_linux|stlinma1.us.oracle.com:/vol/ade_linux|NFS|_BOTTOM_|Filesystem|1908566786048|1908566786048|1908566786048|0||stlinma1.us.oracle.com|stlinma1.us.oracle.com:/vol/ade_linux|/ade_autofs/ade_linux|144.20.224.52|READ||/vol/ade_linux
+em_result=NFS_stlinma2.us.oracle.com:/vol/nfsdo_linux|144.20.224.62::stlinma2.us.oracle.com:/vol/nfsdo_linux|stlinma2.us.oracle.com:/vol/nfsdo_linux|NFS|_BOTTOM_|Filesystem|1799505838080|1799505838080|1799505838080|0||stlinma2.us.oracle.com|stlinma2.us.oracle.com:/vol/nfsdo_linux|/ade_autofs/nfsdo_linux|144.20.224.62|READ||/vol/nfsdo_linux
+em_result=NFS_stlinma2:/vol/local/linux/redhat/OracleProd|144.20.224.62::stlinma2:/vol/local/linux/redhat/OracleProd|stlinma2:/vol/local/linux/redhat/OracleProd|NFS|_BOTTOM_|Filesystem|230952632320|230952632320|230952632320|0||stlinma2|stlinma2:/vol/local/linux/redhat/OracleProd|/usr/local/redhat/OracleProd|144.20.224.62|READ||/vol/local/linux/redhat/OracleProd
+em_result=NFS_stlinma2:/vol/local/linux/redhat/packages|144.20.224.62::stlinma2:/vol/local/linux/redhat/packages|stlinma2:/vol/local/linux/redhat/packages|NFS|_BOTTOM_|Filesystem|230952632320|230952632320|230952632320|0||stlinma2|stlinma2:/vol/local/linux/redhat/packages|/usr/local/redhat/packages|144.20.224.62|READ||/vol/local/linux/redhat/packages
+em_result=NFS_stlinma2:/vol/local/x86/redhat/30_prod/image|144.20.224.62::stlinma2:/vol/local/x86/redhat/30_prod/image|stlinma2:/vol/local/x86/redhat/30_prod/image|NFS|_BOTTOM_|Filesystem|230952632320|230952632320|230952632320|0||stlinma2|stlinma2:/vol/local/x86/redhat/30_prod/image|/usr/local/remote/image|144.20.224.62|READ||/vol/local/x86/redhat/30_prod/image
+em_result=NFS_stlinma2:/vol/local/x86/redhat/30_prod/packages|144.20.224.62::stlinma2:/vol/local/x86/redhat/30_prod/packages|stlinma2:/vol/local/x86/redhat/30_prod/packages|NFS|_BOTTOM_|Filesystem|230952632320|230952632320|230952632320|0||stlinma2|stlinma2:/vol/local/x86/redhat/30_prod/packages|/usr/local/remote/packages|144.20.224.62|READ||/vol/local/x86/redhat/30_prod/packages
+em_result=OS_DISK_-5JV17XRW-1|-5JV17XRW_S63_E401625|/dev/hda1|OS_DISK|_TOP_|Disk Partition|80026361856|205599744|205599744|0|||/dev/hda1|_BLOCKSPECIAL||||
+em_result=OS_DISK_-5JV17XRW-2|-5JV17XRW_S401625_E4514265|/dev/hda2|OS_DISK|_TOP_|Disk Partition|80026361856|2105671680|2105671680|0|||/dev/hda2|_BLOCKSPECIAL||||
+em_result=OS_DISK_-5JV17XRW-3|-5JV17XRW_S4514265_E156296385|/dev/hda3|OS_DISK|_TOP____|Disk Partition|80026361856|77712445440|77712445440|0|||/dev/hda3|_BLOCKSPECIAL||||
+em_result=OS_DISK_-5JV17XRW|-5JV17XRW|/dev/hda|OS_DISK|_BOTTOM______|Disk|80026361856|80026361856|80023716864|2644992|||/dev/hda|_BLOCKSPECIAL||||

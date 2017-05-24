@@ -1,0 +1,92 @@
+
+PL/SQL interfaces for submitting stormon host jobs
+
+STORMON_JOBS.SUBMIT_TO_HOST
+Arguments
+	Target Name
+	OS Username
+	OS Password
+
+STORMON_JOBS.SUBMIT_TO_HOST_GROUP
+Arguments
+	Group Name
+	OS Username
+	OS Password
+
+PL/SQL interfaces for submitting stormon Database jobs
+STORMON_JOBS.SUBMIT_TO_DATABASE
+Arguments
+	Target Name
+	OS Username
+	OS Password
+	Database Username
+	Database Pasword
+
+STORMON_JOBS.SUBMIT_TO_DATABASE_GROUP
+Arguments
+	Group Name
+	OS Username
+	OS Password
+	Database Username
+	Database Pasword
+
+(1) What are the options for submitting the stormon jobs?
+
+Host job can be submitted to an individual host target or an em group that contains a list of host targets
+
+DB job can be submitted to an individual database target or an em group that contains a list of database targets
+
+(2) What's the process for submitting the Stormon Host Job?
+
+All targets in a group should have the same login credentials in order for the group submission to work correctly
+
+(3) What's the process for submitting the Stormon DB Job?
+
+All targets in a group should have the same login credentials in order for the group submission to work correctly
+
+(4) Can you pickup the default user credentials from EM for a given user?
+
+No. We may enhance it at a future time when it is practical to do.
+  
+(5) What happens when a job is submitted through the stormon package?
+
+If a job already exists for the given target or group, it will be deleted first.
+New job is submitted to be executed once in 24 hours at 4pm target time for each target.
+
+(6) What should be done if a group configuration changes?
+
+Resubmit the job for the group, it will take care of the group configuration changes.
+
+(7) What will happen if the submitted user credentials are wrong?
+
+Job execution will fail. In this case, you should resubmit the job with correct credentials.
+
+(8) What should be done if the submitted parameters are wrong?
+
+Job submission will fail with error message, resubmit the job with correct parameters
+
+(9) Are the credentials verified at the time of job submission?
+
+No
+
+(10) What's the job name when it's successfully created?
+
+STORMON_HOST_<host_target_name>_PST
+STORMON_HOST_GROUP_<groupname>_EST
+STORMON_DB_<db_target_name>_PST
+STORMON_DB_GROUP_<groupname>_EST
+
+(11) How to delete a job?
+
+In the EM UI, delete the job by going to Jobs subtab under Configuration tab
+
+(12) How to view the job status?
+
+In the EM UI, view the job status by going to Jobs subtab under Configuration tab.
+
+(13) What should I do if one of the executions in a group fails?
+
+Verify that the user credentials for the failed target are not different from the other targets in the group. If they are different, you can do one of the following.
+
+* Modify the user credentials to be the same as the rest of the members of the group.
+* Remove the failed target from the group through EM UI, resubmit the job to the group. For the failed target, you can make it part of another group with similar credentials or submit the job individually to the target.

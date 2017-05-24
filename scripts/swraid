@@ -1,0 +1,81 @@
+#!/usr/local/git/perl/bin/perl
+#  
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved 
+#
+#  $Id: swraid,v 1.7 2002/05/23 00:00:24 ajdsouza Exp $ 
+#
+#  $Log: swraid,v $
+#  Revision 1.7  2002/05/23 00:00:24  ajdsouza
+#
+#  Modify on GIT feedback
+#  Call functions from Monitor::Storage to execute and print the metrics
+#
+#  Revision 1.5  2002/05/06 21:44:39  ajdsouza
+#  Autoload changes
+#
+#  Revision 1.4  2002/04/23 23:35:19  ajdsouza
+#  Wrap long lines
+#
+#  Revision 1.3  2002/04/23 19:23:02  ajdsouza
+#  Bug fix for Change from STORAGE to Monitor
+#
+#  Revision 1.2  2002/04/23 07:01:52  ajdsouza
+#  Changed Module directory to Monitor
+#
+#  Revision 1.1  2002/04/22 18:51:11  ajdsouza
+#  STDOUT metrics for all softwar e raid devices on the host
+#
+#  Revision 1.1  2002/04/19 22:50:46  ajdsouza
+#  Renamed from stormon_swraid.pl
+#
+#
+#
+# NAME  
+#	 swraid
+#
+# DESC 
+#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/17/03 - Changes to meet GIT requirements
+# ajdsouza	04/03/02 - Call commom print functions from stormon_utilities with ref
+# vswamida	03/25/02 - Created
+#
+#
+# METRIC DESC
+#
+# Metric Name	storage_swraid
+#
+#	Metric Column					Description
+#	----------------------------------------------------------------------
+#	storage_swraid_type			Type of data record eg. DISK, SLICE, SUBDISK
+#	storage_swraid_filetype			File type eg. BLOCK or CHARACTER
+#	storage_swraid_name			Logical Name for the Raid volume, slice or physical disk
+#	storage_swraid_inode			Link inode# for the logical path
+#	storage_swraid_size			Size in byte
+#	storage_swraid_diskkey			Key value for the disk, common for all slices of the disk 
+#						, logical name of the backupslice can be the diskkey
+#	storage_swraid_slicekey			Key value for the slice, common for the block and 
+#						  char counterparts od a slice, eg. diskkey_slice 
+#	storage_swraid_key			Key for the mozart repository, can be the logical name 
+#						  of the disk
+#
+
+require v5.6.1;
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+swraid();
+
+exit 0;
+

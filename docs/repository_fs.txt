@@ -1,0 +1,179 @@
+
+1. Execution
+
+   - Storage summary computation and History rollup are performed by Database Jobs. The jobs are scheduled to execute periodically using the DBMS_JOBS package. 
+   - The storage summary computation job is single threaded and sequentially computes summary for each host target in the target master ( mgmt_targets ) .
+     It computes the shared storage summary for the host and group storage summary for all host groups the host is part of.
+   - The history rollup job rolls up the summaries computed by the storage summary job.
+
+2. Computing storage summary for a target
+
+   - Fetch the de-normalized metric sets for each of the following metrics from the current metrics table mgmt_current_metrics
+     - Oracle Database metrics
+     - Local filesystem metrics
+     - NFS metrics
+     - Volume metrics
+     - Software Raid metrics
+     - Disk metrics
+
+   - Check for timestamp consistency
+     - Metrics should be are later than the last computed summary for a host
+     - All metrics should be of the same snapshot
+   - Check for inode consistency
+   - Check for disk partition consistency
+   - Identify cached filesystems
+   - Check for consistency across metrics.Generate identification key values for storage entities at each storage management level 
+   ( disks, volume manager, software raid, Local filesystem , datafiles ).
+     - Each higher level storage entity should be traceable to one at the lower level. ( disk metrics are the lowest level )
+
+   - Identify backup disks ( Only EMC Symmetrix BCV disks ). Identify entities at each storage management level that use the backup disks.
+   - All inconsistencies encountered during these checks are tracked and logged to the log table ( storage_log ).
+   - Analyze and identify the used and free storage entities at each storage management level.
+   - Compute the storage summary for the host.
+      - Used and free storage for the host
+      - Used and free at each storage management level.
+      - Storage by vendor.   
+   - Storage summary is a multi field single row data set ( summaryObject ).
+   - Format the storage details for the host.
+   - Storage details are multi field, multi row data sets.The data sets differ in structure for each storage management level.
+   - Save the summary in the current summary table ( storage_summaryObject) , delete the previous summary for the host.
+   - Save the details in the current details table , delete the previous details for the host.
+     ( storage_application_table,
+       storage_localfs_table,
+       storage_nfs_table,
+       storage_volume_table,
+       storage_swraid_table,
+       storage_disk_table )
+   - Archive the summary in the archive table for history rollups ( storage_summaryObject_history )
+   - Compute the shared summaries for hosts sharing storage with this host( 3.)
+   - Compute the summaries for all host groups which this host is part of. ( 4.)
+
+
+3. Computing shared summary
+   - Delete all shared summaries for the host from the current summary table ( storage_summaryobject ).   
+   - Get the list of hosts sharing disks with this host.
+   - Identify the storage entities at each storage management level that use the shared disks.
+   - Get the common storage entities at each storage management level 
+   - Compute all combinations of shared hosts ( nC2+...+nCn)
+   - For each combination of hosts compute a shared storage summary for only the shared storage between those hosts
+   - Save each shared summary in the current summary table ( storage_summaryobject )
+   - Insert the summary into the summary archive table for history rollups ( storage_summaryobject_history )
+
+
+3. Compute group summary for reporting
+   - Get the list of hosts for a host group
+   - Compute group summary if the timestamp of storage summary for any host in the group is later than the timestamp of the previously computed group summary.
+   - Filter the list of hosts to get only those hosts which have valid summaries and no consistency issues.
+   - Aggregate the summary of all the filtered hosts in that group
+   - Get the list of shared summaries for the filtered list of hosts.
+   - Aggregate the shared summaries.
+      - Shared summaries for a even combination of hosts get reduced
+      - Shared summaries for a odd combination of hosts get added
+   - Save the group summary in the current summary table ( storage_summaryObject) , delete the previous summary for the group.
+   - Archive the group summary in the archive table for history rollups ( storage_summaryObject_history )
+
+
+5. History Rollup
+   - Fetch the archived summaries from the summary archive table  ( storage_summaryObject_history )
+   - The start time for rolling up history is the lesser of last valid history point and the minimum timestamp in the summary archive table
+   - The end time for rolling up history is the maximum timestamp in the summary archive table	   
+   - Rollup all summaries between the start time and maximum time. Only a simple average is computed in history rollups.
+     - Daily rollup ( storage_history_30days )
+       - One point per day
+      - Weekly rollup ( storage_history_52weeks )
+	- One point per week    
+    - For time points with no values , substitute the valid rolled up summary from the previous time point.
+    - Insert the rolled up summaries into the daily and weekly history tables ( storage_history_30days,storage_history_52weeks ) 
+    - For continuity , insert the most current summary into the rollup history tables.
+    - Purge rolled up history beyond the rollup window cutoff point.
+      - Daily rollup - 31 days
+      - Weekly rollup - 53 Weeks
+     - Purge the rolled up target summaries from the summary archive table
+
+     - Correct rolled up group summaries
+       - For all the hosts in the group definition , Get the count of the number of hosts with valid rolled up summaries.
+       - Get this count for each rolled up point in the history tables
+       - Compare the host count with the actual targets in the group summary for each rolled up point in the history tables.
+       - If the host count is greater than the actual number of targets in the group summary,  re-compute the group summary from the rolled up host summaries for that point.
+
+
+6. Maintaining host groups
+   - Target master ( mgmt_targets )is refreshed periodically from multiple sources
+   - The following reporting groups are maintained dynamically from target properties in the target_master ( mgmt_targets )
+     - Location
+     - Line of Business
+     - Customer ??
+   - Group master ( stormon_group_table, stormon_host_groups ) is updated each time the target master is refreshed
+   - A new group is added in the group master when 
+     - An existing group definition is altered 
+     - A new group is created 
+
+
+7. Storage summary
+	  
+	The following data points are computed for the storage summary of a host or a group of hosts.
+
+	Data Point						Description
+	----------------------------------------------------------------------------------------------------------------------
+	storage_summary_rowcount			
+	storage_summary_name
+	storage_summary_id
+	storage_summary_timestamp
+	storage_summary_collection_timestamp
+	storage_summary_hostcount
+ 	storage_summary_actual_targets
+	storage_summary_issues
+	storage_summary_warnings
+ 	storage_summary_summaryflag	
+	storage_summary_application_rawsize
+	storage_summary_application_size
+	storage_summary_application_used
+	storage_summary_application_free	
+	storage_summary_oracle_database_rawsize
+	storage_summary_oracle_database_size
+	storage_summary_oracle_database_used
+	storage_summary_oracle_database_free
+	storage_summary_local_filesystem_rawsize
+	storage_summary_local_filesystem_size
+	storage_summary_local_filesystem_used
+	storage_summary_local_filesystem_free	
+	storage_summary_nfs_exclusive_size
+	storage_summary_nfs_exclusive_used
+	storage_summary_nfs_exclusive_free
+	storage_summary_nfs_shared_size
+	storage_summary_nfs_shared_used
+	storage_summary_nfs_shared_free	
+	storage_summary_volumemanager_rawsize
+	storage_summary_volumemanager_size
+	storage_summary_volumemanager_used
+	storage_summary_volumemanager_free
+	storage_summary_swraid_rawsize
+	storage_summary_swraid_size
+	storage_summary_swraid_used
+	storage_summary_swraid_free
+	storage_summary_disk_backup_rawsize
+	storage_summary_disk_backup_size
+	storage_summary_disk_backup_used
+	storage_summary_disk_backup_free
+	storage_summary_disk_rawsize
+	storage_summary_disk_size
+	storage_summary_disk_used
+	storage_summary_disk_free	
+	storage_summary_rawsize
+	storage_summary_sizeb
+	storage_summary_used
+	storage_summary_free
+	storage_summary_vendor_emc_rawsize
+	storage_summary_vendor_emc_size
+	storage_summary_vendor_sun_rawsize
+	storage_summary_vendor_sun_size
+	storage_summary_vendor_hp_rawsize
+	storage_summary_vendor_hp_size
+	storage_summary_vendor_hitachi_rawsize
+	storage_summary_vendor_hitachi_size
+	storage_summary_vendor_others_rawsize
+	storage_summary_vendor_others_size
+	storage_summary_vendor_nfs_netapp_size	
+	storage_summary_vendor_nfs_emc_size
+	storage_summary_vendor_nfs_sun_size
+	storage_summary_vendor_nfs_others_size

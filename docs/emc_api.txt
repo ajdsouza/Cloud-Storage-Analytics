@@ -1,0 +1,18 @@
+Functionality that will be affected by absence of EMC SYMAPI
+-----------------------------------------------------------
+
+1. Hardware raid configuration like Mirroring for EMC Symmetrix disks cannot be determined. Implies raw storage cannot be computed accurately for disks from EMC Symmetrix.   
+
+2. Special EMC configurations for the disk like BCV will not be known. In the absence of this information Storage used for backup may not get accounted accurately in the storage reports.
+
+3. The complete Symmetrix ID for the Symmetrix tower cannot be determined. Implies vendor drill down reports which are supposed to provide storage by each external storage system may not be very accurate.
+
+4. Definitive identification of the disk to avoid double counting of shared storage becomes a little harder.
+
+   EMC SYMAPI provides the symmetrix ID and the disk device id which uniquely and definitively identify a disk. This identity is used to avoid double counting of shared storage. In the absense of this information from EMC SYMAPI an id will have to be crafted from the packed decimal buffer returned by the generic SCSI inquiry. Certain byte positions in the buffer returned by the SCSI inquiry provide part of the symmetrix ID and the disk device id for EMC Symmetrix disks.
+
+
+
+Runtime dependencies for executables build using EMC SYMAPI
+-----------------------------------------------------------
+The runtime execution of executables built using EMC SYMAPI would require the shared library libsymapi.so to be available in a trusted directory on the OS. Installing of EMC SYM CLI automatically installs this library in a trusted directory. 

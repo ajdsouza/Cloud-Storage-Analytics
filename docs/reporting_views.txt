@@ -1,0 +1,386 @@
+
+
+The following views are provided for generating storage summary reports.
+
+1. storage_summaryObject_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID						    VARCHAR2(256)
+ NAME						    VARCHAR2(256)
+ TYPE						    VARCHAR2(256)
+ HOSTCOUNT					    NUMBER
+ TIMESTAMP					    DATE
+ COLLECTION_TIMESTAMP				    DATE
+ ACTUAL_TARGETS 				    NUMBER
+ ISSUES 					    NUMBER
+ WARNINGS					    NUMBER
+ SUMMARYFLAG					    VARCHAR2(1)
+ APPLICATION_RAWSIZE				    NUMBER
+ APPLICATION_SIZE				    NUMBER
+ APPLICATION_USED				    NUMBER
+ APPLICATION_FREE				    NUMBER
+ ORACLE_DATABASE_RAWSIZE			    NUMBER
+ ORACLE_DATABASE_SIZE				    NUMBER
+ ORACLE_DATABASE_USED				    NUMBER
+ ORACLE_DATABASE_FREE				    NUMBER
+ LOCAL_FILESYSTEM_RAWSIZE			    NUMBER
+ LOCAL_FILESYSTEM_SIZE				    NUMBER
+ LOCAL_FILESYSTEM_USED				    NUMBER
+ LOCAL_FILESYSTEM_FREE				    NUMBER
+ NFS_EXCLUSIVE_SIZE				    NUMBER
+ NFS_EXCLUSIVE_USED				    NUMBER
+ NFS_EXCLUSIVE_FREE				    NUMBER
+ NFS_SHARED_SIZE				    NUMBER
+ NFS_SHARED_USED				    NUMBER
+ NFS_SHARED_FREE				    NUMBER
+ VOLUMEMANAGER_RAWSIZE				    NUMBER
+ VOLUMEMANAGER_SIZE				    NUMBER
+ VOLUMEMANAGER_USED				    NUMBER
+ VOLUMEMANAGER_FREE				    NUMBER
+ SWRAID_RAWSIZE 				    NUMBER
+ SWRAID_SIZE					    NUMBER
+ SWRAID_USED					    NUMBER
+ SWRAID_FREE					    NUMBER
+ DISK_BACKUP_RAWSIZE				    NUMBER
+ DISK_BACKUP_SIZE				    NUMBER
+ DISK_BACKUP_USED				    NUMBER
+ DISK_BACKUP_FREE				    NUMBER
+ DISK_RAWSIZE					    NUMBER
+ DISK_SIZE					    NUMBER
+ DISK_USED					    NUMBER
+ DISK_FREE					    NUMBER
+ RAWSIZE					    NUMBER
+ SIZEB						    NUMBER
+ USED						    NUMBER
+ FREE						    NUMBER
+ VENDOR_EMC_SIZE				    NUMBER
+ VENDOR_EMC_RAWSIZE				    NUMBER
+ VENDOR_SUN_SIZE				    NUMBER
+ VENDOR_SUN_RAWSIZE				    NUMBER
+ VENDOR_HP_SIZE 				    NUMBER
+ VENDOR_HP_RAWSIZE				    NUMBER
+ VENDOR_HITACHI_SIZE				    NUMBER
+ VENDOR_HITACHI_RAWSIZE 			    NUMBER
+ VENDOR_OTHERS_SIZE				    NUMBER
+ VENDOR_OTHERS_RAWSIZE				    NUMBER
+ VENDOR_NFS_NETAPP_SIZE 			    NUMBER
+ VENDOR_NFS_EMC_SIZE				    NUMBER
+ VENDOR_NFS_SUN_SIZE				    NUMBER
+ VENDOR_NFS_OTHERS_SIZE 			    NUMBER
+
+
+2. storage_disk_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TARGET_ID					    VARCHAR2(256)
+ KEYVALUE					    VARCHAR2(2000)
+ DISKKEY					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ PATH						    VARCHAR2(2000)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ CONFIGURATION					    VARCHAR2(256)
+ FREETYPE					    VARCHAR2(50)
+ BACKUP 					    VARCHAR2(1)
+ VENDOR 					    VARCHAR2(200)
+ PRODUCT					    VARCHAR2(200)
+ STATUS 					    VARCHAR2(1000)
+
+
+3. storage_swraid_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TARGET_ID					    VARCHAR2(256)
+ KEYVALUE					    VARCHAR2(2000)
+ DISKKEY					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ PATH						    VARCHAR2(2000)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ CONFIGURATION					    VARCHAR2(100)
+ FREETYPE					    VARCHAR2(50)
+ BACKUP 					    VARCHAR2(1)
+ PARENT 					    VARCHAR2(2000)
+
+
+4. storage_volume_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TARGET_ID					    VARCHAR2(256)
+ KEYVALUE					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ DISKGROUP					    VARCHAR2(256)
+ PATH						    VARCHAR2(2000)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ CONFIGURATION					    VARCHAR2(256)
+ FREETYPE					    VARCHAR2(50)
+ BACKUP 					    VARCHAR2(1)
+
+
+5.storage_localfs_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TARGET_ID					    VARCHAR2(256)
+ KEYVALUE					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ FILESYSTEM					    VARCHAR2(2000)
+ MOUNTPOINT					    VARCHAR2(2000)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ BACKUP 					    VARCHAR2(1)
+
+
+6. storage_nfs_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ------------------------------
+ TARGET_ID					    VARCHAR2(256)
+ KEYVALUE					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ FILESYSTEM					    VARCHAR2(2000)
+ MOUNTPOINT					    VARCHAR2(2000)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ VENDOR 					    VARCHAR2(256)
+ SERVER 					    VARCHAR2(256)
+ MOUNTTYPE					    VARCHAR2(256)
+ NFSCOUNT					    NUMBER
+ PRIVILEGE					    VARCHAR2(256)
+
+
+7 storage_nfs_shared_view.
+ Name					   Null?    Type
+ ----------------------------------------- -------- ------------------------------
+ TARGET_ID					    VARCHAR2(256)
+ KEYVALUE					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ FILESYSTEM					    VARCHAR2(2000)
+ MOUNTPOINT					    VARCHAR2(2000)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ VENDOR 					    VARCHAR2(256)
+ SERVER 					    VARCHAR2(256)
+ MOUNTTYPE					    VARCHAR2(256)
+ NFSCOUNT					    NUMBER
+ PRIVILEGE					    VARCHAR2(256)
+ 
+
+
+8.storage_oracledb_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TARGET_ID					    VARCHAR2(256)
+ PARENTKEY					    VARCHAR2(2000)
+ KEYVALUE					    VARCHAR2(2000)
+ TYPE						    VARCHAR2(50)
+ APPNAME					    VARCHAR2(50)
+ APPID						    VARCHAR2(50)
+ DBID						    VARCHAR2(50)
+ GROUPING_ID					    NUMBER(38)
+ TABLESPACE					    VARCHAR2(256)
+ FILENAME					    VARCHAR2(256)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+ BACKUP 					    VARCHAR2(1)
+
+
+9. storage_history_day_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ROWCOUNT					    NUMBER(38)
+ NAME						    VARCHAR2(128)
+ ID						    VARCHAR2(256)
+ TIMESTAMP					    DATE
+ COLLECTION_TIMESTAMP				    DATE
+ HOSTCOUNT					    NUMBER(38)
+ ACTUAL_TARGETS 				    NUMBER(38)
+ ISSUES 					    NUMBER(38)
+ WARNINGS					    NUMBER(38)
+ SUMMARYFLAG					    VARCHAR2(1)
+ APPLICATION_RAWSIZE				    NUMBER(16)
+ APPLICATION_SIZE				    NUMBER(16)
+ APPLICATION_USED				    NUMBER(16)
+ APPLICATION_FREE				    NUMBER(16)
+ ORACLE_DATABASE_RAWSIZE			    NUMBER(16)
+ ORACLE_DATABASE_SIZE				    NUMBER(16)
+ ORACLE_DATABASE_USED				    NUMBER(16)
+ ORACLE_DATABASE_FREE				    NUMBER(16)
+ LOCAL_FILESYSTEM_RAWSIZE			    NUMBER(16)
+ LOCAL_FILESYSTEM_SIZE				    NUMBER(16)
+ LOCAL_FILESYSTEM_USED				    NUMBER(16)
+ LOCAL_FILESYSTEM_FREE				    NUMBER(16)
+ NFS_EXCLUSIVE_SIZE				    NUMBER(16)
+ NFS_EXCLUSIVE_USED				    NUMBER(16)
+ NFS_EXCLUSIVE_FREE				    NUMBER(16)
+ NFS_SHARED_SIZE				    NUMBER(16)
+ NFS_SHARED_USED				    NUMBER(16)
+ NFS_SHARED_FREE				    NUMBER(16)
+ VOLUMEMANAGER_RAWSIZE				    NUMBER(16)
+ VOLUMEMANAGER_SIZE				    NUMBER(16)
+ VOLUMEMANAGER_USED				    NUMBER(16)
+ VOLUMEMANAGER_FREE				    NUMBER(16)
+ SWRAID_RAWSIZE 				    NUMBER(16)
+ SWRAID_SIZE					    NUMBER(16)
+ SWRAID_USED					    NUMBER(16)
+ SWRAID_FREE					    NUMBER(16)
+ DISK_BACKUP_RAWSIZE				    NUMBER(16)
+ DISK_BACKUP_SIZE				    NUMBER(16)
+ DISK_BACKUP_USED				    NUMBER(16)
+ DISK_BACKUP_FREE				    NUMBER(16)
+ DISK_RAWSIZE					    NUMBER(16)
+ DISK_SIZE					    NUMBER(16)
+ DISK_USED					    NUMBER(16)
+ DISK_FREE					    NUMBER(16)
+ RAWSIZE					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USED						    NUMBER(16)
+ FREE						    NUMBER(16)
+ VENDOR_EMC_SIZE				    NUMBER(16)
+ VENDOR_EMC_RAWSIZE				    NUMBER(16)
+ VENDOR_SUN_SIZE				    NUMBER(16)
+ VENDOR_SUN_RAWSIZE				    NUMBER(16)
+ VENDOR_HP_SIZE 				    NUMBER(16)
+ VENDOR_HP_RAWSIZE				    NUMBER(16)
+ VENDOR_HITACHI_SIZE				    NUMBER(16)
+ VENDOR_HITACHI_RAWSIZE 			    NUMBER(16)
+ VENDOR_OTHERS_SIZE				    NUMBER(16)
+ VENDOR_OTHERS_RAWSIZE				    NUMBER(16)
+ VENDOR_NFS_NETAPP_SIZE 			    NUMBER(16)
+ VENDOR_NFS_EMC_SIZE				    NUMBER(16)
+ VENDOR_NFS_SUN_SIZE				    NUMBER(16)
+ VENDOR_NFS_OTHERS_SIZE 			    NUMBER(16)
+
+
+10. storage_history_week_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ROWCOUNT					    NUMBER(38)
+ NAME						    VARCHAR2(128)
+ ID						    VARCHAR2(256)
+ TIMESTAMP					    DATE
+ COLLECTION_TIMESTAMP				    DATE
+ HOSTCOUNT					    NUMBER(38)
+ ACTUAL_TARGETS 				    NUMBER(38)
+ ISSUES 					    NUMBER(38)
+ WARNINGS					    NUMBER(38)
+ SUMMARYFLAG					    VARCHAR2(1)
+ APPLICATION_RAWSIZE				    NUMBER(16)
+ APPLICATION_SIZE				    NUMBER(16)
+ APPLICATION_USED				    NUMBER(16)
+ APPLICATION_FREE				    NUMBER(16)
+ ORACLE_DATABASE_RAWSIZE			    NUMBER(16)
+ ORACLE_DATABASE_SIZE				    NUMBER(16)
+ ORACLE_DATABASE_USED				    NUMBER(16)
+ ORACLE_DATABASE_FREE				    NUMBER(16)
+ LOCAL_FILESYSTEM_RAWSIZE			    NUMBER(16)
+ LOCAL_FILESYSTEM_SIZE				    NUMBER(16)
+ LOCAL_FILESYSTEM_USED				    NUMBER(16)
+ LOCAL_FILESYSTEM_FREE				    NUMBER(16)
+ NFS_EXCLUSIVE_SIZE				    NUMBER(16)
+ NFS_EXCLUSIVE_USED				    NUMBER(16)
+ NFS_EXCLUSIVE_FREE				    NUMBER(16)
+ NFS_SHARED_SIZE				    NUMBER(16)
+ NFS_SHARED_USED				    NUMBER(16)
+ NFS_SHARED_FREE				    NUMBER(16)
+ VOLUMEMANAGER_RAWSIZE				    NUMBER(16)
+ VOLUMEMANAGER_SIZE				    NUMBER(16)
+ VOLUMEMANAGER_USED				    NUMBER(16)
+ VOLUMEMANAGER_FREE				    NUMBER(16)
+ SWRAID_RAWSIZE 				    NUMBER(16)
+ SWRAID_SIZE					    NUMBER(16)
+ SWRAID_USED					    NUMBER(16)
+ SWRAID_FREE					    NUMBER(16)
+ DISK_BACKUP_RAWSIZE				    NUMBER(16)
+ DISK_BACKUP_SIZE				    NUMBER(16)
+ DISK_BACKUP_USED				    NUMBER(16)
+ DISK_BACKUP_FREE				    NUMBER(16)
+ DISK_RAWSIZE					    NUMBER(16)
+ DISK_SIZE					    NUMBER(16)
+ DISK_USED					    NUMBER(16)
+ DISK_FREE					    NUMBER(16)
+ RAWSIZE					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USED						    NUMBER(16)
+ FREE						    NUMBER(16)
+ VENDOR_EMC_SIZE				    NUMBER(16)
+ VENDOR_EMC_RAWSIZE				    NUMBER(16)
+ VENDOR_SUN_SIZE				    NUMBER(16)
+ VENDOR_SUN_RAWSIZE				    NUMBER(16)
+ VENDOR_HP_SIZE 				    NUMBER(16)
+ VENDOR_HP_RAWSIZE				    NUMBER(16)
+ VENDOR_HITACHI_SIZE				    NUMBER(16)
+ VENDOR_HITACHI_RAWSIZE 			    NUMBER(16)
+ VENDOR_OTHERS_SIZE				    NUMBER(16)
+ VENDOR_OTHERS_RAWSIZE				    NUMBER(16)
+ VENDOR_NFS_NETAPP_SIZE 			    NUMBER(16)
+ VENDOR_NFS_EMC_SIZE				    NUMBER(16)
+ VENDOR_NFS_SUN_SIZE				    NUMBER(16)
+ VENDOR_NFS_OTHERS_SIZE 			    NUMBER(16)
+
+
+11. storage_issues_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID					   NOT NULL VARCHAR2(256)
+ TARGET_NAME					    VARCHAR2(264)
+ TYPE					   NOT NULL VARCHAR2(128)
+ TIMESTAMP				   NOT NULL DATE
+ MESSAGE					    VARCHAR2(2048)
+
+
+12. storage_hostdetail_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID						    VARCHAR2(256)
+ TYPE						    VARCHAR2(256)
+ NAME						    VARCHAR2(256)
+ RAWSIZEB					    NUMBER(16)
+ SIZEB						    NUMBER(16)
+ USEDB						    NUMBER(16)
+ FREEB						    NUMBER(16)
+
+13. mgmt_targets_view
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ TARGET_ID				   NOT NULL VARCHAR2(256)
+ TARGET_NAME				   NOT NULL VARCHAR2(255)
+
+
+14. Other schema accessed for reporting.
+
+ stormon_group_table
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID					   NOT NULL VARCHAR2(256)
+ TYPE					   NOT NULL VARCHAR2(256)
+ NAME					   NOT NULL VARCHAR2(256)
+ HOST_COUNT					    NUMBER(38)
+
+
+stormon_group_of_groups_table
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ PARENT_ID				   NOT NULL VARCHAR2(256)
+ CHILD_ID				   NOT NULL VARCHAR2(256)
+
+
+stormon_host_groups
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ GROUP_ID					    VARCHAR2(256)
+ TARGET_ID					    VARCHAR2(256)
+

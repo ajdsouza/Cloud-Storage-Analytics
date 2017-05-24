@@ -1,0 +1,35 @@
+  <Metric NAME="NFS Servers" TYPE="TABLE">
+    <Display>
+      <Label NLSID="nfs_servers">NFS Servers</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="nfs_server" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+         <Label NLSID="nfs_server">NFS Server</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="nfs_vendor" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+         <Label NLSID="nfs_vendor">NFS Vendor</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="tcpPing" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+         <Label NLSID="nfs_server_tcpping">TCP Ping, Milliseconds</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="Status" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="nfs_server_status">Status</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin"    SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command"    SCOPE="GLOBAL">
+       %perlBin%/perl %scriptsDir%/nfsresp.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>

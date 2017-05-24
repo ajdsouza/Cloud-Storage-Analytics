@@ -1,0 +1,109 @@
+Total Storage Functions
+- calcTotalStorage
+- calcHostVisible
+- calcrawswraidstorage  ->To be added - Done
+- calcrawvolumestorage  ->To be added - Done
+
+Return 
+Size NUMBER
+
+
+Free Storage Functions
+- calcunallocatedvolumes
+- calcvolumewasteddskspace
+- calcfreeswraiddisks
+- calcfreeswraidpartitions
+- calcfreedisks
+- calcunallocatedpartitions
+
+Return
+ Free 		NUMBER
+ FreeList[]
+	Name 	VARCHAR2
+	Size 	NUMBER
+	Free	NUMBER
+
+
+
+- calcfilesystemstorage
+- calcnfsstorage
+
+Return
+ Size		NUMBER
+ Used		NUMBER
+ Free		NUMBER
+ FreeList[]
+	Name 	VARCHAR2
+	Size 	NUMBER
+	Used	NUMBER
+	Free	NUMBER
+
+
+- calcdatabasefree
+Return
+ Size		NUMBER
+ Used		NUMBER
+ Free		NUMBER
+  FreeList[]
+	Name		VARCHAR2
+        Size		NUMBER
+	Used		NUMBER
+	Free 		NUMBER
+	AppName 	VARCHAR2
+        Tablespace	VARCHAR2
+
+
+- calcappfree
+  Size		NUMBER
+  Used		NUMBER
+  Free		NUMBER
+  FreeList []
+	Name		VARCHAR2
+	Size		NUMBER
+	Used		NUMBER
+	Free		NUMBER
+	AppName		VARCHAR2
+
+
+- Split storage_summary_pack.sql
+	- storage_summary_analysis.sql  - package storage_summary
+	- storage_summary_db_9i.sql     - package storage_summary_db
+	- storage_summary_db_mozart.sql     - package storage_summary_db
+
+New Functions in storage_summary_db
+
+- getcollectiontimestamp(targetid, metricid)
+- insertstoragesummary (targetid, targettype, targetname, collectiontimestamp, metriccolumn,value)
+
+- Add logical_name, pseudo_parent,path_count fields to the diskObject;
+
+
+
+New Object for all return types
+
+type resultTable is table of storageResultRecord;
+
+An Object has to be created in the database , so lets keep it as records
+Can we have a table of record ?? - 
+
+storageResultRecord
+{
+	name 		VARCHAR2
+	rawsize		NUMBER
+	size		NUMBER
+	used		NUMBER
+	free		NUMBER
+	storageList	detailList
+}
+
+detailList
+{
+	Name		stringTable
+	size		numberTable
+	used		numberTable
+	free		numberTable
+	appName		stringTable
+	Tablespace	stringTable
+	Pseudoparent	stringTable
+}
+

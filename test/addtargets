@@ -1,0 +1,29 @@
+#!/usr/local/git/perl/bin/perl
+
+use warnings;
+use strict;
+use DBI;
+
+$ENV{ORACLE_HOME}="/usr/local/git/oracle";
+
+my $rep_username = qw/storage_test/;
+my $rep_password = qw/storage_test/;
+my $rep_address = "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=138.1.160.78)(Port=1521)))(CONNECT_DATA=(SID=emniap)))";
+my %attr = (AutoCommit => 0, RaiseError => 1);
+
+my $dbh = DBI->connect("dbi:Oracle:".$rep_address,$rep_username,$rep_password,\%attr) or die $DBI::errstr;
+my $sth = $dbh->prepare('INSERT INTO MGMT_TARGETS (TARGET_ID,TARGET_NAME,TARGET_TYPE) VALUES(:1,:2,:3)') or die $DBI::errstr;
+my $sth1 = $dbh->prepare('INSERT INTO SMP_VIEW_TARGETS (TARGET_NAME,TARGET_TYPE,NODE_NAME) VALUES(:1,:2,:3)') or die $DBI::errstr;
+
+for my $i (301..600){
+    
+    $sth->execute($i,"target\_$i","oracle_sysman_node") or die $dbh->errstr;
+    
+    $sth1->execute("target\_$i\_db1","oracle_sysman_database","target\_$i") or  die $dbh->errstr;
+    $sth1->execute("target\_$i\_db2","oracle_sysman_database","target\_$i") or  die $dbh->errstr;
+}
+
+$dbh->commit;
+
+$dbh->disconnect;
+

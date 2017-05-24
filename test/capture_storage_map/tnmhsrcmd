@@ -1,0 +1,53 @@
+
+use strict;
+use warnings;
+use storage::Register;
+
+my @error_stack;
+
+sub handle_error 
+{ 
+   my ( $message ) = @_; 
+
+   chomp $message; 
+
+   return unless $message;
+
+   push @error_stack,$message; 
+
+   print "STORAGE_REPORTS:$message\n" if $ENV{EM_STORAGE_EXECUTION_MODE} and $ENV{EM_STORAGE_EXECUTION_MODE} =~ /test/i;
+
+}
+
+sub exit_fail()
+  {
+    
+    for my $error_message ( @error_stack ){
+      
+      chomp $error_message;
+
+      $error_message =~ s/^\s+|\s+$//g;
+
+      print "em_error=$error_message\n";
+
+    }
+    
+    exit 1;
+    
+  }
+
+$SIG{'__DIE__'} = sub {  handle_error( @_ ); exit_fail() };
+$SIG{'__WARN__'} = sub { handle_error( @_)  };
+
+my @results = storage::Register::run_system_command('/home/ajdsouza/stormon/test/tnmhsslp',1,5);
+
+for ( @results ){
+  print "$_\n";
+}
+
+@results = storage::Register::run_system_command('/home/ajdsouza/stormon/test/tttnmhsslp',1,5);
+
+for ( @results ){
+  print "$_\n";
+}
+die "Testign die here";

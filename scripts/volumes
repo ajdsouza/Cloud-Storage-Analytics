@@ -1,0 +1,84 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved 
+#
+#  $Id: volumes,v 1.4 2002/05/23 00:00:24 ajdsouza Exp $ 
+#
+#  $Log: volumes,v $
+#  Revision 1.4  2002/05/23 00:00:24  ajdsouza
+#
+#  Modify on GIT feedback
+#  Call functions from Monitor::Storage to execute and print the metrics
+#
+#  Revision 1.3  2002/05/06 21:44:39  ajdsouza
+#  Autoload changes
+#
+#  Revision 1.2  2002/04/23 07:01:52  ajdsouza
+#  Changed Module directory to Monitor
+#
+#  Revision 1.1  2002/04/22 18:50:50  ajdsouza
+#  STDOUT metrics for all volume devices on the host
+#
+#  Revision 1.2  2002/04/19 22:48:25  ajdsouza
+#  Renamed from stormon_volumes.pl
+#
+#
+#
+# NAME  
+#	 volumes
+#
+# DESC 
+#	List the volumes, disk slices and disks provided by the volume manager
+#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/17/02 - Changes to meet GIT requirements
+# ajdsouza	04/03/02 - MOved print functions to stormon_utilities, pass ref to print function
+# ajdsouza	04/02/02 - Switch between 9I and Mozart print formats on ENV 
+#			   variable EMD_PRINT_ENV, added function printList
+# ajdsouza	10/01/01 - Created
+#
+#
+# METRIC DESC
+#
+#	  Metric Name	storage_volume_layers
+#
+#	  Metric Column 			Description
+#	  --------------------------------------------------
+#         storage_volume_layers_vendor		Vendor  eg. VERITAS, HPLVM etc.
+#         storage_volume_layers_type		Type of layer in the volume metric 
+#							eg. VOLUME,PLEX,SUBDISK,DISK etc.
+#         storage_volume_layers_name		Name 
+#         storage_volume_layers_diskgroup	Disk Group
+#         storage_volume_layers_size		Size 
+#         storage_volume_layers_config		Configuration
+#         storage_volume_layers_stripeconfig	Stripe Configuration 
+#         storage_volume_layers_mirrors	 	Mirrors 
+#         storage_volume_layers_parent	 	Parent 
+#         storage_volume_layers_filesystem	Filesystem mounted on the Volume
+#         storage_volume_layers_path		Volume Path (Block) 
+#         storage_volume_layers_inode	 	Inode# for the Block Volume Path 
+#         storage_volume_layers_path_raw	Volume Path (Character) 
+#         storage_volume_layers_inode_raw	Inode# for the Character Volume Path
+#         storage_volume_layers_disk_path	Disk Path 
+#         storage_volume_layers_disk_inode	Disk Inode 
+#         storage_volume_layers_shared		Is volume shared (Y/N) 
+#         storage_volume_layers_cluster		Cluster id for shared volumes 
+#         storage_volume_layers_key		Key 
+
+require v5.6.1;
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+volumes();
+
+exit 0;

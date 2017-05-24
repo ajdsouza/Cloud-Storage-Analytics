@@ -1,0 +1,11 @@
+
+<!-- ******* Storage Utilization Metrics ******* -->
+<!-- ******* To enable collection of tbspFull metrics ******* -->
+
+  <CollectionItem NAME = "storage_applications">
+     <Schedule>
+        <IntervalSchedule INTERVAL = "30" TIME_UNIT = "Min"/>
+     </Schedule>
+  </CollectionItem>
+
+<!-- ******* End of changes for Storage Ultilization Metrics******* -->

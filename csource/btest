@@ -1,0 +1,145 @@
+#!/usr/local/git/perl/bin/perl
+
+my @specials = qw( \ ~ ` ! @ # $ % ^ & * ( ) + - " ' : ; );
+
+use strict;
+use warnings;
+use Cwd;
+
+
+
+# Perl script to test buffer overflows for input variables in C programs
+
+	exit(1) if not $ARGV[0];
+
+	$ENV{PATH}="/home/ajdsouza/stormon/csource:$ENV{PATH}";
+my $file;
+my $dir;
+my $corefile;
+my $buffer;
+my $arg;
+my $n;
+
+	sub test1run($$){
+
+		my ($file,$arg) = @_;
+
+		system($file,$arg,$arg) == 0 or warn "Test Failed \n";
+		die "ERROR : $file core dumped !!!" if ( -e $corefile );
+
+	}
+
+
+	sub test2run($$$){
+
+		my ($file,$arg1,$arg2) = @_;
+
+		system($file,$arg,$arg,$arg2) == 0 or warn "Test Failed \n";
+		die "ERROR : $file core dumped !!!" if ( -e $corefile );
+
+	}
+
+	$dir = cwd;
+
+	$file = "$dir/$ARGV[0]";
+	$corefile = "$dir/core";
+
+	foreach (1..1000000)
+	{
+		$buffer = $buffer."a";
+	}
+
+TEST1 :
+	$arg = pack("a*",$buffer);
+	$n = length $arg;
+	print "TEST 1 : BUFFER $n \n";
+	test1run($file,$arg);
+
+TEST2:
+	$arg = pack("x40000");
+	$n = length $arg;
+	print "\nTEST 2: null BUFFER $n \n";
+	test1run($file,$arg);
+
+TEST3:
+	$arg = pack("x400000a*",$buffer);
+	$n = length $arg;
+	print "\nTEST 3: PREFIX PACKED nulls $n \n";
+	test1run($file,$arg);
+
+TEST4:
+	$arg = pack("a*x400000",$buffer);
+	$n = length $arg;
+	print "\nTEST 4: POSTFIX PACKED nulls $n \n";
+	test1run($file,$arg);
+
+TEST5:
+ 	$buffer="";	
+	foreach ( 1..1000)
+	{
+		$buffer = $buffer."-\^~*&()%`\$#@!";
+	}
+	$arg = pack("a*",$buffer);
+	$n = length $arg;
+	print "\nTEST 5: BINARY SPECIAL CHAR BUFFER  $n \n";
+	test1run($file,$arg);
+
+TEST5_1:
+ 	$buffer="";	
+	foreach ( 1..1000)
+	{
+		$buffer = $buffer."\^~*&()%`\$#@!+-\|></'\;:[]{}.?,";
+	}
+	$arg = pack("a*",$buffer);
+	$n = length $arg;
+	print "\nTEST 5.1: BINARY SPECIAL CHAR BUFFER  $n \n";
+	test1run($file,$arg);
+TEST6:
+ 	$buffer ="";	
+	foreach ( 1..255)
+	{
+		$buffer = $buffer."a";
+	}
+	$arg = pack("a*",$buffer);
+	$n = length $arg;
+	print "\nTEST 6: SIZE $n \n";
+	test1run($file,$arg);
+
+TEST7:
+ 	$buffer="";	
+	foreach ( 1..256)
+	{
+		$buffer = $buffer."a";
+	}
+	$arg = pack("a*",$buffer);
+	$n = length $arg;
+	print "\nTEST 7: SIZE $n \n";
+	test1run($file,$arg);
+
+TEST8:
+ 	$buffer="";	
+	foreach ( 1..257)
+	{
+		$buffer = $buffer."a";
+	}
+	$arg = pack("a*",$buffer);
+	$n = length $arg;
+	print "\nTEST 8: SIZE $n \n";
+	test1run($file,$arg);
+
+TEST9:
+	$arg = "-\^~*&()%`\$#@!";
+	$n = length $arg;
+	print "\nTEST 9: SPECIAL CHARACTERS SIZE $n \n";
+	test1run($file,$arg);
+
+
+TEST10:
+	foreach ( @specials ){
+	
+		$arg = "-$_";
+		$n = length $arg;
+		print "\nTEST 10: SPECIAL CHARACTERS SIZE $n \n";
+		test1run($file,$arg);
+	}
+

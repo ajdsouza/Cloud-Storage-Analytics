@@ -1,0 +1,65 @@
+<!-- $Header: /private/cvsroot/CVSREPOSITORY/stormon/configfiles/StormonDbJob.xml,v 1.2 2003/06/25 16:10:29 ajdsouza Exp $
+	Execute stormon for collection of Db storage metrics
+-->
+<jobtype name="StormonDbJobs" version="1.0">
+   <paramInfo>
+      <paramSource sourceType="user" paramNames="upload_db_user,upload_db_tns,em_target_type,em_target_username,username" required="true" evaluateAtSubmission="true"/>
+      <paramSource sourceType="user" paramNames="upload_db_password,password,em_target_password" encrypted="true" required="true" evaluateAtSubmission="true"/>
+      <paramSource sourceType="sql" paramNames="em_target_address" evaluateAtSubmission="true">
+      SELECT 'em_target_address', '"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST='||host||')(PORT='||port||')))(CONNECT_DATA=(SID='||sid||')))"' 
+      FROM
+	(
+	 select prop.property_value sid
+	 from mgmt_target_properties prop, mgmt_targets tgt
+	 where tgt.target_name = '%job_target_names%[%job_iterate_index%]'
+	 and tgt.target_type = 'oracle_database'
+	 and prop.target_guid = tgt.target_guid
+	 and prop.property_name = 'SID'
+	) a,
+	(
+	select prop.property_value port
+	from mgmt_target_properties prop, mgmt_targets tgt
+	where tgt.target_name = '%job_target_names%[%job_iterate_index%]'
+	and tgt.target_type = 'oracle_database'
+	and prop.target_guid = tgt.target_guid
+	and prop.property_name = 'Port' ) b,
+	(		      
+	select prop.property_value host
+	from mgmt_target_properties prop, mgmt_targets tgt
+	where tgt.target_name = '%job_target_names%[%job_iterate_index%]'
+	and tgt.target_type = 'oracle_database'
+	and prop.target_guid = tgt.target_guid
+	and prop.property_name = 'MachineName' ) c
+	WHERE  ROWNUM=1
+	</paramSource>
+    </paramInfo>
+   <stepset ID="main" type="iterativeParallel" iterateParam="job_target_names">
+         <step ID="command" command="remoteOp">
+            <paramList>
+               <param name="remoteCommand">/bin/sh</param>
+               <param name="targetName">%job_target_names%[%job_iterate_index%]</param>
+               <param name="targetType">%job_target_types%[%job_iterate_index%]</param>
+               <param name="username">%username%</param>
+               <param name="password">%password%</param>
+	       <param name="executeSynchronous">false</param>
+               <param name="input">
+	         <![CDATA[
+		 unset LD_LIBRARY_PATH 
+		 unset LIBPATH
+		 unset PERL5LIB
+		 unset SHLIB_PATH
+		 EM_TARGET_NAME=%job_target_names%[%job_iterate_index%];export EM_TARGET_NAME
+		 EM_TARGET_TYPE=%em_target_type%;export EM_TARGET_TYPE
+		 EM_TARGET_ADDRESS=%em_target_address%;export EM_TARGET_ADDRESS
+		 EM_TARGET_USERNAME=%em_target_username%;export EM_TARGET_USERNAME
+		 EM_TARGET_PASSWORD=%em_target_password%;export EM_TARGET_PASSWORD
+		 UPLOAD_DB_USER=%upload_db_user%;export UPLOAD_DB_USER
+		 UPLOAD_DB_PASSWORD=%upload_db_password%;export UPLOAD_DB_PASSWORD
+		 UPLOAD_DB_TNS=%upload_db_tns%;export UPLOAD_DB_TNS
+		  /usr/local/git/oem/storage/stormon
+		  ]]>
+               </param>
+            </paramList>
+         </step>
+   </stepset>
+</jobtype>

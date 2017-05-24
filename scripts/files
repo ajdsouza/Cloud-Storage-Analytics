@@ -1,0 +1,80 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved 
+#
+#  $Id: files,v 1.4 2002/05/23 00:00:24 ajdsouza Exp $ 
+#
+#  $Log: files,v $
+#  Revision 1.4  2002/05/23 00:00:24  ajdsouza
+#
+#  Modify on GIT feedback
+#  Call functions from Monitor::Storage to execute and print the metrics
+#
+#  Revision 1.3  2002/05/18 01:03:03  vswamida
+#  Added nfs_exclusive metric.
+#
+#  Revision 1.2  2002/04/23 07:01:52  ajdsouza
+#  Changed Module directory to Monitor
+#
+#  Revision 1.1  2002/04/22 18:51:48  ajdsouza
+#  STDOUT metrics for all local and netrowked filesystems on the host
+#
+#  Revision 1.1  2002/04/19 22:50:27  ajdsouza
+#  Renamed from stormon_files.pl
+#
+#
+#
+# NAME  
+#	 files
+#
+# DESC 
+#  	instrument metrics for all filesystems 
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/15/02 - Changes to meet GIT requirements
+# ajdsouza	04/03/02 - MOved print functions to stormon_utilities, pass ref to print function
+# ajdsouza	04/02/02 - Switch between 9I and Mozart print formats on ENV 
+#			   variable EMD_PRINT_ENV, added function printList
+# ajdsouza	10/01/01 - Created
+#
+#
+#
+# METRIC DESC 
+#
+#	Metric Name	storage_filesystems
+#
+#	  Metric Column 			Description
+#	  --------------------------------------------------
+#	  storage_filesystems_fstype		Type of filesystem eg. ufs,vxfs,nfs etc.  
+#         storage_filesystems_filesystem	Filesystem Name
+#         storage_filesystems_inode		Inode# of the file system on the host
+#         storage_filesystems_mountpoint	Mount Point
+#         storage_filesystems_size		Size of the filesystem (bytes)
+#         storage_filesystems_used		Used (%) 
+#	  storage_filesystems_free		Free space in the filesystem ( bytes )
+#	  storage_filesystems_nfs_server	NFS server for nfs
+#	  storage_filesystems_nfs_volume	Volume name (ID) on the NFS server
+#	  storage_filesystems_nfs_vendor	NFS server Vendor  eg. NETAPP, EMC 
+#	  storage_filesystems_nfs_product	NFS Product or Model eg. CELERA,F800
+#	  storage_filesystems_nfs_privilege	Mount privilege for the NFS file system eg. READ, WRITE etc.
+#	  storage_filesystems_nfs_exclusive	Y/N Is the nfs share mounted exclusively
+#	  storage_filesystems_cluster_id	Cluster Id , for clustered flesystems
+#	  storage_filesystems_key		Key field for mozart
+
+
+require v5.6.1;
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+files();
+	
+exit 0;

@@ -1,0 +1,75 @@
+#!/usr/local/git/perl/bin/perl
+#
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved 
+#
+#  $Id: teststdout,v 1.7 2002/10/14 20:42:58 ajdsouza Exp $ 
+#
+#
+# NAME  
+#	 tststdout
+#
+# DESC 
+#	print output of stormon scripts to STDOUT
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+#
+#
+
+use strict;
+use warnings;
+use Monitor::Storage;
+
+# Print in 9I format
+$ENV{'EMD_PRINT_ENV'}= '9I' unless $ENV{EMD_PRINT_ENV};
+
+print "**************************** FILESYSTEMS ********************\n";
+for ( files() )
+{
+    print "$_\n";
+}
+print "**************************** VOLUMES ********************\n";
+for ( volumes() )
+{
+    print "$_\n";
+}
+print "************************ SOFTWARE RAID ********************\n";
+for ( swraid() )
+{
+    print "$_ \n";
+}
+print "***************************** DISKS ********************\n";
+for ( disks() )
+{
+    print "$_ \n";
+}
+
+#If Oracle db environment is defined get db metrics
+if (
+    $ENV{EM_TARGET_NAME}
+    and  $ENV{EM_TARGET_TYPE}
+    and  $ENV{EM_TARGET_TYPE} =~ /^oracle_sysman_database$/
+    and  $ENV{EM_TARGET_USERNAME}
+    and  $ENV{EM_TARGET_PASSWORD}
+    and  $ENV{EM_TARGET_ADDRESS}
+    )
+{
+
+    print "***************************** DISKS ********************\n";      
+    print "$ENV{EM_TARGET_NAME} \n";
+    print "$ENV{EM_TARGET_TYPE}\n";
+    print "$ENV{EM_TARGET_USERNAME}\n";
+    print "$ENV{EM_TARGET_PASSWORD}\n";
+    print "$ENV{EM_TARGET_ADDRESS}\n";
+
+    for ( apps() )
+    {
+	print "$_ \n";
+    }     
+}

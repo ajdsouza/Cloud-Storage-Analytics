@@ -1,0 +1,34 @@
+
+The reports to be provided to GIT for monitoring the status of stormon monitoring.
+The reports will be scheduled in cron to be emailed once a day.
+
+Report 1 is actionable for GIT.
+Report 2 is actionable for SMP.
+
+1. Report 1
+   - Hosts where stormon EPM has not been installed
+   - Hosts with stormon EPM installed but where stormon job has not been scheduled
+   - Hosts with stormon EPM installed but with no stormon job execution in the last 25 Hours
+   - Hosts where stormon job has been scheduled but may have failed to execute
+   - Hosts where stormon job has been scheduled but may have timed out.
+
+   The report will list the following fields
+    - Type of failure
+    - Host name
+    - EPM Version
+    - Time of last execution of the stormon job
+    - Duration of execution of the last stormon job
+
+2. Report 2  
+   - Hosts where job has executed successfully but computation of summary has failed.
+
+   The report will list the following fields    
+    - Host name
+    - EPM Version
+    - Time of last summary computation
+    - Time of last execution of the stormon job
+    - Duration of execution of the last stormon job
+
+
+
+   

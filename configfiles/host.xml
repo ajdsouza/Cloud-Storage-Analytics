@@ -1,0 +1,3112 @@
+<!-- $Header: host.xml 15-jul-2004.21:01:54 ajdsouza Exp $
+   MODIFIED    (MM/DD/YY)
+      ajdsouza  07/14/04 - Add storage reporting host metrics
+      rmenon    05/25/04 - fixed bug 3630907 - verified using ilint
+      rmenon    05/15/04 - fixed label ids for host mgmt metrics so that 
+                           they don't go beyond one line. Otherwise
+                           loader ignores them as they exceed the
+                           64 byte limit.
+      rmenon    05/13/04 - added host management related metrics
+      nsharma   01/31/04 - Changing the TablesStatus label 
+      skumar    01/19/04 - CPU IO-Wait and PagingActivity changes 
+      skumar    01/09/04 - Linux 10G changes 
+      jpyang    12/22/03 - fix Display 
+      jpyang    12/20/03 - add Display for sol9 host 
+      hmulling  12/01/03 - fix metric name for executeStack 
+      hmulling  11/26/03 - add metric to determine execute on stack config 
+      njagathe  11/21/03 - Add Version to CATEGORY_PROPERTIES 
+      hmulling  11/03/03 - add help=no_help attribute to esm metrics 
+      gbhat     10/06/03 - Remove redundant whitespaces in metric tags 
+      gbhat     10/06/03 - Fix for bug 3173847. Add OPTIONAL tag to username 
+                           and password properties in QuryDescriptor for User 
+                           and ProjectResourceUsage metrics 
+      aaitghez  10/03/03 - OUIinventories.add is in emhome 
+      aaitghez  10/03/03 - pass in emhome directory to ecmCollectInventory 
+      eujang    09/22/03 - move metric defintion; add validIf element 
+      eujang    09/22/03 - ESM integration
+      gbhat     09/22/03 - Fix propertyname in User and Project Resource Usage 
+      skini     09/20/03 - Fix merge error 
+      skini     09/18/03 - Remove HostCredsMonitoring 
+      jabramso  09/17/03 - out of order 
+      gbhat     09/12/03 - Adding in Solaris 9 Resource Utilization metrics 
+      rzkrishn  09/02/03 - scriptErrorValue is optional . not needed from 4.1 
+      skini     08/28/03 - Host credential sets 
+      xxu       08/25/03 - update NLSID
+      jabramso  07/31/03 - Add DOCTYPE
+      vnukal    07/23/03 - vnukal_host-metadata-branching
+      subsunda  07/16/03 - Commnetd out OS alert log
+      subsunda  07/16/03 - 
+      vnukal    06/11/03 - pages paged-out non-transient
+      mgoodric  05/19/03 - Added HELP="NO_HELP" to collectSnapshot
+      njagathe  05/12/03 - Make env variables optional
+      njagathe  05/07/03 - Allow passing in NMUPM_TIMEOUT from emd.properties
+      subsunda  05/05/03 - Fix for bug 2922324
+      njagathe  04/23/03 - Fixes for bug 2922324
+      njagathe  04/23/03 -
+      vnukal    11/26/02 - fixing metric _OSConfig to not define ValidIf
+	  vnukal    10/31/02 - metadata versioning
+-->
+
+<!DOCTYPE TargetMetadata SYSTEM "../dtds/TargetMetadata.dtd">
+
+<TargetMetadata META_VER="2.0" TYPE="host" CATEGORY_PROPERTIES="OS;Version">
+  <Display>
+    <Label NLSID="host_name">Host</Label>
+  </Display>
+
+
+  <Metric NAME="Load" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_load">Load</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="cpuLoad_1min" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_load_cpuLoad_1min">Run Queue Length (1 minute average)</Label>
+          <ShortName NLSID="host_load_cpuLoad_1min_short">CPU Load (1min)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuLoad" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuLoad">Run Queue Length (5 minute average)</Label>
+          <ShortName NLSID="host_load_cpuLoad_short">CPU Load (5min)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuLoad_15min" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuLoad_15min">Run Queue Length (15 minute average)</Label>
+          <ShortName NLSID="host_load_cpuLoad_15min_short">CPU Load (15min)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPgin" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_activity_pgpgin">Pages Paged in by Page Stealing Daemon (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPgout" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_activity_pgpgout">Pages Paged out by Page Stealing Daemon (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="noOfProcs" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_load_noOfProcs">Total Processes</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="noOfUsers" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_load_noOfUsers">Total Users</Label>
+        </Display>
+      </ColumnDescriptor>
+     <ColumnDescriptor NAME="transfers" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_transfers">Transfers</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="longestServ" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_longest_serv">Longest Service Time (ms)</Label>
+          <ShortName NLSID="host_longest_serv_short">Longest IO(ms)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="idleTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuIdle">CPU Idle Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="userTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuUser">CPU in User Mode Raw</Label>
+        </Display>
+
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="systemTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuSysRaw">CPU in System Mode Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="waitTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuIOWait_raw">CPU on Wait Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pageSize" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_pagesize">Memory Page Size</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="realMem" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_realMem">Real Memory, Kilobytes</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="freeMemRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeMem">Free Memory Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="usedSwapRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_usedSwap">Swap Utilization Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="freeSwapRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeSwap">Swap Free Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPginRate" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(pgPgin - _pgPgin)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_pgpginrate">PageIn Rate</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPgoutRate" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(pgPgout - _pgPgout)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_pgpgoutrate">PageOut Rate</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgScanRate" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(pgPginRate/pgPgoutRate)/__interval">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_pgscanrate">Memory Page Scan Rate (per second)</Label>
+          <ShortName NLSID="host_load_pgscanrate_short">Page Scan rate</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+     <ColumnDescriptor NAME="totIO" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(transfers-_transfers)/__interval" >
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_tot_io">Total I/O (per second)</Label>
+          <ShortName NLSID="host_tot_io_short">Total IO/sec</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="freeMem" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(freeMemRaw / 1024.0)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeMem">Free Memory, Kilobytes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="usedSwap" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(usedSwapRaw / 1024.0)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_usedSwap">Swap Utilization, Kilobytes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="freeSwap" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(freeSwapRaw / 1024.0)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeSwap">Swap Free (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="swapUtil" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * usedSwap / (usedSwap + freeSwap))">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_swapUtil">Swap Utilization (%)</Label>
+          <ShortName NLSID="host_load_swapUtil_short">Swap Util %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="memfreePct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * freeMem / realMem)">
+        <Display>
+          <Label NLSID="host_load_memfreePct">Free Memory (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="memUsedPct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * (realMem - freeMem) / realMem)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_memUsedPct">Memory Utilization (%)</Label>
+          <ShortName NLSID="host_load_memUsedPct_short">Mem Util %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="idleTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(idleTimeRaw - _idleTimeRaw)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_idle_time_raw_diff">Idle Time Raw Difference</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="userTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(userTimeRaw - _userTimeRaw)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_user_time_raw_diff">User Time Raw Difference</Label>
+         </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="systemTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(systemTimeRaw - _systemTimeRaw)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_system_time_raw_diff">System Time Raw Difference</Label>
+      </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="waitTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(waitTimeRaw - _waitTimeRaw)" HELP="NO_HELP">
+       <Display>
+         <Label NLSID="host_wait_time_raw_diff">Wait Time Raw Difference</Label>
+       </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="totalTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(userTimeRawDiff + systemTimeRawDiff + idleTimeRawDiff)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_total_time_raw_diff">Total Time Raw Difference</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuUtil" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="((100.0 * (userTimeRawDiff + systemTimeRawDiff)) /  totalTimeRawDiff)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuIdle">CPU Utilization (%)</Label>
+          <ShortName NLSID="host_load_cpuIdle_short">CPU Util %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuUser" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * userTimeRawDiff /  totalTimeRawDiff)">
+        <Display>
+          <Label NLSID="host_load_cpuUser">CPU in User Mode (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuKernel" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * systemTimeRawDiff /  totalTimeRawDiff)">
+        <Display>
+          <Label NLSID="host_load_cpuKernel">CPU in System Mode (%)</Label>
+
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuIOWait" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * waitTimeRawDiff /  totalTimeRawDiff)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuIOWait">CPU in IO-Wait (%)</Label>
+          <ShortName NLSID="host_load_cpuIOWait_short">CPU IO Wait %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <ExecutionDescriptor>
+      <GetTable NAME="DiskActivity"/>
+      <GetView NAME="AvgSrvcTimeView" FROM_TABLE="DiskActivity">
+	<Column NAME="DiskActivityavserv"/>
+      </GetView>
+      <GroupBy NAME="DA_MaxAvServ" FROM_TABLE="AvgSrvcTimeView">
+	<AggregateColumn NAME="longestServ"
+                         COLUMN_NAME="DiskActivityavserv"
+                         OPERATOR="MAX" />
+      </GroupBy>
+      <GetTable NAME="_LoadInternal"/>
+      <JoinTables NAME="Load">
+        <Table NAME="_LoadInternal"/>
+        <Table NAME="DA_MaxAvServ"/>
+      </JoinTables>
+    </ExecutionDescriptor>
+  </Metric>
+
+
+
+  <Metric NAME="_LoadInternal" TYPE="TABLE" USAGE_TYPE="HIDDEN">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_load">_LoadInternal</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="cpuLoad_1min" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_load_cpuLoad_1min">Run Queue Length (1 minute average)</Label>
+          <ShortName NLSID="host_load_cpuLoad_1min_short">CPU Load(1min)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuLoad" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuLoad">Run Queue Length (5 minute average)</Label>
+          <ShortName NLSID="host_load_cpuLoad_short">CPU Load(5min)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuLoad_15min" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuLoad_15min">Run Queue Length (15 minute average)</Label>
+          <ShortName NLSID="host_load_cpuLoad_15min_short">CPU Load(15min)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPgin" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_activity_pgpgin">Pages Paged in by Page Stealing Daemon (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPgout" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_activity_pgpgout">Pages Paged out by Page Stealing Daemon (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="noOfProcs" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_noOfProcs">Total Processes</Label>
+          <ShortName NLSID="host_load_noOfProcs_short">Process Count</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="noOfUsers" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_load_noOfUsers">Total Users</Label>
+        </Display>
+      </ColumnDescriptor>
+     <ColumnDescriptor NAME="transfers" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_transfers">Transfers</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="idleTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuIdle">CPU Idle Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="userTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuUser">CPU in User Mode Raw</Label>
+        </Display>
+
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="systemTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuSysRaw">CPU in System Mode Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="waitTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_cpuIOWait_raw">CPU on Wait Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pageSize" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_pagesize">Memory Page Size</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="realMem" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_realMem">Real Memory, Kilobytes</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="freeMemRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeMem">Free Memory Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="usedSwapRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_usedSwap">Swap Utilization Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="freeSwapRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeSwap">Swap Free Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPginRate" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(pgPgin - _pgPgin)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_pgpginrate">PageIn Rate</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgPgoutRate" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(pgPgout - _pgPgout)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_pgpgoutrate">PageOut Rate</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pgScanRate" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(pgPginRate/pgPgoutRate)/__interval">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_pgscanrate">Memory Page Scan Rate (per second)</Label>
+          <ShortName NLSID="host_load_pgscanrate_short">Page Scan rate</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+     <ColumnDescriptor NAME="totIO" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(transfers-_transfers)/__interval" >
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_tot_io">Total I/O (per second)</Label>
+          <ShortName NLSID="host_tot_io_short">Total IO/sec</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="freeMem" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(freeMemRaw / 1024.0)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeMem">Free Memory, Kilobytes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="usedSwap" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(usedSwapRaw / 1024.0)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_usedSwap">Swap Utilization, Kilobytes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="freeSwap" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(freeSwapRaw / 1024.0)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_load_freeSwap">Swap Free (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="swapUtil" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * usedSwap / (usedSwap + freeSwap))">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_swapUtil">Swap Utilization (%)</Label>
+          <ShortName NLSID="host_load_swapUtil_short">Swap Util %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="memfreePct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * freeMem / realMem)">
+        <Display>
+          <Label NLSID="host_load_memfreePct">Free Memory (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="memUsedPct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * (realMem - freeMem) / realMem)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_memUsedPct">Memory Utilization (%)</Label>
+          <ShortName NLSID="host_load_memUsedPct_short">Mem Util %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="idleTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(idleTimeRaw - _idleTimeRaw)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_idle_time_raw_diff">Idle Time Raw Difference</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="userTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(userTimeRaw - _userTimeRaw)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_user_time_raw_diff">User Time Raw Difference</Label>
+         </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="systemTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(systemTimeRaw - _systemTimeRaw)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_system_time_raw_diff">System Time Raw Difference</Label>
+      </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="waitTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(waitTimeRaw - _waitTimeRaw)" HELP="NO_HELP">
+       <Display>
+         <Label NLSID="host_wait_time_raw_diff">Wait Time Raw Difference</Label>
+       </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="totalTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(userTimeRawDiff + systemTimeRawDiff + idleTimeRawDiff)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_total_time_raw_diff">Total Time Raw Difference</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuUtil" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="((100.0 * (userTimeRawDiff + systemTimeRawDiff)) /  totalTimeRawDiff)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuIdle">CPU Utilization (%)</Label>
+          <ShortName NLSID="host_load_cpuIdle_short">CPU Util %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuUser" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * userTimeRawDiff /  totalTimeRawDiff)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuUser">CPU in User Mode (%)</Label>
+          <ShortName NLSID="host_load_cpuUser_short">CPU Usr Mode %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuKernel" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * systemTimeRawDiff /  totalTimeRawDiff)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuKernel">CPU in System Mode (%)</Label>
+          <ShortName NLSID="host_load_cpuKernel_short">CPU Sys Mode %</ShortName>
+
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="cpuIOWait" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * waitTimeRawDiff /  totalTimeRawDiff)">
+        <Display FOR_SUMMARY_UI="TRUE">
+          <Label NLSID="host_load_cpuIOWait">CPU in I/O-Wait (%)</Label>
+          <ShortName NLSID="host_load_cpuIOWait_short">CPU IO Wait %</ShortName>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/osLoad.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+
+  <Metric NAME="Filesystems" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_filesys">Filesystems</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="mountPoint" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_filesys_mountPoint">Mount Point</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="fileSystem" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_filesys_fileSystem">Filesystem</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="size" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_filesys_size">Filesystem Size (MB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="used" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_filesys_used">Used (MB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="available" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_filesys_available">Available (MB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pctAvailable" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_filesys_pctAvailable">Filesystem Space Available (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/filesystems.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="Network" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_network">Network Interfaces</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="interface" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_network_interface">Network Interface Name</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="inputErrorsRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_inputErrorsRaw">Input Errors Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="inputPacketsRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_inputPacketsRaw">Input Packets Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="outputErrorsRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_outputErrorsRaw">Output Errors Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="outputPacketsRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_outputPacketsRaw">Output Packets Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="collisionsRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_collisionsRaw">Collisions Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="ispeedRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_ispeedRaw">Interface Speed (MBits/Sec)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="rbytesRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_rbytesRaw">Rbytes Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="wbytesRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_wbytesRaw">Wbytes Raw</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="counterMax" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_network_wbytesRaw">Max Counter Value</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="inputErrorsDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((inputErrorsRaw &lt; _inputErrorsRaw) ? ( counterMax - _inputErrorsRaw + inputErrorsRaw ) : (inputErrorsRaw - _inputErrorsRaw))" >
+        <Display>
+          <Label NLSID="host_network_inputErrorsDelta">Input Errors Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="inputPacketsDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((inputPacketsRaw &lt; _inputPacketsRaw) ? ( counterMax - _inputPacketsRaw + inputPacketsRaw ) : (inputPacketsRaw - _inputPacketsRaw))" >
+        <Display>
+          <Label NLSID="host_network_inputPacketsDelta">Input Packets Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="outputErrorsDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((outputErrorsRaw &lt; _outputErrorsRaw) ? ( counterMax - _outputErrorsRaw + outputErrorsRaw ) : (outputErrorsRaw - _outputErrorsRaw))" >
+        <Display>
+          <Label NLSID="host_network_outputErrorsDelta">Output Errors Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="outputPacketsDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((outputPacketsRaw &lt; _outputPacketsRaw) ? ( counterMax - _outputPacketsRaw + outputPacketsRaw ) : (outputPacketsRaw - _outputPacketsRaw))" >
+        <Display>
+          <Label NLSID="host_network_outputPacketsDelta">Output Packets Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="collisionsDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((collisionsRaw &lt; _collisionsRaw) ? ( counterMax - _collisionsRaw + collisionsRaw ) : (collisionsRaw - _collisionsRaw))" >
+        <Display>
+          <Label NLSID="host_network_collisionsDelta">Collisions Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="rbytesDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((rbytesRaw &lt; _rbytesRaw) ? ( counterMax - _rbytesRaw + rbytesRaw ) : (rbytesRaw - _rbytesRaw))" >
+        <Display>
+          <Label NLSID="host_network_rbytesDelta">Rbytes Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="wbytesDelta" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP" COMPUTE_EXPR="((wbytesRaw &lt; _wbytesRaw) ? ( counterMax - _wbytesRaw + wbytesRaw ) : (wbytesRaw - _wbytesRaw))" >
+        <Display>
+          <Label NLSID="host_network_wbytesDelta">Wbytes Delta</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="inpErrors" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100 * (inputErrorsDelta / inputPacketsDelta))">
+        <Display>
+          <Label NLSID="host_network_inpErrors"> Network Interface Input Errors (%) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="outErrors" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100 * (outputErrorsDelta / outputPacketsDelta))">
+        <Display>
+          <Label NLSID="host_network_outErrors">Network Interface Output Errors (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="collisions" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100 * (collisionsDelta / outputPacketsDelta))">
+        <Display>
+          <Label NLSID="host_network_collisions">Network Interface Collisions (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="readRate" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="((rbytesDelta / __interval) / 1000 / 1000)">
+        <Display>
+          <Label NLSID="host_network_readRate">Network Interface Read (MB/s)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="writeRate" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="((wbytesDelta / __interval) / 1000 / 1000)">
+        <Display>
+          <Label NLSID="host_network_writeRate">Network Interface Write (MB/s)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="readThroughput" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="((readRate / (ispeedRaw / 8)) * 100.0)">
+        <Display>
+          <Label NLSID="host_network_readthroughput">Network Interface Read Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="writeThroughput" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(writeRate / (ispeedRaw / 8) * 100.0)">
+        <Display>
+          <Label NLSID="host_network_writeThroughput">Network Interface Write Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="totalThroughput" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(readThroughput + writeThroughput)">
+        <Display>
+          <Label NLSID="host_network_totalThroughput">Network Interface Combined Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/network.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="Users" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_users">Users</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="user" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_users_user">User Name</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="numLogons" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_users_numLogons">Number of Logons </Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/allusers.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">=</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="Processes" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_topProcs">Top Processes</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="pmem" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_pmem">Memory Utilization for Top Processes (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pcpu" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_pcpu">CPU Utilization for Top Processes (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="tottime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_tottime">CPU Time for Top Processes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="pvmsize" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_pvmsize">Virtual Memory Utilization (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pressize" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_pressize">Physical Memory Utilization (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="userName" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_userName">Process User ID</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pid" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_topProcs_pid">Process ID</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="commandArgs" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_topProcs_commandArgs">Command and Arguments</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/topProcs.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+ <Metric NAME="All Processes" TYPE="TABLE" USAGE_TYPE="HIDDEN">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_allProcs">All Processes</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="pid" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_allProcs_pid">Process ID</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="ppid" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_allProcs_ppid">Parent Process ID</Label>
+        </Display>
+      </ColumnDescriptor>
+       <ColumnDescriptor NAME="pcpu" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_allProcs_pcpu">CPU Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="virtual_mem" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_allProcs_virtual_mem">Virtual Memory Utilization (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="physical_mem" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_allProcs_physical_mem">Physical Memory Utilization (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+<!--
+  The uptime column comes back in the format described in the ps(1) manpage for etime;  [[ddd-]hh:]mm:ss, where ddd can be any length and hh, mm, and ss are always 2 length (may be left zero padded)
+-->
+      <ColumnDescriptor NAME="uptime" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_allProcs_uptime">Start Time</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%scriptsDir%/allprocs.sh</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<Metric NAME="ResSize" TYPE="TABLE" USAGE_TYPE="HIDDEN">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_estResSize">Resident Memory for Process</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="size" TYPE="STRING" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_estResSize_kb">Resident Size (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%scriptsDir%/pmapinfo.ksh</Property>
+      <Property NAME="args" SCOPE="USER">args</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+    </QueryDescriptor>
+  </Metric>
+
+ <Metric NAME="ProcessInfo" TYPE="TABLE" USAGE_TYPE="HIDDEN">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_procInfo">Process Information</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="pid" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_procInfo_pid">Process ID</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="ppid" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_ppid">Parent Process ID</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pcpu" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_pcpu">CPU Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="state" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_state">Process State</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="tottime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_tottime">Total CPU Time </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pmem" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_pmem">Memory Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pvmsize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_pvmsize">Virtual Memory Utilization (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="pressize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_pressize">Physical Memory Utilization (KB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="userName" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_userName">Process User ID</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="uptime" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_uptime">Process Start Time</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="commandArgs" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_procInfo_commandArgs">Process Command and Arguments </Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/procInfo.pl</Property>
+      <Property NAME="args" SCOPE="USER">args</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="CPUUsage" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+   <Display>
+    <Label NLSID="host_cpu_usage">CPU Usage</Label>
+   </Display>
+
+   <TableDescriptor>
+    <ColumnDescriptor NAME="cpuNumber" TYPE="NUMBER" IS_KEY="TRUE">
+     <Display>
+      <Label NLSID="host_cpu_number">CPU Number</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="userTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_user_time_raw">User time raw</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="systemTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_system_time_raw">System time raw</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="waitTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_wait_time_raw">Wait time raw</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="idleTimeRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_idle_time_raw">Idle time raw</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="userTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(userTimeRaw - _userTimeRaw)" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_user_time_raw_diff">User Time Raw Difference</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="systemTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(systemTimeRaw - _systemTimeRaw)" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_system_time_raw_diff">System Time Raw Difference</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="waitTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(waitTimeRaw - _waitTimeRaw)" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_wait_time_raw_diff">Wait Time Raw Difference</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="idleTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(idleTimeRaw - _idleTimeRaw)" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_idle_time_raw_diff">Idle Time Raw Difference</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="totalTimeRawDiff" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR=
+                "(userTimeRawDiff + systemTimeRawDiff + waitTimeRawDiff + idleTimeRawDiff)" HELP="NO_HELP">
+     <Display>
+      <Label NLSID="host_total_time_raw_diff">Total Time Raw Difference</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="userTimePct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * userTimeRawDiff /  totalTimeRawDiff)">
+     <Display>
+      <Label NLSID="host_user_time_pct">CPU User Time (%)</Label>
+     </Display>
+    </ColumnDescriptor>
+
+    <ColumnDescriptor NAME="systemTimePct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * systemTimeRawDiff /  totalTimeRawDiff)">
+     <Display>
+      <Label NLSID="host_system_time_pct">CPU System Time (%)</Label>
+     </Display>
+    </ColumnDescriptor>
+
+<!-- not available
+    <ColumnDescriptor NAME="waitTimePct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * waitTimeRawDiff /  totalTimeRawDiff)">
+     <Display>
+      <Label NLSID="host_wait_time_pct">CPU Wait Time (%)</Label>
+     </Display>
+    </ColumnDescriptor>
+-->
+
+    <ColumnDescriptor NAME="idleTimePct" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(100.0 * idleTimeRawDiff /  totalTimeRawDiff)">
+     <Display>
+      <Label NLSID="host_idle_time_pct">CPU Idle Time (%)</Label>
+     </Display>
+    </ColumnDescriptor>
+
+
+
+   </TableDescriptor>
+
+   <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/osCpuUsage.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+   </QueryDescriptor>
+  </Metric>
+
+<!-- ***** Buffer Activity ********************* -->
+
+  <Metric NAME="BufferActivity" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_buffer_activity">Buffer Activity</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="BufferActivitybread" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_bread">Physical Reads (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivitybwrit" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_bwrit">Physical Writes (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivitylread" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_lread">Buffer Cache Reads (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivitylwrit" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_lwrit">Buffer Cache Writes (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivityrcache" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_rcache">Buffer Cache Read Hit Ratio (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivitywcache" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_wcache">Buffer Cache Write Hit Ratio (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivitypread" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_pread">Physical I/O Reads (per second) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="BufferActivitypwrit" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_buffer_activity_pwrit">Physical I/O Writes (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostbufferactivity.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ***** SYSTEM CALLS ********************* -->
+
+  <Metric NAME="SystemCalls" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="SunOS"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_system_calls">System Calls</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="SystemCallsscall" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_scall">System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SystemCallssread" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_sread">read() System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SystemCallsswrite" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_swrit">write() System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SystemCallsfork" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_fork">fork() System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SystemCallsexec" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_exec">exec() System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SystemCallsrchar" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_rchar">Characters Transferred by Read System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SystemCallswchar" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_system_calls_wchar">Characters Transferred by Write System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostsyscalls.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ******** DISK ACTIVITY ************** -->
+
+  <Metric NAME="DiskActivity" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_disk_activity">Disk Activity</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="DiskActivitydevice" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_disk_activity_device">Disk Device</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivNReads" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_nreads">Disk Reads</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivNWrites" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_nwrites">Disk Writes</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivBytesRd" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_bytesrd">Bytes Read</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivBytesWr" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_byteswr">Bytes Written</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivCumServTm" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_cumsrvtm">Cumulative Service Time</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="diskActivWtLastUpdate" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_wtlastupdt">Last Time Wait Q Changed</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivWtLenTime" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_wtlentime">Wait Length*Time</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="diskActivRunLastUpdate" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_rnlastupdt">Last Time Run Q Changed</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivRunLenTime" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_rnlentime">Run Length*Time</Label>
+        </Display>
+      </ColumnDescriptor>
+
+<!-- % Busy -->
+      <ColumnDescriptor NAME="DiskActivitybusy" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(diskActivRunLenTime/(diskActivWtLenTime*1000))*100">
+        <Display>
+          <Label NLSID="host_disk_activity_busy">Disk Utilization (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+<!-- End % Busy -->
+
+<!-- Transfers/Second -->
+      <ColumnDescriptor NAME="diskActivReadsPerSec" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(diskActivNReads - _diskActivNReads)/__interval">
+        <Display>
+          <Label NLSID="host_disk_activity_reads_per_sec">Disk Reads (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivWritesPerSec" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(diskActivNWrites - _diskActivNWrites)/ __interval">
+        <Display>
+          <Label NLSID="host_disk_activity_writes_per_sec">Disk Writes (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="DiskActivityreadwrite" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="diskActivReadsPerSec + diskActivWritesPerSec" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_rps">Transfers (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+<!-- End Transfers/sec -->
+
+<!-- Average wait time -->
+<!-- N/A
+      <ColumnDescriptor NAME="diskActivAvWaitLen" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(diskActivWtLenTime - _diskActivWtLenTime)/(diskActivWtLastUpdate - _diskActivWtLastUpdate)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_avwaitlen">Average Commands Waiting in Queue</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="DiskActivityavwait" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="DiskActivityreadwrite > 0  ? diskActivAvWaitLen * 1000.0 / DiskActivityreadwrite:0">
+        <Display>
+          <Label NLSID="host_disk_activity_avwait">Average Disk I/O Wait Time (ms)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="diskActivAvRunLen" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(diskActivRunLenTime - _diskActivRunLenTime)/(diskActivRunLastUpdate - _diskActivRunLastUpdate)" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_disk_activity_avwaitlen">Average Commands in Run Queue</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="DiskActivityavrun" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="DiskActivityreadwrite > 0 ? diskActivAvRunLen * 1000.0 / DiskActivityreadwrite : 0 ">
+        <Display>
+          <Label NLSID="host_disk_activity_avrun">Average Run Time (ms)</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+
+      <ColumnDescriptor NAME="DiskActivityavserv" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(diskActivNReads+diskActivNWrites) > 0 ? diskActivCumServTm/(diskActivNReads+diskActivNWrites) : 0">
+        <Display>
+          <Label NLSID="host_disk_activity_avserv">Average Disk I/O Service Time (ms)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+<!-- N/A
+      <ColumnDescriptor NAME="DiskActivityavque" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="diskActivAvRunLen + diskActivAvWaitLen">
+        <Display>
+          <Label NLSID="host_disk_activity_avque">Average Outstanding Disk I/O Requests</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+
+
+<!-- Transfer Blks/sec -->
+      <ColumnDescriptor NAME="diskActivReadsBlks" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(diskActivBytesRd - _diskActivBytesRd)/ __interval">
+        <Display>
+          <Label NLSID="host_disk_activity_blocks_read_per_sec">Disk Blocks Reads (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="diskActivWritesBlks" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(diskActivBytesWr - _diskActivBytesWr)/ __interval">
+        <Display>
+          <Label NLSID="host_disk_activity_blocks_written_per_sec">Disk Block Writes (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+<!-- End Transfer Blks/sec -->
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostdiskactivity.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ******************* PAGING ACTIVITY *********** -->
+
+  <Metric NAME="PagingActivity" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_paging_activity">Paging Activity</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="PPgoutRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_ppgoutraw">Pages Paged out(Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="Pgactive" TYPE="NUMBER" IS_KEY="FALSE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_pgactive">Active Pages</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="PginactiveDirty" TYPE="NUMBER" IS_KEY="FALSE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_pgdirty">Inactive Dirty Pages</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="PginactiveClean" TYPE="NUMBER" IS_KEY="FALSE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_pgclean">Inactvie Clean Pages</Label>
+        </Display>
+      </ColumnDescriptor>
+<!--   Needs to be uncommented once the proper counter is indentified.
+       <ColumnDescriptor NAME="PgAtchs" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_pgatchs">Page attaches (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+      <ColumnDescriptor NAME="PPginRaw" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_ppginraw">Pages Paged in(Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+<!--   Needs to be uncommented once the proper counter is indentified.
+       <ColumnDescriptor NAME="PgFlts" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_pgflts">Page Faults (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="ATFault" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_atfault">Address translation faults (Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+       <ColumnDescriptor NAME="softlocks" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_paging_activity_softlocks"> Faults due to Software lock requests(Raw)</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+
+
+      <ColumnDescriptor NAME="PagingActivityppgout" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(PPgoutRaw-_PPgoutRaw)/__interval" >
+        <Display>
+          <Label NLSID="host_paging_activity_ppgout">Pages Paged-out (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="PagingActivityppgin" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="(PPginRaw - _PPginRaw)/__interval">
+       <Display>
+        <Label NLSID="host_paging_activity_ppgin">Pages Paged-in (per second)</Label>
+       </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="PagingActivitypgscan" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="PagingActivityppgin/PagingActivityppgout">
+        <Display>
+          <Label NLSID="host_paging_activity_pgscan">Pages Scanned by Page Stealing Daemon (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="PagingActivitypgactive" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(Pgactive-_Pgactive)/__interval">
+        <Display>
+          <Label NLSID="host_paging_activity_pgactive">Active Pages (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+<!-- not available
+      <ColumnDescriptor NAME="PagingActivityufsipf" TYPE="NUMBER" IS_KEY="FALSE" COMPUTE_EXPR="IgetUfsPct">
+        <Display>
+          <Label NLSID="host_paging_activity_ufsipf">igets with Page Flushes(%)</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+
+<!--  See above not on undetermined counter
+      <ColumnDescriptor NAME="PagingActivityatch" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_paging_activity_atch">Page faults by memory page reclaim (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+
+<!--  See top note about determining counter names
+      <ColumnDescriptor NAME="PagingActivitypflt" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_paging_activity_pflt">Page faults from protection errors (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+-->
+      <ColumnDescriptor NAME="PagingActivitypDirty" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(PginactiveDirty - _PginactiveDirty)/__interval">
+        <Display>
+          <Label NLSID="host_paging_activity_pgdirty">Inactvie Dirty Pages (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="PagingActivitypClean" TYPE="NUMBER" IS_KEY="FALSE" TRANSIENT="TRUE" COMPUTE_EXPR="(PginactiveClean - _PginactiveClean)/__interval">
+        <Display>
+          <Label NLSID="host_paging_activity_pgclean">Inactive Clean Pages (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostpagingactivity.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ******************* Message and Semaphore Activity *********** -->
+
+  <Metric NAME="MessageActivity" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="SunOS"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_message_activity">Message and Semaphore Activity</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="MessageActivitymsg" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_message_activity_msg">msgrcv() System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="MessageActivitysema" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_message_activity_sema">semop() System Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostmessageactivity.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ******************* TABLES STATUS *********** -->
+
+    <Metric NAME="TablesStatus" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_tables_status">Process, Inode, File Tables Statistics</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="TablesStatusfilesz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_filesz">Number Of Used File Handles</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatusfilepsz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_filepsz">Percentage Of Used File Handles</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatusinodsz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_inodsz">Size of Inode Table</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatussupersz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_supersz">Number Of Super Block Handlers Allocated</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatuspsupersz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_psupersz">Percentage Of Allocated Super Block Handlers</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatusdquotsz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_dquotsz">Number Of Allocated Disk Quota Entries</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatuspdquotsz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_pdquotsz">Percentage Of Allocated Disk Quota Entries</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatusrtsigsz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_rtsigsz">Number Of Queued RT Signals</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TablesStatusprtsigsz" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tables_status_prtsigsz">Percentage Of Queued RT Signals</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hosttablesstatus.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+ <!-- ******************* System Switch Swap Activity *********** -->
+
+  <Metric NAME="SSSActivity" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_sss_activity">Switch/Swap Activity</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="SSSActivityswpin" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_sss_activity_swpin">System Swapins (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SSSActivityswpot" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_sss_activity_swpot">System Swapouts (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SSSActivitybswin" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_sss_activity_bswin">Swapins Transfers (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SSSActivitybswot" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_sss_activity_bswot">Swapout Transfers (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SSSActivitybswch" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_sss_activity_bswch">Process Context Switches (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostsysswapswitch.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+ <!-- ******************* TTY Activity *********** -->
+
+  <Metric NAME="TtyActivity" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="SunOS"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_tty_activity">TTY Activity</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="TtyActivityrawch" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tty_activity_rawch">TTY Raw Input (chars/s)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TtyActivitycanch" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tty_activity_canch">Input Characters Processed by canon()</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TtyActivityoutch" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tty_activity_outch">TTY Output Characters (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TtyActivityrcvin" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tty_activity_rcvin">Incoming Character Interrupts (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TtyActivityxmtin" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tty_activity_xmtin">Outgoing Character Interrupts (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TtyActivitymdmin" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_tty_activity_mdmin">Modem Interrupt Rate (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostttyactivity.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ******************* Kernel Memory *********** -->
+
+  <Metric NAME="KernelMemory" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="SunOS"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_kernel_memory">Kernel Memory</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="KernelMemorysmlmem" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_alloc">KMA for Small Memory Requests </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemorysalloc" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_salloc">Memory Allocated for Small Memory Requests (Bytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemorysfail" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_sfail">Failed Requests for Small Kernel Memory </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemorylgmem" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_lgmem">KMA Available for Large Memory Requests (Bytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemorygalloc" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_galloc">Memory Allocated for Large Memory Requests (Bytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemorygfail" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_gfail">Failed Requests for Large Kernel Memory</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemoryovszalloc" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_ovszalloc">KMA for Oversize Memory Requests (Bytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="KernelMemoryovszfail" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_kernel_memory_ovszfail">Failed Requests for Oversize Kernal Memory</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostkernelmem.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ***** FILE ACCESS ******** -->
+
+  <Metric NAME="FileAccess" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="SunOS"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_file_access">File Access System Calls</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="FileAccessiget" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_file_access_iget">iget() Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="FileAccessnamei" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_file_access_namei">lookuppn() Calls (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="FileAccessdirbk" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_file_access_dirbk">Blocks Read by Directory Search Routine (per second)</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/hostfileaccess.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+
+<!-- ************** Inventory metrics (START) ************** -->
+
+  <Metric NAME="Inventory" TYPE="EXTERNAL" >
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_Inventory">Inventory</Label>
+    </Display>
+    <QueryDescriptor FETCHLET_ID="OS">
+      <Property NAME="separateErrorStream" SCOPE="GLOBAL">TRUE</Property>
+      <Property NAME="emdRoot" SCOPE="SYSTEMGLOBAL">emdRoot</Property>
+      <Property NAME="emHome" SCOPE="SYSTEMGLOBAL">agentStateDir</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="hostConfigClasspath" SCOPE="SYSTEMGLOBAL">hostConfigClasspath</Property>
+      <Property NAME="loaderFile" SCOPE="SYSTEMGLOBAL">_loaderFile</Property>
+      <Property NAME="hostname" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="type" SCOPE="INSTANCE">TYPE</Property>
+      <Property NAME="display_target_name" SCOPE="INSTANCE">DISPLAY_NAME</Property>
+      <Property NAME="display_target_type" SCOPE="INSTANCE">TYPE_DISPLAY_NAME</Property>
+      <!--<Property NAME="targetType" SCOPE="INSTANCE">TYPE</Property>-->
+      <Property NAME="command" SCOPE="GLOBAL">"%perlBin%/perl" "%scriptsDir%/osm/ecmCollectInventory.pl" "%hostConfigClasspath%" "%perlBin%" "%emdRoot%" "%emHome%" "%hostname%" "%loaderFile%" "%emHome%/sysman/config/OUIinventories.add" "%type%" "%display_target_name%" "%display_target_type%"</Property>
+    </QueryDescriptor>
+  </Metric>
+
+
+  <Metric NAME="collectSnapshot" TYPE="TABLE" USAGE_TYPE="HIDDEN">
+    <ValidIf>
+       <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+  <Display>
+      <Label NLSID="host_collectSnapshot">Collect Snapshot</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="name" TYPE="STRING" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="host_collectSnapshot">Name</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OS">
+      <Property NAME="separateErrorStream" SCOPE="GLOBAL">TRUE</Property>
+      <Property NAME="emdRoot" SCOPE="SYSTEMGLOBAL">emdRoot</Property>
+      <Property NAME="emHome" SCOPE="SYSTEMGLOBAL">agentStateDir</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="hostConfigClasspath" SCOPE="SYSTEMGLOBAL">hostConfigClasspath</Property>
+      <Property NAME="hostname" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="type" SCOPE="INSTANCE">TYPE</Property>
+      <Property NAME="display_target_name" SCOPE="INSTANCE">DISPLAY_NAME</Property>
+      <Property NAME="display_target_type" SCOPE="INSTANCE">TYPE_DISPLAY_NAME</Property>
+      <Property NAME="SNAPSHOT_TYPE" SCOPE="USER">SNAPSHOT_TYPE</Property>
+      <Property NAME="command" SCOPE="GLOBAL">"%perlBin%/perl" "%scriptsDir%/osm/ecmCollectInventory.pl" "%hostConfigClasspath%" "%perlBin%" "%emdRoot%" "%emHome%" "%hostname%" "" "%emHome%/sysman/config/OUIinventories.add" "%type%" "%display_target_name%" "%display_target_type%" "%SNAPSHOT_TYPE%"</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ************** Inventory metrics (END) ************** -->
+
+  <Metric NAME="UDM" TYPE="TABLE"
+          KEYS_FROM_MULT_COLLS="TRUE" >
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_udm">User Defined Metrics</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="ID" TYPE="STRING" IS_KEY="TRUE">
+        <Display >
+          <Label NLSID="host_udm_id">Script</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="NumValue" TYPE="NUMBER" IS_KEY="FALSE" >
+        <Display>
+          <Label NLSID="host_udm_value">User Defined Numeric Metric</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="StrValue" TYPE="STRING" IS_KEY="FALSE">
+        <Display >
+          <Label NLSID="host_udm_strvalue">User Defined String Metric</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="Message" TYPE="STRING" IS_KEY="FALSE" TRANSIENT="TRUE">
+        <Display>
+          <Label NLSID="host_udm_message">Message</Label>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="UDM">
+      <Property NAME="ID" SCOPE="USER">ID</Property>
+      <Property NAME="command" SCOPE="USER">command</Property>
+      <Property NAME="username" SCOPE="USER">username</Property>
+      <Property NAME="password" SCOPE="USER">password</Property>
+      <Property NAME="args" SCOPE="USER" OPTIONAL="TRUE">args</Property>
+      <Property NAME="ENV_ARRAY" SCOPE="USER" OPTIONAL="TRUE">ENV_ARRAY</Property>
+      <Property NAME="em_failure_tag" SCOPE="USER" OPTIONAL="TRUE">em_failure_tag</Property>
+      <Property NAME="em_result_tag" SCOPE="USER" OPTIONAL="TRUE">em_result_tag</Property>
+      <Property NAME="em_message_tag" SCOPE="USER" OPTIONAL="TRUE">em_message_tag</Property>
+      <Property NAME="valuetype" SCOPE="USER" OPTIONAL="TRUE">valuetype</Property>
+      <Property NAME="scriptErrorValue" SCOPE="USER" OPTIONAL="TRUE">scriptErrorValue</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ************** Support metrics (Begin) ************** -->
+  <Metric NAME="DiskErrors" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="SunOS"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_diskerrors">Disk Device Errors</Label>
+    </Display>
+
+    <TableDescriptor>
+      <ColumnDescriptor NAME="Device" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_diskerrors_device">Device</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="SoftErrors" TYPE="NUMBER" IS_KEY="FALSE">
+      <Display>
+        <Label NLSID="host_diskerrors_softerrors">Soft Errors</Label>
+      </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="HardErrors" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_diskerrors_harderrors">Hard Errors</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="TransportErrors" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_diskerrors_transporterrors">Transport Errors</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="Total" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_diskerrors_total">Total</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/diskErrors.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="Swap_Area_Status" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_swap">Swap Area Status</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="swapfile" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_swap_swapfile">Swap File</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="swaplen" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_swap_swaplen">Swap Size</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="swapfree" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_swap_swapfree">Swap Free</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%scriptsDir%/swapList.sh</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ************** Support metrics (End) ************** -->
+
+<!-- ************** OS Alerts metrics (Begin) ************** -->
+
+<!-- Commenting out until set/clear UI is available
+
+  <Metric NAME="osAlertLog" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_alertLog">OS Alert Log</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="timeLine" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_alertLog_timeLine">Timestamp/LineNumber</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="alertSeverity" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_alertLog_alertSeverity">OS Alert</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="alertLogName" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_alertLog_fileName">Alert Log Name</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="alertConcatString" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_alertLog_alertConcatString">Alert Log Error Messages</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+         %perlBin%/perl %scriptsDir%/osAlertlog.pl
+      </Property>
+      <Property NAME="ENVEM_TARGET_GUID" SCOPE="INSTANCE">GUID</Property>
+    </QueryDescriptor>
+  </Metric>
+
+-->
+<!-- ************** OS Alerts metrics (End) ************** -->
+
+  <Metric NAME="_OSConfig" TYPE="TABLE" USAGE_TYPE="HIDDEN">
+<!-- This metric will not define ValidIf property as the DynamicPropery uses
+     this metric for computation in it's ExecutionDescriptor.
+    <ValidIf>
+      <CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+-->
+    <Display>
+      <Label NLSID="host_osConfig">_OSConfig</Label>
+    </Display>
+    <TableDescriptor>
+       <ColumnDescriptor NAME="osName" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="host_osConfig_osName">Operating System</Label>
+          </Display>
+       </ColumnDescriptor>
+       <ColumnDescriptor NAME="osVersion" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="host_osConfig_osVersion">OS Version</Label>
+          </Display>
+       </ColumnDescriptor>
+       <ColumnDescriptor NAME="osPatchLevel" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="host_osConfig_osPatchLevel">OS Patch Level</Label>
+          </Display>
+       </ColumnDescriptor>
+       <ColumnDescriptor NAME="Platform" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="host_osConfig_platform">Platform</Label>
+          </Display>
+       </ColumnDescriptor>
+       <ColumnDescriptor NAME="Boottime" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="host_osConfig_boottime">Started since</Label>
+          </Display>
+       </ColumnDescriptor>
+       <ColumnDescriptor NAME="IPAddress" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="host_osConfig_ipAddress">IP address</Label>
+          </Display>
+       </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+        <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+        <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+        <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+        <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/osconfig.pl</Property>
+        <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+        <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="UserResourceUsage" TYPE="TABLE">
+	<ValidIf>
+		<CategoryProp NAME="OS" CHOICES="SunOS"/>
+	    <CategoryProp NAME="Version" CHOICES="5.9"/>
+	</ValidIf>
+    <Display>
+      <Label NLSID="host_user_perf">Aggregate Resource Usage Statistics(By User)</Label>
+    </Display>
+	
+    <TableDescriptor>
+	  
+      <ColumnDescriptor NAME="UserID" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_user_id">User ID</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="numProcs" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_numProcs">Number of Processes Owned by User</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="userModeTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_modetime">Cumulative User Mode Time (seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemModeTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_systime">Cumulative System Mode Time (seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemTrapTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_traptime">Cumulative System Trap Time (seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="textPageFaultSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_tpagefaulttime">Cumulative Text Page Fault Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="dataPageFaultSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_dpagefaulttime">Cumulative Data Page Fault Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemPageFaultSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_spagefaulttime">Cumulative System Page Fault Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="userLockWaitSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_lockwaittime">Cumulative User Lock-Wait Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="userOtherSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_othersleeptime">Cumulative User Other Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="userCPUWaitTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_cpuwaittime">Cumulative CPU Wait Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="userStopTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_stoptime">Cumulative Stop Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="minorPageFaults" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_minPageFaults">Cumulative Minor Page Faults</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="majorPageFaults" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_majPageFaults">Cumulative Major Page Faults</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="swapOperations" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_swapOperations">Cumulative Swap Operations</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="blocksRead" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_blocksRead">Cumulative Number Of Blocks Read</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="blocksWritten" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_blocksWritten">Cumulative Number Of Blocks Written</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="messagesReceived" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_mesgRecvd">Cumulative Number Of Messages Received</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="messagesSent" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_mesgSent">Cumulative Number Of Messages Sent</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="signalsReceived" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_signalsReceived">Cumulative Number of Signals Received</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="voluntaryCtxtSwitches" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_vCtxtSwitches">Cumulative Number of Voluntary Context Switches</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="involuntaryCtxtSwitches" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_invCtxtSwitches">Cumulative Number of Involuntary Context Switches</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemCallsMade" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_systemCallsMade">Cumulative Number of System Calls Made</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="ioUsage" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_ioUsage">Cumulative Number Character IO (bytes) Read and Written</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="processHeapSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_processHeapSize">User's Total Process Heap Size(KiloBytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="processVMSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_processVMSize">User's Total Process Virtual Memory Size(KiloBytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="processResidentSetSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_processResidentSetSize">User's Total Process Resident Set Size(KiloBytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="percentCPUTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_cputime">User CPU Time (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="percentMemSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_memsize">User Process Memory Size (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="numThreads" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_user_numThreads">Total Number of Threads in User's Processes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="WBEM">
+      <Property NAME="username" SCOPE="INSTANCE" OPTIONAL="TRUE">Username</Property>
+      <Property NAME="password" SCOPE="INSTANCE" OPTIONAL="TRUE">Password</Property>
+      <Property NAME="host" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="operation" SCOPE="GLOBAL">VALUES</Property>
+      <Property NAME="classname" SCOPE="GLOBAL">Solaris_UserProcessAggregateStatisticalInformation</Property>
+      <Property NAME="properties" SCOPE="GLOBAL">Name,NumProcs,UserModeTime,SystemModeTime,SystemTrapTime,TextPageFaultSleepTime,DataPageFaultSleepTime,SystemPageFaultSleepTime,UserLockWaitSleepTime,OtherSleepTime,WaitCPUTime,StoppedTime,MinorPageFaults,MajorPageFaults,SwapOperations,BlocksRead,BlocksWritten,MessagesReceived,MessagesSent,SignalsReceived,VoluntaryContextSwitches,InvoluntaryContextSwitches,SystemCallsMade,CharacterIOUsage,ProcessHeapSize,ProcessVMSize,ProcessResidentSetSize,PercentCPUTime,PercentMemorySize,NumThreads</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="ProjectResourceUsage" TYPE="TABLE">
+	<ValidIf>
+		<CategoryProp NAME="OS" CHOICES="SunOS"/>
+	    <CategoryProp NAME="Version" CHOICES="5.9"/>
+	</ValidIf>
+    <Display>
+      <Label NLSID="host_proj_perf">Aggregate Resource Usage Statistics (By Project)</Label>
+    </Display>
+	
+    <TableDescriptor>
+	  
+      <ColumnDescriptor NAME="ProjectName" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_project_id">Project Name</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="numProcs" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_numProcs">Number of Processes Owned by Project</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="userModeTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_modetime">Cumulative User Mode Time (seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemModeTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_systime">Cumulative System Mode Time (seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemTrapTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_traptime">Cumulative System Trap Time (seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="textPageFaultSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_tpagefaulttime">Cumulative Text Page Fault Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="dataPageFaultSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_dpagefaulttime">Cumulative Data Page Fault Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemPageFaultSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_spagefaulttime">Cumulative System Page Fault Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="projectLockWaitSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_lockwaittime">Cumulative Project Lock-Wait Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="projectOtherSleepTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_othersleeptime">Cumulative Project Other Sleep Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="projectCPUWaitTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_cpuwaittime">Cumulative CPU Wait Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="projectStopTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_stoptime">Cumulative Stop Time(Seconds)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="minorPageFaults" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_minPageFaults">Cumulative Minor Page Faults</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="majorPageFaults" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_majPageFaults">Cumulative Major Page Faults</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="swapOperations" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_swapOperations">Cumulative Swap Operations</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="blocksRead" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_blocksRead">Cumulative Number Of Blocks Read</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="blocksWritten" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_blocksWritten">Cumulative Number Of Blocks Written</Label>
+        </Display>
+      </ColumnDescriptor>
+	  
+      <ColumnDescriptor NAME="messagesReceived" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_mesgRecvd">Cumulative Number Of Messages Received</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="messagesSent" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_mesgSent">Cumulative Number Of Messages Sent</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="signalsReceived" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_signalsReceived">Cumulative Number of Signals Received</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="voluntaryCtxtSwitches" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_vCtxtSwitches">Cumulative Number of Voluntary Context Switches</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="involuntaryCtxtSwitches" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_invCtxtSwitches">Cumulative Number of Involuntary Context Switches</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="systemCallsMade" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_systemCallsMade">Cumulative Number of System Calls Made</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="ioUsage" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_ioUsage">Cumulative Number Character IO (bytes) Read and Written</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="processHeapSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_processHeapSize">Project's Total Process Heap Size(KiloBytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="processVMSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_processVMSize">Project's Total Process Virtual Memory Size(KiloBytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="processResidentSetSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_processResidentSetSize">Project's Total Process Resident Set Size(KiloBytes)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="percentCPUTime" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_cputime">Project CPU Time (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="percentMemSize" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_memsize">Project Process Memory Size (%)</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="numThreads" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_project_numThreads">Total Number of Threads in Project's Processes</Label>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="WBEM">
+      <Property NAME="username" SCOPE="INSTANCE" OPTIONAL="TRUE">Username</Property>
+      <Property NAME="password" SCOPE="INSTANCE" OPTIONAL="TRUE">Password</Property>
+      <Property NAME="host" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="operation" SCOPE="GLOBAL">VALUES</Property>
+      <Property NAME="classname" SCOPE="GLOBAL">Solaris_ProjectProcessAggregateStatisticalInformation</Property>
+      <Property NAME="properties" SCOPE="GLOBAL">Name,NumProcs,UserModeTime,SystemModeTime,SystemTrapTime,TextPageFaultSleepTime,DataPageFaultSleepTime,SystemPageFaultSleepTime,UserLockWaitSleepTime,OtherSleepTime,WaitCPUTime,StoppedTime,MinorPageFaults,MajorPageFaults,SwapOperations,BlocksRead,BlocksWritten,MessagesReceived,MessagesSent,SignalsReceived,VoluntaryContextSwitches,InvoluntaryContextSwitches,SystemCallsMade,CharacterIOUsage,ProcessHeapSize,ProcessVMSize,ProcessResidentSetSize,PercentCPUTime,PercentMemorySize,NumThreads</Property>
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ESM host collection -->
+  <Metric NAME="openPorts" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_open_ports_ESM">Open Ports</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/openports.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">=</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="insecureServices" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_insecure_services_ESM">Insecure Services</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/insecureservices.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">=</Property>
+    </QueryDescriptor>
+  </Metric>
+  <Metric NAME="executeStack" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="execute_stack_ESM">Execute Stack</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/executestack.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">=</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- host management related metrics begin -->
+
+  <Metric NAME="FileMonitoring" TYPE="TABLE">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+      <Display>
+          <Label NLSID="FileMon">File Monitoring</Label>
+      </Display>
+      <TableDescriptor>
+          <ColumnDescriptor NAME="file_name" TYPE="STRING" IS_KEY="TRUE">
+              <Display>
+                  <Label NLSID="file_mon_name">File Name</Label>
+              </Display>
+          </ColumnDescriptor>
+          <ColumnDescriptor NAME="file_status" TYPE="STRING" IS_KEY="FALSE">
+              <Display>
+                  <Label NLSID="file_mon_Status">Status</Label>
+              </Display>
+          </ColumnDescriptor>
+          <ColumnDescriptor NAME="file_permissions" TYPE="STRING" IS_KEY="FALSE">
+              <Display>
+                  <Label NLSID="file_mon_permissions">File Permissions</Label>
+              </Display>
+          </ColumnDescriptor>
+          <ColumnDescriptor NAME="file_sizechangerate" TYPE="NUMBER" IS_KEY="FALSE">
+              <Display>
+                  <Label NLSID="file_mon_sizechangerate">File Change Rate (KB/hour)</Label>
+              </Display>
+          </ColumnDescriptor>
+          <ColumnDescriptor NAME="file_size" TYPE="NUMBER" IS_KEY="FALSE">
+              <Display>
+                  <Label NLSID="file_mon_size">File Size (KB)</Label>
+              </Display>
+          </ColumnDescriptor>
+          <ColumnDescriptor NAME="file_last_changed" TYPE="STRING" IS_KEY="FALSE">
+              <Display>
+                  <Label NLSID="file_mon_last_changed">File Last Changed</Label>
+              </Display>
+          </ColumnDescriptor>
+
+      </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+        <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+        <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+        <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+        <Property NAME="filesToMonitor" SCOPE="USER" OPTIONAL="TRUE">filesToMonitor</Property>
+        <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/fileMonitoring.pl "%filesToMonitor%"</Property>
+        <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+        <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+        <Property NAME="ENVEM_TARGET_GUID" SCOPE="INSTANCE">GUID</Property>
+        <Property NAME="ENVAGENTSTATEDIR"  SCOPE="SYSTEMGLOBAL">agentStateDir</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="CriticalProcesses" TYPE="TABLE">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+      <Display>
+        <Label NLSID="host_proc_crit">Critical Process</Label>
+    </Display>
+    <TableDescriptor>
+        <ColumnDescriptor NAME="proc_name" TYPE="STRING" IS_KEY="TRUE">
+            <Display>
+                <Label NLSID="host_proc_crit_proc_name">Process Name ([owner]:command)</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="count" TYPE="NUMBER" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_crit_count">Critical Processes - Process InstanceCount</Label>
+            </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+        <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+        <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+        <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+        <Property NAME="processesToMonitor" SCOPE="USER" OPTIONAL="TRUE">processesToMonitor</Property>
+        <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/procExist.pl 0 %processesToMonitor%</Property>
+       <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+       <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+   </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="UnwantedProcess" TYPE="TABLE">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+      <Display>
+          <Label NLSID="host_proc_unwanted">Unwanted Processes</Label>
+      </Display>
+      <TableDescriptor>
+          <ColumnDescriptor NAME="proc_name" TYPE="STRING" IS_KEY="TRUE">
+            <Display>
+                <Label NLSID="host_proc_unwanted_proc_name">Process Name ([owner]:command)</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="pid" TYPE="STRING" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_unwanted_pid">Unwanted Processes IDs</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="count" TYPE="NUMBER" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_unwanted_count">Unwanted Process Instance Count</Label>
+            </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+        <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+        <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+        <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+        <Property NAME="processesToMonitor" SCOPE="USER" OPTIONAL="TRUE">processesToMonitor</Property>
+        <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/procExist.pl 1 %processesToMonitor%</Property>
+       <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+       <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+   </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="ProcessUtilization" TYPE="TABLE">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_proc_util">Process Resource Utilization</Label>
+    </Display>
+    <TableDescriptor>
+        <ColumnDescriptor NAME="proc_name" TYPE="STRING" IS_KEY="TRUE">
+            <Display>
+                <Label NLSID="host_proc_util_proc_name"> Process Name ([owner]:command)</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="count" TYPE="NUMBER" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_util_proc_count"> Process Instance Count</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="pid" TYPE="STRING" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_util_pids"> Process ID's</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="total_pcnt_cpu" TYPE="NUMBER" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_util_cpu">Process Resource Utilization Total Cpu (%)</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="max_res_mem_pid" TYPE="STRING" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_util_max_res_mem_pid">Max Resident Memory Process ID</Label>
+            </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="max_res_mem" TYPE="NUMBER" IS_KEY="FALSE">
+            <Display>
+                <Label NLSID="host_proc_util_percent_mem">Process Resource Utilization Max Resident Memory (MB)</Label>
+            </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+        <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+        <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+        <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+        <Property NAME="processesToMonitor" SCOPE="USER" OPTIONAL="TRUE">processesToMonitor</Property>
+        <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/procResUtil.pl %processesToMonitor%</Property>
+       <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+       <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+   </QueryDescriptor>
+   </Metric>
+
+   <Metric NAME="LogFileAlerts" TYPE="TABLE">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="log_file_alerts_header">Log File Alerts</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="logFileAlertsKey" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="log_file_alerts_key">Key</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="logFileAlertsStat" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="log_file_alerts_stat">Alerts</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="logFileAlertsMsg" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="log_file_alerts_msg">Pattern Matches</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="emdRoot" SCOPE="SYSTEMGLOBAL">emdRoot</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="logFiles" SCOPE="USER" OPTIONAL="TRUE">logFiles</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/parse-log.pl "%logFiles%"</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_AGENT_STATE" SCOPE="GLOBAL">%emdRoot%/sysman/emd/state</Property>
+      <Property NAME="ENVEM_TARGET_GUID" SCOPE="INSTANCE">GUID</Property>
+    </QueryDescriptor>
+  </Metric>  
+
+  <!-- Metric: Zombie Processes : Monitor the ratio of zombie processes to 
+       total number of processes. -->
+  <Metric NAME="proc_zombie" TYPE="TABLE">
+    <ValidIf>
+	<CategoryProp NAME="OS" CHOICES="Linux"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="host_proc_zombie">Zombie Processes</Label>
+    </Display>
+
+    <TableDescriptor>
+      <ColumnDescriptor NAME="percnt" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="host_proc_zombie_percnt">% of Processes in Zombie State</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl %scriptsDir%/procZombie.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- Storage reporting metrics for host -->
+  <Metric NAME="storage_reporting_data" TYPE="RAW" CONFIG="TRUE" IS_METRIC_LONG_RUNNING="TRUE">
+
+    <Display>
+      <Label NLSID="storage_reporting_data">Storage Reporting Data</Label>
+    </Display>
+
+    <TableDescriptor TABLE_NAME="mgmt_storage_report_data" >
+
+      <ColumnDescriptor NAME="key_value" COLUMN_NAME="key_value" TYPE="STRING" IS_LONG_TEXT="TRUE" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_storage_report_key_value">key for storage entity</Label>
+          <ShortName NLSID="host_storage_report_key_value_short">key</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="global_unique_id" COLUMN_NAME="global_unique_id" TYPE="STRING" IS_LONG_TEXT="TRUE">
+        <Display>
+          <Label NLSID="host_storage_report_global_unique_id">Globally Unique Identifier for storage entity</Label>
+          <ShortName NLSID="host_storage_report_global_unique_id_short">Globally Unique Identifier</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="name" COLUMN_NAME="name" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_name">Name for storage entity</Label>
+          <ShortName NLSID="host_storage_report_name_short">Name</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="storage_layer" COLUMN_NAME="storage_layer" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_storage_layer">Storage Layer for storage entity</Label>
+          <ShortName NLSID="host_storage_report_storage_layer_short">Storage Layer</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="em_query_flag" COLUMN_NAME="em_query_flag" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_em_query_flag">Query Flag for storage entity</Label>
+          <ShortName NLSID="host_storage_report_em_query_flag_short">Query Flag</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="entity_type" COLUMN_NAME="entity_type" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_entity_type">Entity Type for storage entity</Label>
+          <ShortName NLSID="host_storage_report_entity_type_short">Entity type</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="rawsizeb" COLUMN_NAME="rawsizeb" TYPE="NUMBER" >
+        <Display>
+          <Label NLSID="host_storage_report_rawsizeb">Raw Size for storage entity</Label>
+          <ShortName NLSID="host_storage_report_rawsizeb_short">Raw Size</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="sizeb" COLUMN_NAME="sizeb" TYPE="NUMBER" >
+        <Display>
+          <Label NLSID="host_storage_report_sizeb">Size for storage entity</Label>
+          <ShortName NLSID="host_storage_report_sizeb_short">Size</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="usedb"  COLUMN_NAME="usedb" TYPE="NUMBER" >
+        <Display>
+          <Label NLSID="host_storage_report_usedb">Used Size for storage entity</Label>
+          <ShortName NLSID="host_storage_report_usedb_short">Used Size</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="freeb" COLUMN_NAME="freeb" TYPE="NUMBER" >
+        <Display>
+          <Label NLSID="host_storage_report_freeb">Free Size for storage entity</Label>
+          <ShortName NLSID="host_storage_report_freeb_short">Free Size</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="a1" COLUMN_NAME="a1" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a1">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a1_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="a2"  COLUMN_NAME="a2" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a2">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a2_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="a3" COLUMN_NAME="a3" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a3">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a3_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="a4" COLUMN_NAME="a4" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a4">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a4_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="a5" COLUMN_NAME="a5" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a5">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a5_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="a6" COLUMN_NAME="a6" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a6">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a6_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="a7" COLUMN_NAME="a7" TYPE="STRING" >
+        <Display>
+          <Label NLSID="host_storage_report_a7">Attribute for storage entity</Label>
+          <ShortName NLSID="host_storage_report_a7_short">Attribute</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+  </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/storage_report_metrics.pl data</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+
+  </Metric>
+
+
+  <Metric NAME="storage_reporting_keys" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" IS_METRIC_LONG_RUNNING="TRUE">
+
+    <Display>
+      <Label NLSID="storage_reporting_keys">Storage Reporting Keys</Label>
+    </Display>
+
+    <TableDescriptor TABLE_NAME="mgmt_storage_report_keys">
+
+      <ColumnDescriptor NAME="key_value" COLUMN_NAME="key_value" TYPE="STRING" IS_LONG_TEXT="TRUE" IS_KEY="TRUE" >
+        <Display>
+          <Label NLSID="host_storage_report_key_value">key for storage entity</Label>
+          <ShortName NLSID="host_storage_report_key_value_short">key</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="parent_key_value" COLUMN_NAME="parent_key_value" TYPE="STRING" IS_LONG_TEXT="TRUE" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_storage_report_parent_key_value">Key for storage entity</Label>
+          <ShortName NLSID="host_storage_report_parent_key_value_short">Key for the parent Storage Entity</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/storage_report_metrics.pl keys</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+
+  </Metric>
+
+
+  <Metric NAME="storage_reporting_alias" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" IS_METRIC_LONG_RUNNING="TRUE">
+
+    <Display>
+      <Label NLSID="storage_reporting_alias">Storage Reporting Alias</Label>
+    </Display>
+
+    <TableDescriptor TABLE_NAME="mgmt_storage_report_alias">
+
+      <ColumnDescriptor NAME="key_value" COLUMN_NAME="key_value" TYPE="STRING" IS_LONG_TEXT="TRUE" IS_KEY="TRUE" >
+        <Display>
+          <Label NLSID="host_storage_report_key_value">key for storage entity</Label>
+          <ShortName NLSID="host_storage_report_key_value_short">key</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="host_storage_report_alias_value">Alias value for storage entity</Label>
+          <ShortName NLSID="host_storage_report_alias_value_short">Alias value for the Storage Entity</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/storage_report_metrics.pl alias</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+
+  </Metric>
+
+
+  <Metric NAME="storage_reporting_issues" TYPE="RAW" CONFIG="TRUE" IS_METRIC_LONG_RUNNING="TRUE">
+
+    <Display>
+      <Label NLSID="storage_reporting_issues">Storage Reporting Issues</Label>
+    </Display>
+
+    <TableDescriptor TABLE_NAME="mgmt_storage_report_issues">
+
+      <ColumnDescriptor NAME="type" COLUMN_NAME="type"  TYPE="STRING" IS_KEY="TRUE"  >
+        <Display>
+          <Label NLSID="host_storage_report_type">Type of message</Label>
+          <ShortName NLSID="host_storage_report_type_short">Type</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="message" COLUMN_NAME="message" TYPE="STRING" IS_KEY="TRUE" >
+        <Display>
+          <Label NLSID="host_storage_report_message">Message</Label>
+          <ShortName NLSID="host_storage_report_message_short">Message</ShortName>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl</Property>
+      <Property NAME="script" SCOPE="GLOBAL">%scriptsDir%/storage_report_metrics.pl issues</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+
+  </Metric>
+  <!-- End of Storage reporting metrics for host -->
+
+  <!-- host management related metrics end -->
+  <CredentialInfo>
+    <!-- The credential type for target type host -->
+    <CredentialType NAME="HostCreds" >
+      <Display>
+        <Label NLSID="CREDS_HOST_HOSTCREDS">Host Credentials</Label>
+      </Display>
+      <CredentialTypeColumn NAME="HostUserName" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="CREDS_HOST_USERNAME">UserName</Label>
+        </Display>
+      </CredentialTypeColumn>
+      <CredentialTypeColumn NAME="HostPassword">
+        <Display>
+          <Label NLSID="CREDS_HOST_Password">Password</Label>
+        </Display>
+      </CredentialTypeColumn>
+    </CredentialType>
+
+    <!-- The NORMAL credential set -->
+    <CredentialSet NAME="HostCredsNormal" CREDENTIAL_TYPE="HostCreds" USAGE="PREFERRED_CRED">
+      <CredentialSetColumn TYPE_COLUMN="HostUserName" 
+           SET_COLUMN="username">
+        <Display>
+          <Label NLSID="CREDS_NORMAL_USER">UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="HostPassword" 
+          SET_COLUMN="password">
+        <Display>
+          <Label NLSID="CREDS_NORMAL_PASSWORD">Password</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+
+    <!-- The Privileged credential set -->
+    <CredentialSet NAME="HostCredsPriv" CREDENTIAL_TYPE="HostCreds" USAGE="PREFERRED_CRED">
+      <CredentialSetColumn TYPE_COLUMN="HostUserName" 
+           SET_COLUMN="username">
+        <Display>
+          <Label NLSID="CREDS_PRIV_USER">Privileged UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="HostPassword" 
+          SET_COLUMN="password">
+        <Display>
+          <Label NLSID="CREDS_PRIV_PASSWORD">Privileged Password</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+
+    <!-- The OracleHome credential set -->
+    <CredentialSet NAME="OHCreds" CREDENTIAL_TYPE="HostCreds" 
+        USAGE="PREFERRED_CRED" CONTEXT_TYPE="CONTAINER" CONTEXT="OracleHome" >
+      <CredentialSetColumn TYPE_COLUMN="HostUserName" 
+           SET_COLUMN="OHUsername">
+        <Display>
+          <Label NLSID="CREDS_OH_USER">Oracle Home UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="HostPassword" 
+          SET_COLUMN="OHPassword">
+        <Display>
+          <Label NLSID="CREDS_OH_PASSWORD">Oracle Home Password</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+
+  </CredentialInfo>
+
+  <InstanceProperties>
+    <DynamicProperties NAME="Config" FORMAT="ROW"
+                       PROP_LIST="OS;Version;OS_patchlevel;Platform;Boottime;IP_address">
+      <ExecutionDescriptor>
+	<GetTable NAME="_OSConfig"/>
+        <GetView NAME="Config" FROM_TABLE="_OSConfig">
+          <ComputeColumn NAME="osName" EXPR="Linux" IS_VALUE="TRUE"/>
+          <Column NAME="osVersion"/>
+          <Column NAME="osPatchLevel"/>
+          <Column NAME="Platform"/>
+          <Column NAME="Boottime"/>
+          <Column NAME="IPAddress"/>
+	</GetView>
+      </ExecutionDescriptor>
+    </DynamicProperties>
+	<InstanceProperty NAME="Username" OPTIONAL="TRUE" CREDENTIAL="TRUE">
+	  <ValidIf>
+		<CategoryProp NAME="OS" CHOICES="Linux"/>
+	  </ValidIf>
+          <Display>
+            <Label NLSID="host_username_iprop">Username</Label>
+          </Display>
+	</InstanceProperty>
+	<InstanceProperty NAME="Password" OPTIONAL="TRUE" CREDENTIAL="TRUE">
+	  <ValidIf>
+		<CategoryProp NAME="OS" CHOICES="Linux"/>
+	  </ValidIf>
+          <Display>
+            <Label NLSID="host_password_iprop">Password</Label>
+          </Display>
+	</InstanceProperty>
+  </InstanceProperties>
+
+<!--
+  Copy this block into your targets.xml and replace values for strings with
+  %% to get a target instance
+
+  <Target TYPE="solaris" NAME="%HOSTNAME" VERSION="1.0">
+  </Target>
+-->
+
+</TargetMetadata>
+

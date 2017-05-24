@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $timeout = $ARGV[0] if @ARGV and $ARGV[0] and $ARGV[0] =~ /\d+/;
+
+$timeout=5 unless $timeout;
+
+sleep $timeout;

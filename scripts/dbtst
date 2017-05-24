@@ -1,0 +1,75 @@
+#!/usr/local/git/perl/bin/perl
+
+require v5.6.1;
+use strict;
+use warnings;
+
+#-------------------------------------------------------------------------
+# Have BEGIN before use so its executed at compile time 
+# before use DBI
+
+BEGIN{
+# Set Oracle_home for DBI
+    %ENV = ();
+    $ENV{ORACLE_HOME}="/usr/local/git/oracle"; 
+}
+ 
+use DBI;
+
+   my %dbattribs = (
+		     AutoCommit => 0,
+		     PrintError => 1,
+		     RaiseError => 0
+		     );
+
+#---------------------------------------------------------------------------
+# Connection credentials to ISIS for LOB information
+#---------------------------------------------------------------------------
+#my $isis = "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = gitprod1.us.oracle.com)(PORT = 1521)))(CONNECT_DATA =(SID = osiris)))";
+#my $isis_un = "snathan_us";
+#my $isis_pw = "osiris";
+
+my %loadparam;
+
+my $isis = "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = sm2sun01.us.oracle.com)(PORT = 1522)))(CONNECT_DATA =(SID = smmdev)))";
+my $isis_un = "smminfo";
+my $isis_pw = "imet1info";
+
+#my $isis ="(DESCRIPTION = (ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(Host = gitmon1.us.oracle.com)(Port = 1521)))(CONNECT_DATA = (SID = emap)(SERVER = DEDICATED)))";
+#my $isis_un = "storage_rep";
+#my $isis_pw = "storage_rep";
+
+$loadparam{dbh} = DBI->connect("dbi:Oracle:$isis",
+				   $isis_un,
+				   $isis_pw
+				   ,\%dbattribs) or 
+				   die 
+				   " Failed to Connect to the ISIS Database";
+    
+    # All column names in hashes shoule be in lower case
+    $loadparam{dbh}->{FetchHashKeyName} = 'NAME_lc';
+
+    #----------------------------------------------------------------------------
+    # Fetch the hostname to LOB map ISIS_HARDWARE_ASSETS
+    #----------------------------------------------------------------------------		
+
+   # $sql = "SELECT UPPER(LTRIM(RTRIM(HOSTNAME))) HOSTNAME, ESCALATION_GROUP LOB FROM ISIS_HARDWARE_ASSETS";    
+    my $sql = "SELECT 'X' HOSTNAME FROM DUAL";   
+
+    my $sth = $loadparam{dbh}->prepare($sql) or return;
+        
+    $sth->execute or return;	
+    
+    my $ref = $sth->fetchall_hashref('hostname');
+    
+    warn "ERROR : $sql fetch :: ".$sth->errstr."\n" and return if $sth->err;
+    
+    warn "ERROR : Hostname to Lob map not found in ISIS_HARDWARE_ASSETS \n" and return if not $sth->rows or not $ref;   
+
+    #Save the hostname, Lob map
+    my %isisdata = %{$ref};
+
+    $sth->finish or return ;
+    
+    # Disconnect from the database 
+    $loadparam{dbh}->disconnect or return;

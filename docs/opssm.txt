@@ -1,0 +1,54 @@
+
+1. Detailed report for a Host
+---------------------------------------------------------------------------------
+
+Summary Table summarizing the Size and Rawsize for the followign elements.			
+- Disk,Volume,SwRaid,Local Filesystem,NFS,Oracle Database
+
+
+Details for each of the elements:
+
+Disk(Disk, slices, pseudo devices)
+- Name,Size,Rawsize,Vendor,Product<External Storage System>,Configuration,Format status,Controller,Path count,Parent,
+EMC Specific <Symmetrix ID, Device ID,Disk Spindle Information>
+
+
+Volume(Volumes, Sub disks, disks)
+-Name,Diskgroup,Size,Configuration,Parent
+
+
+Swraid(Meta disks, sundisks)
+-Name,Size,Configuration,Parent
+
+Local Filesystem
+-Filesystem,Mountpoint,Size,Used,Free
+
+NFS
+-Filessytem,Mountpoint,Size,Used,Free,No of mounts,Vendor
+
+Oracle Database(Datafiles)
+-DB Name,Filename,Tablespace,Size,Used,Free
+
+
+------------------------------------------------------------------------------------
+2. Layout of a File <A dump of the layout of all Oracle datafiles on the host> through the
+   following elements.
+
+File
+	<Filesystem>
+		<Volume>
+			<Swraid Disk>
+				Disk, controller
+					<Spindle in external storage system For EMC Symmetrix>
+
+-------------------------------------------------------------------------------------
+3.Metrics could be analyzed to flag layout issues such as
+a)   If a mirrored or striped Tablespace/Datafile has LUNs on the same spindle
+
+
+--------------------------------------------------------------------------------------
+4. A dump of the folloring EMC specific metrics could be provided
+
+EMC statistics - using symstat
+List of Possible hosts connected to the sym
+List of Hypers along with spindle location in the sym.

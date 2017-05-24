@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Storable  qw ( nstore retrieve freeze thaw dclone );
+use Data::Dumper;
+
+my $file;
+$file = "$ENV{HOME}/stormon/test/storage/staca31_test1/$ARGV[0].txt" if $ARGV[0];
+$file = "$ENV{HOME}/stormon/test/storage/staca31_test1/tmp.txt" unless $file;
+
+my $ref = retrieve($file) or die "Failed to read $file\n";
+
+my $ref_type = ref $ref;
+
+$Data::Dumper::Indent = 2;
+print Dumper($ref);
+

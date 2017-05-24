@@ -1,0 +1,3 @@
+#!/bin/sh
+emctl stop oms
+emctl start oms

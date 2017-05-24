@@ -1,0 +1,10 @@
+90<<</usr/local/redhat/OracleProd
+20<<</home/scgrover
+21<<</ade_autofs/ade_linux
+771<<</
+22<<</ade_autofs/nfsdo_linux
+16<<</usr/local/remote/packages
+17<<</usr/local/redhat/packages
+18<<</home/ajdsouza
+19<<</usr/local/remote/image
+769<<</boot

@@ -1,0 +1,1 @@
+columns=type|message_counter|message_nls_id|message_params|action_nls_id|action_params|

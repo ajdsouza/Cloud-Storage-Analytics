@@ -1,0 +1,233 @@
+
+# Entities in the storage layers
+#------------------------------------------
+
+# key		storage_layer	entity		size	used	free		Global_UID	EM_QUERY_FLAG            Start       End
+#						
+
+# HOST 2 - Spare disks in volume manager
+2 DF1	       ORACLE_DATABASE	Data-File	100	80	20		-		TOP_BOTTOM               1       10 
+2 FS1	       LOCAL_FILESYSTEM	Filesystem	200	200	0		-		TOP_BOTTOM
+2 V1	       VOLUME_MANAGER	Volume		200	200	0		-		TOP
+2 PL1	       VOLUME_MANAGER	Plex		200	200	0		-		INTERMEDIATE
+2 PL2	       VOLUME_MANAGER	Plex		200	200	0		-		INTERMEDIATE
+2 DS1	       VOLUME_MANAGER	Sub-Disk	200	200	0		-		INTERMEDIATE             1       10
+2 DS2	       VOLUME_MANAGER	Sub-Disk	100	100	0		-		INTERMEDIATE		 1	 5
+2 DS3	       VOLUME_MANAGER	Sub-Disk	100	100	0		-		INTERMEDIATE		 1	 5
+2 DG1	       VOLUME_MANAGER	Disk-Group	1400	1400	0		-		INTERMEDIATE_CONTAINER
+2 UP1	       VOLUME_MANAGER	Volume-Disk	200	200	0		-		BOTTOM
+2 UP2	       VOLUME_MANAGER	Volume-Disk	100	100	0		-		BOTTOM
+2 UP3	       VOLUME_MANAGER	Volume-Disk	100	100	0		-		BOTTOM
+2 SDK3	       VOLUME_MANAGER	Volume-Disk	1000	1000	0		-		BOTTOM_SPARE
+2 SDK4	       VOLUME_MANAGER	Volume-Disk	1000	1000	0		-		BOTTOM_SPARE
+2 P1	       OS_DISK		Disk-Partition	200	200	0		-		TOP	                 1       20
+2 P2	       OS_DISK		Disk-Partition	100	100	0		-		TOP			 1	 10
+2 P3	       OS_DISK		Disk-Partition	100	100	0		-		TOP			 1	 10
+2 DK1	       OS_DISK		Disk		1000	300	700		2_DK1		BOTTOM
+2 DK2	       OS_DISK		Disk		1000	100	900		2_DK2		BOTTOM
+2 DK3	       OS_DISK		Disk		1000	1000	0		2_DK3		TOP_BOTTOM
+2 DK4	       OS_DISK		Disk		1000	1000	0		2_DK4		TOP_BOTTOM
+2 DK5	       OS_DISK		Disk		1000	0	1000		2_DK5		TOP_BOTTOM_UNALLOCATED
+2 DK6	       OS_DISK		Disk		1000	0	1000		2_DK6		TOP_BOTTOM_UNALLOCATED
+2 DF2	       ORACLE_DATABASE	Data-File	100	80	20		-		TOP_BOTTOM                 1     10
+2 FS2	       LOCAL_FILESYSTEM	Filesystem	300	300	0		-		TOP_BOTTOM
+2 DK7_P1       OS_DISK		Disk-Partition	300	300	0		-		TOP	                   1     30
+2 DK7	       OS_DISK		Disk		1000	300	700		G_DK7		BOTTOM
+
+
+# HOST 3 - Host sharing storage with another host
+3 DF1	       ORACLE_DATABASE	Data-File	100	80	20		-		TOP_BOTTOM		 1    10
+3 FS2	       LOCAL_FILESYSTEM	Filesystem	300	300	0		-		TOP_BOTTOM
+3 DK7_P1       OS_DISK		Disk-Partition	300	300	0		-		TOP			 1    30
+3 DK7	       OS_DISK		Disk		1000	300	700		G_DK7		BOTTOM
+
+
+# HOST 4 - Psuedo Disk with multipath
+4 PSU1	       OS_DISK		Disk		1000	0	1000		4_DK1		TOP_BOTTOM_UNALLOCATED
+4 C1DK1	       OS_DISK		Disk		1000	0	1000		4_DK1		TOP_BOTTOM_UNALLOCATED
+4 C2DK1	       OS_DISK		Disk		1000	0	1000		4_DK1		TOP_BOTTOM_UNALLOCATED
+
+
+# HOST 5 - Layered Volume configuration
+5 V1	       VOLUME_MANAGER	Volume		1000	0	1000		-		TOP
+5 PL1	       VOLUME_MANAGER	Plex		1000	1000	0		-		INTERMEDIATE
+5 VL1	       VOLUME_MANAGER	Volume		1000	1000	0		-		INTERMEDIATE
+5 PLL1	       VOLUME_MANAGER	Plex		1000	1000	0		-		INTERMEDIATE
+5 PLL2	       VOLUME_MANAGER	Plex		1000	1000	0		-		INTERMEDIATE
+5 DS1	       VOLUME_MANAGER	Sub-Disk	1000	1000	0		-		INTERMEDIATE		1    10
+5 DS2	       VOLUME_MANAGER	Sub-Disk	1000	1000	0		-		INTERMEDIATE		1    10
+5 UD1	       VOLUME_MANAGER	Volume-Disk	1000	0	1000		-		BOTTOM_UNALLOCATED
+5 UD2	       VOLUME_MANAGER	Volume-Disk	1000	1000	0		-		BOTTOM
+5 UD3	       VOLUME_MANAGER	Volume-Disk	1000	1000	0		-		BOTTOM
+5 DG1	       VOLUME_MANAGER	Disk-Group	3000	2000	1000		-		INTERMEDIATE_CONTAINER
+5 DK1	       OS_DISK		Disk		1000	1000	0		5_DK1		TOP_BOTTOM
+5 DK2	       OS_DISK		Disk		1000	1000	0		5_DK2		TOP_BOTTOM
+5 DK3	       OS_DISK		Disk		1000	1000	0		5_DK3		TOP_BOTTOM
+
+
+# HOST 6 - Disks with a Device Identifier Disk configured for clustered storage , one of the disk is also multipathed
+6 FS1	       LOCAL_FILESYSTEM	Filesystem	    300		300	0	-	TOP_BOTTOM		1	30
+6 P1MD1	       VOLUME_MANAGER	Metadevice-Partition 300	300	0	-	TOP
+6 MD1	       VOLUME_MANAGER	Metadevice	    1000	300	700	-	PIECE_OF_TOP
+6 SDID1	       VOLUME_MANAGER	Sub-Disk	    1000	1000	0	-	BOTTOM			1	10
+6 SDID2	       VOLUME-MANAGER	Sub-Disk	    1000	1000	0	-	BOTTOM			1	10
+6 DID1	       OS_DISK		Disk		    1000	1000	0	6_DK1	TOP_BOTTOM
+6 PSU1	       OS_DISK		Disk		    1000	1000	0	6_DK1	TOP_BOTTOM
+6 C1DK1	       OS_DISK		Disk		    1000	1000	0	6_DK1	TOP_BOTTOM
+6 C2DK1	       OS_DISK		Disk		    1000	1000	0	6_DK1	TOP_BOTTOM
+6 DID2	       OS_DISK		Disk		    1000	1000	0	6_DK2	TOP_BOTTOM
+6 DK2	       OS_DISK		Disk		    1000	1000	0	6_DK2	TOP_BOTTOM
+
+
+# HOST 7 - Host with Oracle ASM for Oracle Database Server
+7 DF1	       ORACLE_DATABASE	Data-File	    500		300	200	-	TOP				1   50
+7 DF2	       ORACLE_DATABASE	Data-File	    500		100	400	-	TOP				1   50
+7 DG1	       ORACLE_DATABASE	Disk-Group	    2000	2000	0	-	INTERMEDIATE_CONTAINER
+7 ODK1	       ORACLE_DATABASE	Disk		    1000	1000	0	-	BOTTOM
+7 ODK2	       ORACLE_DATABASE	Disk		    1000	1000	0	-	BOTTOM
+7 DK1	       OS_DISK		Disk		    1000	1000	0	7_DK1	TOP_BOTTOM
+7 DK2	       OS_DISK		Disk		    1000	1000	0	7_DK2	TOP_BOTTOM
+
+
+# HOST 8 - Host with Disk partitioned but the whole disk slice in use
+8 FS1	       FILESYSTEM	Filesystem	    1000	500	500	-	TOP_BOTTOM		1	10
+8 DK1P2	       OS_DISK		Disk-Partition	    1000	1000	0	-	TOP			1	10
+8 DK1	       OS_DISK		Disk		    1000	1000	0	8_DK1	BOTTOM
+
+
+# HOST 9 - A single filesystem with multiple mountpoints
+9 FS_2	       LOCAL_FILESYSTEM	Filesystem	300	300	0		-		TOP_BOTTOM	1	3
+9 FS_1	       LOCAL_FILESYSTEM	Filesystem	300	300	0		-		TOP_BOTTOM	1	3
+9 DK7_P1       OS_DISK		Disk-Partition	300	300	0		-		TOP		1	3
+9 DK7	       OS_DISK		Disk		1000	300	700		9_DK1		BOTTOM	
+
+
+# HOST 10 - A Host with plexes configured but not in use
+10 FS1	       LOCAL_FILESYSTEM	Filesystem	500	300	200		-		TOP_BOTTOM		1  5
+10 V1	       VOLUME_MANAGER	Volume		500	500	0		-		TOP
+10 PL1	       VOLUME_MANAGER	Plex		500	500	0		-		INTERMEDIATE
+10 PL2	       VOLUME_MANAGER	Plex		500	0	500		-		INTERMEDIATE_UNALLOCATED
+10 DS1	       VOLUME_MANAGER	Sub-Disk	500	500	0		-		INTERMEDIATE		 1   5
+10 DS2	       VOLUME_MANAGER	Sub-Disk	500	500	0		-		INTERMEDIATE		 1   5
+10 DS3	       VOLUME_MANAGER	Sub-Disk	500	500	0		-		INTERMEDIATE		 6   10
+10 DG1	       VOLUME_MANAGER	Disk-Group	2000	1500	500		-		INTERMEDIATE_CONTAINER
+10 UD1	       VOLUME_MANAGER	Volume-Disk	1000	500	500		-		BOTTOM
+10 UD2	       VOLUME_MANAGER	Volume-Disk	1000	1000	0		-		BOTTOM
+10 DK1	       OS_DISK		Disk		1000	1000	0		10_DK1		BOTTOM
+10 DK2	       OS_DISK		Disk		1000	1000	0		10_DK2		BOTTOM
+
+# Physical mapping between the keys in the storage layers
+#------------------------------------------------------------
+#
+#		key_value	parent_key_value
+# HOST 2 - Spare disks in volume manager
+2		DF1		-
+2		FS1		DF1
+2		V1		FS1
+2		PL1		V1
+2		PL2		V1
+2		DS1		PL1
+2		DS2		PL2
+2		DS3		PL2
+2		UP1		DS1
+2		UP2		DS2
+2		UP3		DS3
+2		SDK3		-
+2		SDK4		-
+2		DG1		-
+2		UP1		DG1
+2		UP2		DG1
+2		UP3		DG1
+2		SDK3		DG1
+2		P1		UP1
+2		P2		UP2
+2		P3		UP3
+2		DK1		P1
+2		DK2		P2
+2		DK2		P3
+2		DK3		SDK3
+2		DK4		SDK4
+2		DK5		-
+2		DK6		-
+2		DF2		-
+2		FS2		DF2
+2		DK7_P1		FS2
+2		DK7		DK7_P1
+# HOST 3 - Host sharing storage with another host
+3		DF1		-
+3		FS2		DF1
+3		DK7_P1		FS2
+3		DK7		DK7_P1
+# HOST 4 - Psuedo Disk with multipath
+4		PSU1		-
+4		C1DK1		PSU1
+4		C2DK1		PSU1
+# HOST 5  - Layered Volume configuration
+5		V1		-
+5		PL1		V1
+5		VL1		PL1
+5		PLL1		VL1
+5		PLL2		VL1
+5		DS1		PLL1
+5		DS2		PLL2
+5		UD1		-
+5		UD2		DS2
+5		UD3		DS1
+5		UD1		DG1
+5		UD2		DG1
+5		UD3		DG1
+5		DK1		UD1
+5		DK2		UD2
+5		DK3		UD3
+# HOST 6  -  Disks with a Device Identifier Disk configured for clustered storage , one of the disk is also multipathed
+6		FS1		-
+6		P1MD1		FS1
+6		MD1		P1MD1
+6		SDID1		MD1
+6		SDID2		MD1
+6		DID1		SDID1
+6		PSU1		DID1
+6		C1DK1		PSU1
+6		C2DK1		PSU1
+6		DID2		SDID2
+6		DK2		DID2
+# HOST 7 - Host with Oracle ASM for Oracle Database Server
+7		DF1		DG1
+7		DF2		DG1
+7		DG1		-
+7		ODK1		DG1
+7		ODK2		DG1
+7		DK1		ODK1
+7		DK2		ODK2
+# HOST 8 - Host with Disk partitioned but the whole disk slice in use
+8		FS1		-
+8		DK1P2		FS1
+8		DK1		DK1P2
+# HOST 9 - A single filesystem with multiple mountpoints
+9		FS_1		-
+9		FS_2		-
+9		DK7_P1		FS_2
+9		DK7_P1		FS_1
+9		DK7		DK7_P1
+# HOST 10 - A Host with plexes configured but not in use
+10	       FS1		-
+10	       V1		FS1
+10	       PL1		V1
+10	       DS1		PL1
+10	       UD1		DS1
+10	       PL2		-
+10	       DS2		PL2
+10	       DS3		PL2
+10	       UD2		DS2
+10	       UD2		DS3
+10	       DG1		-
+10	       V1		DG1
+10	       PL1		DG1
+10	       PL2		DG1
+10	       DS1		DG1
+10	       DS2		DG1
+10	       DS3		DG1
+10	       UD1		DG1
+10	       UD2		DG1
+10	       DK1		UD1
+10	       DK2		UD2

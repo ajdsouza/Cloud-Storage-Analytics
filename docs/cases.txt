@@ -1,0 +1,419 @@
+-- Relationships to handle
+
+--  cardinality  ( Top down , one way )
+--	1:1	- eg. A filesystem is on a partition, a partition is on a disk
+--	1:N, 	- eg. A disk has n partitions, a volume is related to n disks
+
+--
+--  Physical Containment	 -  
+--	a is b			- eg. Block and char partitions are the same physical device
+--	a is part of b		- eg. A partition is part of a physical disk
+--	a is part of b and c	- eg. A volume may have part of disk a and disk b in it.
+--
+-- Cardinality can be seen from the keys in the table - its obvious there,
+-- Containment cannot be ?
+--
+-- eg.
+--	Volume v1 is based on one disk a	- Cardinality is 1:1,  But containment is : v1 is a part of a
+--	Volume v2 is also based on one disk a   - cardinality is 1:1,  But containment is : v2 is a part of a
+--
+--
+--
+-- eg   disk partition p1 is in use
+--	p1 is part of disk d1							- Cardinality is 1:1, but containment is : p1 is part of d1
+--	disk d1 is multipathed, with disk d2, and  pseudo device psu1		- Cardinality is 1:n, but containment is : d1 is the same as d2 , d1 is the same as psu1
+--
+-- Is it important to know containment , why ?
+-- The usage data loaded from the host should have already taken care containment in the size, used and free numbers in the usage table 
+--
+-- The repository need know only the relationship between the physical and virtual levels 
+-- 
+
+Layout model - Generated from the repository data by fetch_map
+
+Host 2 -  Spare disks in volume manager
+-----------------------------------------------------------------------------------------------------
+
+   Top Down Traverse 
+
+	Host 02 
+	|------> ORACLE_DATABASE DATAFILE DF1  ( s 100 , u 80 , f 20 )
+		|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 200 , u 100 , f 100 )
+			|------> LOCAL_FILESYSTEM FILESYSTEM V1  ( s 200 , u 100 , f 100 )
+				|------> VOLUME_MANAGER VOLUME V1  ( s 200 , u 200 , f 0 )
+					|------> VOLUME_MANAGER PLEX PL1  ( s 200 , u 200 , f 0 )
+						|------> VOLUME_MANAGER DISKSLICE DS1  ( s 200 , u 200 , f 0 )
+							|------> VOLUME_MANAGER USED_DISK P1  ( s 200 , u 200 , f 0 )
+								|------> OS_DISK DISK_PARTITION P1  ( s 200 , u 200 , f 0 )
+									|------> OS_DISK DISK DK1  ( s 1000 , u 300 , f 700 )
+
+					|------> VOLUME_MANAGER PLEX PL2  ( s 200 , u 200 , f 0 )
+						|------> VOLUME_MANAGER DISKSLICE DS2  ( s 100 , u 100 , f 0 )
+							|------> VOLUME_MANAGER USED_DISK P2  ( s 100 , u 100 , f 0 )
+								|------> OS_DISK DISK_PARTITION P2  ( s 100 , u 100 , f 0 )
+									|------> OS_DISK DISK DK2  ( s 1000 , u 100 , f 900 )
+
+						|------> VOLUME_MANAGER DISKSLICE DS3  ( s 100 , u 100 , f 0 )
+							|------> VOLUME_MANAGER USED_DISK P3  ( s 100 , u 100 , f 0 )
+								|------> OS_DISK DISK_PARTITION P3  ( s 100 , u 100 , f 0 )
+									|------> OS_DISK DISK DK2  ( s 1000 , u 100 , f 900 )
+
+	|------> VOLUME_MANAGER SPARE_DISK DK3  ( s 1000 , u 1000 , f 0 )
+		|------> OS_DISK DISK DK3  ( s 1000 , u 1000 , f 0 )
+
+	|------> VOLUME_MANAGER SPARE_DISK DK4  ( s 1000 , u 1000 , f 0 )
+		|------> OS_DISK DISK DK4  ( s 1000 , u 1000 , f 0 )
+
+	|------> OS_DISK DISK_PARTITION DK6_P1  ( s 200 , u 200 , f 0 )
+		|------> OS_DISK DISK DK6  ( s 1000 , u 400 , f 800 )
+
+	|------> OS_DISK DISK_PARTITION DK6_P2  ( s 200 , u 200 , f 0 )
+		|------> OS_DISK DISK DK6  ( s 1000 , u 0 , f 800 )
+
+	|------> OS_DISK DISK DK5  ( s 1000 , u 0 , f 1000 )
+
+	|------> ORACLE_DATABASE DATAFILE DF2  ( s 100 , u 80 , f 20 )
+		|------> LOCAL_FILESYSTEM MOUNTPOINT MP2  ( s 300 , u 100 , f 200 )
+			|------> LOCAL_FILESYSTEM FILESYSTEM DK7_P1  ( s 300 , u 100 , f 200 )
+				|------> OS_DISK DISK_PARTITION DK7_P1  ( s 300 , u 300 , f 0 )
+					|------> OS_DISK DISK DK7  ( s 1000 , u 300 , f 700 )
+
+   Bottom Up  Traverse 
+
+	Host 02 
+	|------> OS_DISK DISK DK1  ( s 1000 , u 300 , f 700 )
+		|------> OS_DISK DISK_PARTITION P1  ( s 200 , u 200 , f 0 )
+			|------> VOLUME_MANAGER USED_DISK P1  ( s 200 , u 200 , f 0 )
+				|------> VOLUME_MANAGER DISKSLICE DS1  ( s 200 , u 200 , f 0 )
+					|------> VOLUME_MANAGER PLEX PL1  ( s 200 , u 200 , f 0 )
+						|------> VOLUME_MANAGER VOLUME V1  ( s 200 , u 200 , f 0 )
+							|------> LOCAL_FILESYSTEM FILESYSTEM V1  ( s 200 , u 100 , f 100 )
+								|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 200 , u 100 , f 100 )
+									|------> ORACLE_DATABASE DATAFILE DF1  ( s 100 , u 80 , f 20 )
+
+				|------> VOLUME_MANAGER DISKGROUP DG1  ( s 1400 , u 1400 , f 0 )
+
+	|------> OS_DISK DISK DK2  ( s 1000 , u 100 , f 900 )
+		|------> OS_DISK DISK_PARTITION P2  ( s 100 , u 100 , f 0 )
+			|------> VOLUME_MANAGER USED_DISK P2  ( s 100 , u 100 , f 0 )
+				|------> VOLUME_MANAGER DISKSLICE DS2  ( s 100 , u 100 , f 0 )
+					|------> VOLUME_MANAGER PLEX PL2  ( s 200 , u 200 , f 0 )
+						|------> VOLUME_MANAGER VOLUME V1  ( s 200 , u 200 , f 0 )
+							|------> LOCAL_FILESYSTEM FILESYSTEM V1  ( s 200 , u 100 , f 100 )
+								|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 200 , u 100 , f 100 )
+									|------> ORACLE_DATABASE DATAFILE DF1  ( s 100 , u 80 , f 20 )
+
+				|------> VOLUME_MANAGER DISKGROUP DG1  ( s 1400 , u 1400 , f 0 )
+
+		|------> OS_DISK DISK_PARTITION P3  ( s 100 , u 100 , f 0 )
+			|------> VOLUME_MANAGER USED_DISK P3  ( s 100 , u 100 , f 0 )
+				|------> VOLUME_MANAGER DISKSLICE DS3  ( s 100 , u 100 , f 0 )
+					|------> VOLUME_MANAGER PLEX PL2  ( s 200 , u 200 , f 0 )
+						|------> VOLUME_MANAGER VOLUME V1  ( s 200 , u 200 , f 0 )
+							|------> LOCAL_FILESYSTEM FILESYSTEM V1  ( s 200 , u 100 , f 100 )
+								|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 200 , u 100 , f 100 )
+									|------> ORACLE_DATABASE DATAFILE DF1  ( s 100 , u 80 , f 20 )
+
+				|------> VOLUME_MANAGER DISKGROUP DG1  ( s 1400 , u 1400 , f 0 )
+
+	|------> OS_DISK DISK DK3  ( s 1000 , u 1000 , f 0 )
+		|------> VOLUME_MANAGER SPARE_DISK DK3  ( s 1000 , u 1000 , f 0 )
+			|------> VOLUME_MANAGER DISKGROUP DG1  ( s 1400 , u 1400 , f 0 )
+
+	|------> OS_DISK DISK DK4  ( s 1000 , u 1000 , f 0 )
+		|------> VOLUME_MANAGER SPARE_DISK DK4  ( s 1000 , u 1000 , f 0 )
+
+	|------> OS_DISK DISK DK5  ( s 1000 , u 0 , f 1000 )
+
+	|------> OS_DISK DISK DK6  ( s 1000 , u 400 , f 600 )
+		|------> OS_DISK DISK_PARTITION DK6_P1  ( s 200 , u 200 , f 0 )
+
+		|------> OS_DISK DISK_PARTITION DK6_P2  ( s 200 , u 200 , f 0 )
+
+	|------> OS_DISK DISK DK7  ( s 1000 , u 300 , f 700 )
+		|------> OS_DISK DISK_PARTITION DK7_P1  ( s 300 , u 300 , f 0 )
+			|------> LOCAL_FILESYSTEM FILESYSTEM DK7_P1  ( s 300 , u 100 , f 200 )
+				|------> LOCAL_FILESYSTEM MOUNTPOINT MP2  ( s 300 , u 100 , f 200 )
+					|------> ORACLE_DATABASE DATAFILE DF2  ( s 100 , u 80 , f 20 )
+
+
+
+Host 3 -  Host sharing storage with another host
+-----------------------------------------------------------------------------------------------------
+
+   Top Down Traverse 
+
+	Host 03 
+	|------> ORACLE_DATABASE DATAFILE DF1  ( s 100 , u 80 , f 20 )
+		|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 300 , u 100 , f 100 )
+			|------> LOCAL_FILESYSTEM FILESYSTEM DK7_P1  ( s 300 , u 100 , f 100 )
+				|------> OS_DISK DISK_PARTITION DK7_P1  ( s 300 , u 300 , f 0 )
+					|------> OS_DISK DISK DK7  ( s 1000 , u 300 , f 700 )
+
+   Bottom Up  Traverse 
+
+	Host 03 
+	|------> OS_DISK DISK DK7  ( s 1000 , u 300 , f 700 )
+		|------> OS_DISK DISK_PARTITION DK7_P1  ( s 300 , u 300 , f 0 )
+			|------> LOCAL_FILESYSTEM FILESYSTEM DK7_P1  ( s 300 , u 100 , f 100 )
+				|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 300 , u 100 , f 100 )
+					|------> ORACLE_DATABASE DATAFILE DF1  ( s 100 , u 80 , f 20 )
+
+
+
+
+Host 4 -  Psedudo Disk with multipath
+-----------------------------------------------------------------------------------------------------
+
+   Top Down Traverse 
+
+	Host 04 
+	|------> OS_DISK DISK_PARTITION P1  ( s 250 , u 0 , f 250 )
+		|------> OS_DISK DISK 4_DK1  ( s 1000 , u 500 , f 500 )
+			|------> OS_DISK DISK PSU1  ( s 1000 , u 500 , f 500 )
+				|------> OS_DISK DISK C1DK1  ( s 1000 , u 500 , f 500 )
+
+				|------> OS_DISK DISK C2DK1  ( s 1000 , u 500 , f 500 )
+
+	|------> OS_DISK DISK_PARTITION P2  ( s 250 , u 0 , f 250 )
+		|------> OS_DISK DISK 4_DK1  ( s 1000 , u 500 , f 500 )
+			|------> OS_DISK DISK PSU1  ( s 1000 , u 500 , f 500 )
+				|------> OS_DISK DISK C1DK1  ( s 1000 , u 500 , f 500 )
+
+				|------> OS_DISK DISK C2DK1  ( s 1000 , u 500 , f 500 )
+
+   Bottom Up  Traverse 
+
+	Host 04 
+	|------> OS_DISK DISK C2DK1  ( s 1000 , u 500 , f 500 )
+		|------> OS_DISK DISK PSU1  ( s 1000 , u 500 , f 500 )
+			|------> OS_DISK DISK 4_DK1  ( s 1000 , u 500 , f 500 )
+				|------> OS_DISK DISK_PARTITION P1  ( s 250 , u 0 , f 250 )
+
+				|------> OS_DISK DISK_PARTITION P2  ( s 250 , u 0 , f 250 )
+
+	|------> OS_DISK DISK C1DK1  ( s 1000 , u 500 , f 500 )
+		|------> OS_DISK DISK PSU1  ( s 1000 , u 500 , f 500 )
+			|------> OS_DISK DISK 4_DK1  ( s 1000 , u 500 , f 500 )
+				|------> OS_DISK DISK_PARTITION P1  ( s 250 , u 0 , f 250 )
+
+				|------> OS_DISK DISK_PARTITION P2  ( s 250 , u 0 , f 250 )
+
+
+
+Host 5 -  Layered Volume configuration
+-----------------------------------------------------------------------------------------------------
+
+   Top Down Traverse 
+
+	Host 05 
+	|------> VOLUME_MANAGER VOLUME V1  ( s 1000 , u 0 , f 1000 )
+		|------> VOLUME_MANAGER PLEX PL1  ( s 1000 , u 1000 , f 0 )
+			|------> VOLUME_MANAGER VOLUME VL1  ( s 1000 , u 1000 , f 0 )
+				|------> VOLUME_MANAGER PLEX PLL1  ( s 1000 , u 1000 , f 0 )
+					|------> VOLUME_MANAGER DISKSLICE DS1  ( s 1000 , u 1000 , f 0 )
+						|------> VOLUME_MANAGER USED_DISK UD1  ( s 1000 , u 0 , f 1000 )
+							|------> OS_DISK DISK 5_DK1  ( s 1000 , u 500 , f 500 )
+
+				|------> VOLUME_MANAGER PLEX PLL2  ( s 1000 , u 1000 , f 0 )
+					|------> VOLUME_MANAGER DISKSLICE DS2  ( s 1000 , u 1000 , f 0 )
+						|------> VOLUME_MANAGER USED_DISK UD2  ( s 1000 , u 1000 , f 0 )
+							|------> OS_DISK DISK 5_DK2  ( s 1000 , u 500 , f 500 )
+
+	|------> VOLUME_MANAGER USED_DISK UD2  ( s 1000 , u 1000 , f 0 )
+		|------> OS_DISK DISK 5_DK2  ( s 1000 , u 500 , f 500 )
+
+   Bottom Up  Traverse 
+
+	Host 05 
+	|------> OS_DISK DISK 5_DK1  ( s 1000 , u 500 , f 500 )
+		|------> VOLUME_MANAGER USED_DISK UD1  ( s 1000 , u 0 , f 1000 )
+			|------> VOLUME_MANAGER DISKSLICE DS1  ( s 1000 , u 1000 , f 0 )
+				|------> VOLUME_MANAGER PLEX PLL1  ( s 1000 , u 1000 , f 0 )
+					|------> VOLUME_MANAGER VOLUME VL1  ( s 1000 , u 1000 , f 0 )
+						|------> VOLUME_MANAGER PLEX PL1  ( s 1000 , u 1000 , f 0 )
+							|------> VOLUME_MANAGER VOLUME V1  ( s 1000 , u 0 , f 1000 )
+
+			|------> VOLUME_MANAGER DISKGROUP DG1  ( s 3000 , u 2000 , f 1000 )
+
+	|------> OS_DISK DISK 5_DK2  ( s 1000 , u 500 , f 500 )
+		|------> VOLUME_MANAGER USED_DISK UD2  ( s 1000 , u 1000 , f 0 )
+			|------> VOLUME_MANAGER DISKSLICE DS2  ( s 1000 , u 1000 , f 0 )
+				|------> VOLUME_MANAGER PLEX PLL2  ( s 1000 , u 1000 , f 0 )
+					|------> VOLUME_MANAGER VOLUME VL1  ( s 1000 , u 1000 , f 0 )
+						|------> VOLUME_MANAGER PLEX PL1  ( s 1000 , u 1000 , f 0 )
+							|------> VOLUME_MANAGER VOLUME V1  ( s 1000 , u 0 , f 1000 )
+
+			|------> VOLUME_MANAGER DISKGROUP DG1  ( s 3000 , u 2000 , f 1000 )
+
+	|------> OS_DISK DISK 5_DK3  ( s 1000 , u 500 , f 500 )
+		|------> VOLUME_MANAGER USED_DISK UD3  ( s 1000 , u 1000 , f 0 )
+			|------> VOLUME_MANAGER DISKGROUP DG1  ( s 3000 , u 2000 , f 1000 )
+
+
+
+Host 6 -  Disks with a Device Identifier Disk configured for for clustered storage , one of the disk is also multipathed
+------------------------------------------------------------------------------------------------------------------------
+
+   Top Down Traverse 
+
+	Host 06 
+	|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 300 , u 100 , f 100 )
+		|------> LOCAL_FILESYSTEM FILESYSTEM P1MD1  ( s 300 , u 100 , f 100 )
+			|------> SWRAID METADISK_PARTITION P1MD1  ( s 300 , u 300 , f 0 )
+				|------> SWRAID METADISK MD1  ( s 1000 , u 300 , f 700 )
+					|------> SWRAID SUBDISK DID1  ( s 1000 , u 1000 , f 0 )
+						|------> OS_DISK DISK DID1  ( s 1000 , u 1000 , f 0 )
+							|------> OS_DISK DISK DK1  ( s 1000 , u 1000 , f 0 )
+								|------> OS_DISK DISK PSU1  ( s 1000 , u 1000 , f 0 )
+									|------> OS_DISK DISK C1DK1  ( s 1000 , u 1000 , f 0 )
+
+									|------> OS_DISK DISK C2DK1  ( s 1000 , u 1000 , f 0 )
+
+					|------> SWRAID SUBDISK DID2  ( s 1000 , u 1000 , f 0 )
+						|------> OS_DISK DISK DID2  ( s 1000 , u 1000 , f 0 )
+							|------> OS_DISK DISK DK2  ( s 1000 , u 1000 , f 0 )
+
+   Bottom Up  Traverse 
+
+	Host 06 
+	|------> OS_DISK DISK DK2  ( s 1000 , u 1000 , f 0 )
+		|------> OS_DISK DISK DID2  ( s 1000 , u 1000 , f 0 )
+			|------> SWRAID SUBDISK DID2  ( s 1000 , u 1000 , f 0 )
+				|------> SWRAID METADISK MD1  ( s 1000 , u 300 , f 700 )
+					|------> SWRAID METADISK_PARTITION P1MD1  ( s 300 , u 300 , f 0 )
+						|------> LOCAL_FILESYSTEM FILESYSTEM P1MD1  ( s 300 , u 100 , f 100 )
+							|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 300 , u 100 , f 100 )
+
+	|------> OS_DISK DISK C2DK1  ( s 1000 , u 1000 , f 0 )
+		|------> OS_DISK DISK PSU1  ( s 1000 , u 1000 , f 0 )
+			|------> OS_DISK DISK DK1  ( s 1000 , u 1000 , f 0 )
+				|------> OS_DISK DISK DID1  ( s 1000 , u 1000 , f 0 )
+					|------> SWRAID SUBDISK DID1  ( s 1000 , u 1000 , f 0 )
+						|------> SWRAID METADISK MD1  ( s 1000 , u 300 , f 700 )
+							|------> SWRAID METADISK_PARTITION P1MD1  ( s 300 , u 300 , f 0 )
+								|------> LOCAL_FILESYSTEM FILESYSTEM P1MD1  ( s 300 , u 100 , f 100 )
+									|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 300 , u 100 , f 100 )
+
+	|------> OS_DISK DISK C1DK1  ( s 1000 , u 1000 , f 0 )
+		|------> OS_DISK DISK PSU1  ( s 1000 , u 1000 , f 0 )
+			|------> OS_DISK DISK DK1  ( s 1000 , u 1000 , f 0 )
+				|------> OS_DISK DISK DID1  ( s 1000 , u 1000 , f 0 )
+					|------> SWRAID SUBDISK DID1  ( s 1000 , u 1000 , f 0 )
+						|------> SWRAID METADISK MD1  ( s 1000 , u 300 , f 700 )
+							|------> SWRAID METADISK_PARTITION P1MD1  ( s 300 , u 300 , f 0 )
+								|------> LOCAL_FILESYSTEM FILESYSTEM P1MD1  ( s 300 , u 100 , f 100 )
+									|------> LOCAL_FILESYSTEM MOUNTPOINT MP1  ( s 300 , u 100 , f 100 )
+
+
+
+
+
+
+
+------------- WIP---------------------------------------
+Nfs Filesystem
+
+--
+--
+-- CASE 4
+--
+--
+-- Host has a datafile DF1 on the NFS filesystem NFS1.
+--
+--	Data to be loaded by the stormon script
+--	
+--	key_value	Parent 	Entity		Level		Physical
+--	DF1		-	DATAFILE	ORACLEDB	Y
+--	NFS1		DF1	FILESYSTEM	NFS		Y	
+--
+--
+-- The basic usage data for this case will be the following
+--	KEY_VALUE	SIZEB	USEDB	FREEB	
+--	DF1		sdf1	udf1	( sfd1 - udf1)
+--	NFS1		snfs1	unfs1	( snfs1 - unfs1)
+--
+--  
+--  TOTAL DISK SPACE ON THIS HOST IS 	snfs1
+--  FREE SPACE IS 			( snfs1 - unfs1) + ( sdf1 - udf1 )
+--  USED SPACE IS 			snfs1 -  ( ( snfs1 - unfs1) + ( sdf1 - udf1 ) )
+ --
+--
+--
+-- Physical map is
+--	DF1
+--		DF1/SNFS1
+--
+--
+--
+
+Host 1
+
+	F1
+	|------NFS1
+	|	|
+	|	|----NFS_DIR1
+	|		|
+	|		|----NFS_DIR2
+	|			|
+	|			|------MAC1
+	|				|
+	|				|-------SERVER 1
+	F3----NFS2
+		|---NFS_DIR3
+			|----NFS_DIR2
+				|
+				|------MAC1
+					|
+					|-------SERVER 1
+	
+
+Host 2
+	F2
+	|------NFS1
+		|
+		|----NFS_DIR1
+			|
+			|----NFS_DIR2
+				|
+				|------MAC1
+					|
+					|-------SERVER 1
+
+
+Host 3
+	F4
+	|------NFS2
+		|
+		|----NFS_DIR3
+			|
+			|----NFS_DIR2
+				|
+				|------MAC2
+					|
+					|-------SERVER 1
+
+
+Botton UP view
+
+       Server 1
+       |-------MAC1
+       |	|-----NFS_DIR2
+       |		|----NFS_DIR1
+       |		|	|------NFS1
+       |		|		|----HOST1 
+       |		|		|	|-----F1    
+       |		|		|
+       |		|		|----HOST2	
+       |		|			|-----F2
+       |		|----NFS_DIR3
+       |			|------NFS2
+       |				|------HOST1
+       |					|-----F3
+       |
+       |------MAC2
+		|---NFS_DIR2
+			|---NFS_DIR3
+				|-----NFS2
+					|----HOST3
+						|-----F4

@@ -1,0 +1,158 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved 
+#
+#  $Id: stormon,v 1.22 2003/10/02 01:37:34 ajdsouza Exp $ 
+#
+#
+#
+# NAME  
+#	 stormon
+#
+# DESC 
+#	Execute the stormon scripts to gather disk, volume manager, swraid , filesystem 
+#	and database application metrics and load them into the repository
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/11/02 - Use DBI instead of Oraperl, redirect STDERR to logfile
+# ajdsouza	04/10/02 - Renames from stormon.sh 
+#			 - Changes To meet GIT standards
+# ajdsouza	04/09/02 - Add ORACLE_HOME, LD_LIBRARY_PATH
+# ajdsouza	04/04/02 - Merged database scripts, added spooling error log
+# ajdsouza	04/03/02 - Created
+#
+#
+
+require v5.6.1;
+
+use strict;
+use warnings;
+
+#-------------------------------------------------------------------------
+# Clean Environment at compile time before the libraries are initialized
+#-------------------------------------------------------------------------
+BEGIN{
+    
+        for ( keys %ENV ){
+                delete $ENV{$_} 
+		unless $_ =~ 
+		    /^(HOME|UPLOAD_DB_USER|UPLOAD_DB_PASSWORD|UPLOAD_DB_TNS|EM_TARGET_NAME|EM_TARGET_TYPE|EM_TARGET_USERNAME|EM_TARGET_PASSWORD|EM_TARGET_ADDRESS)$/;
+        }
+ 
+    
+}
+
+#--------------------------------------------------------------------------
+use Monitor::Upload;
+
+#-------------------------------------------------
+# Configuration Variables
+#------------------------------------------------
+my %logdirs;
+
+# $logdir{order of dir lookup}{ dir name}="YES|NO" Create|Not create the directory if not present
+$logdirs{1}{'/u01/app/oracle/product/oemagent/network/agent/om/trace'} = 'NO';
+$logdirs{2}{'/oem/app/oracle/product/oemagent/network/agent/om/trace'} = 'NO';
+$logdirs{3}{"$ENV{HOME}/.stormon_trace"} = 'YES' if $ENV{HOME};
+$logdirs{4}{'/dev/null'} = 'NO';  # Last resort, dont log
+
+#--------------------------------------------------------------------------
+# Rewind the log file after a week 
+# redirect STDERR to logfile
+#-------------------------------------------------------------------------
+
+# Save the stderr to restore at the end
+open(OLDERR,">&STDERR") or die "Failed to open STDERR ";
+
+my $wday = (localtime)[6];
+
+# loOop thru each possible log location and chose the first one that exists
+for ( map { $logdirs{$_} } sort keys %logdirs ){
+    
+    my ($dir) = keys %$_;
+        
+    # last resort Dont log
+    ( warn "No log will be generated for this execution \n" and open(STDERR,$dir) and last ) 
+	or warn "Failed to redirect STDERR to $dir \n" and next if $dir =~ /\/dev\/null/;
+    
+    # Create the directory if dir does not exist and config says can create one
+    ( mkdir $dir or warn "Failed to create directory $dir \n" and next ) if not -e $dir  and $_->{$dir} =~ /YES/;
+    
+    # Skip to next if not dir or does not exist
+    next if not -d $dir ;
+        
+    my $LOGFILE="$dir/storagelog\_$wday";
+    
+    warn "Logging to file $LOGFILE \n";
+
+    stat($LOGFILE);
+    
+    # If file exists and not writable
+    warn "Failed to  write to Log file $LOGFILE " and next if -e $LOGFILE  and not -w _;
+    
+    # The database job and host job are excuted at different times in a day
+    # check for logfile older than 2days if it exists to make sure its previous
+    # the weeks file    
+    if ( not -e $LOGFILE )
+    {
+	open(STDERR,"> $LOGFILE") and last or warn "Failed to open Log $LOGFILE " and next;
+    }
+    else
+    {
+	if ( -M _ > 2 )
+	{
+	    open(STDERR,"> $LOGFILE") and last or warn "Failed to open Log $LOGFILE " and next; 
+	} 
+	else
+	{
+	    open(STDERR,">> $LOGFILE") and last or warn "Failed to open Log $LOGFILE " and next; 
+	}
+    }
+
+}
+
+#----------------------------------------------------------------------------
+# SIGNAL handler for die and warn to Log error and warning messages
+#----------------------------------------------------------------------------
+# die will exit the program with a warn message
+$SIG{'__DIE__'} = sub { warn "ERROR : $_[0] \n"; }; 
+$SIG{'__WARN__'} = sub { warn "$_[0]"; }; 
+
+
+#----------------------------------------------------------------------------
+# Log the start time
+#----------------------------------------------------------------------------
+my $nowstrg = localtime;    
+warn "*******************************************\n"; 
+warn "\tSTORAGE METRICS LOG \n";
+warn "\t$nowstrg \n"; 
+warn "\tEXECUTING JOB for \n\t\t Target     : $ENV{EM_TARGET_NAME} \n\t\t Target Type: $ENV{EM_TARGET_TYPE} \n" if $ENV{EM_TARGET_NAME} and $ENV{EM_TARGET_TYPE};
+warn "*******************************************\n";
+
+#----------------------------------------------------------------------------
+# Collect and load the metric data
+#----------------------------------------------------------------------------
+Monitor::Upload::loadMetric;
+
+#----------------------------------------------------------------------------
+# Log the completion time
+#----------------------------------------------------------------------------
+$nowstrg = localtime;
+warn "\n\tJOB COMPLETED  $nowstrg\n";
+warn "*******************************************\n";
+
+#----------------------------------------------------------------------------
+# Restore STDERR
+#----------------------------------------------------------------------------
+close(STDERR);
+open(STDERR,">&OLDERR") or warn " Failed to restore STDERR \n";
+
+close(OLDERR);
+
+exit 0;

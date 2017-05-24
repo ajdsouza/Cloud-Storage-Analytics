@@ -1,0 +1,419 @@
+Metrics for Monitoring Storage
+
+
+1	Introduction
+
+	Metrics are collected for the following storage management layers.
+
+	- Disk devices
+	- Software Raid Manager
+	- Volume Manager
+	- Filesystems ( Local and networked )
+	- Oracle RDBMS Server Application
+
+	The collected metrics are analyzed in the repository to compute the storage summary.
+
+2.	Disk devices
+
+	The disk device metrics are instrumented for all disks entities mounted on the system. The disks entities are all
+	    - Block and Character whole disks, 
+	    - Block and Character disk partitions,
+	    - Block and Character pseudo disks and 
+	    - Block and Character pseudo disk partitions.
+	
+	A disk device will have 
+	- One metric set instrumented for the whole physical disk.
+	- A metric set for each block and character partition of the disk
+
+
+	2.1 Metrics
+
+	Metric Name  	disk_devices
+
+	  Metric Column 			Mandatory	Relevance			Use
+	  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+          disk_devices_type			YES		For a Partition			To identify the metrics for the whole disk DISK from those of a PARTITION
+	  disk_devices_filetype			YES		For each device			To differentiate between block and character devices
+	  disk_devices_nameinstance				For a Partition			-
+          disk_devices_logical_name		YES		For each device			-
+          disk_devices_inode			YES		For each device			To correlate the use of the device across different storage management layers
+	  disk_devices_capacity			YES		For a Partition			To calculate the size of a partition
+          disk_devices_vendor			YES		For the Whole disk		To identify the vendor for external storage
+          disk_devices_product			YES		For the Whole disk		To identify the type of external storage system
+	  disk_devices_configuration		YES		For the Whole disk		To calculate the raw storage in the external storage system consumed by the disk
+          disk_devices_storage_system_id			For external Storage System	
+	  disk_devices_storage_disk_device_id			For external Storage System	
+	  disk_devices_storage_system_key	YES		For external Storage System	To uniquely identify the external storage system
+	  disk_devices_storage_spindles				For external Storage System	To identify the spindle location of the disk spindles in the external storage system
+	  disk_devices_partitionstart				For a Partition			To check for sector overlap in partitions
+	  disk_devices_nsectors					For a Partition			To check for sector overlap in partitions
+          disk_devices_device_status		YES		For the Whole disk		To check if the disk is accessible and formatted
+          disk_devices_slice_key		YES		For a Partition			To take care of double counting of shared or multipathed disks
+          disk_devices_disk_key			YES		For the Whole disk		To take care of double counting of shared or multipathed disks
+          disk_devices_key			YES		For each row			Unique identifer for each row. Required by the mozart metric framework
+
+	
+	2.2 Metric Description
+
+	 Metric Column				Description
+	 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	disk_devices_inode			Is a id to uniquely identify the disk device on the host. On UNIX based systems, a concatenation of the filesystem inode and the device inode uniquely identifies the device on the host.
+	disk_devices_nameinstance		On UNIX based operating systems a disk can be identified by the disk driver name and the instance number eg. sd10 On Solaris
+	disk_devices_logical_name		Is the name of the disk device on the operating system.
+	disk_devices_filetype			Is the file type of the device being instrumented. It may be one of the following values
+						- BLOCK for block devices
+						- CHARACTER for character or raw devices.
+
+	disk_devices_slice_key			Will uniquely identify a disk partition or slice across multiple hosts. Partitions of disks mounted on multiple hosts should have identical values for disk_devices_slice_key.
+	disk_devices_type			Is the type of disk device or partition. It may have one of the following values
+						- DISK for the whole disk and 
+						- PARTITION for any disk partition.
+
+	disk_devices_capacity			Is the storage capacity of the disk or the partition being instrumented. The value should be in bytes.
+	
+	disk_devices_disk_key			Uniquely identifies the physical disk device across multiple hosts. For a disk mounted on multiple systems the disk_devices_disk_key should have identical values. For most disks a disk key can be generated from the disk_devices_vendor , disk_devices_product and Vendor specific serial number for that disk.
+
+	disk_devices_vendor			Is the vendor of the disk, for disks from external storage systems it is the vendor of the external storage system.
+	disk_devices_product			Is the disk product, for disks from external storage systems it is the external storage system product.
+	disk_devices_configuration		Is the hardware raid configuration of the disk device. 
+	disk_devices_device_status		The status of the disk device. The device status field can have multiple values separated by the a space. The device status for a disk can be one or more of the following values
+						-  OFFLINE for disks which are configured but not accessible.
+						-  READY for disks which are configured and accessible.
+						-  FORMATTED for formatted disks
+						-  UNFORMATTED for unformatted disks
+	
+	disk_devices_storage_system_id		For an external storage system is a identifier for the external storage system. This id should uniquely identify the external storage system in a vendor family of products.
+	disk_devices_storage_disk_device_id	Is the id of the disk device in the external storage system.
+	disk_devices_storage_system_key		Is a universally unique id for a external storage system. It can be generated by appending the disk_devices_vendor , disk_devices_product and disk_devices_storage_system_id of a external storage system.
+	disk_devices_storage_spindles		The location of the spindle in the external storage system. For a disk device carved out of multiple spindle ,disk_devices_storage_spindles can have multiple names separated by a coma.
+
+	disk_devices_partitionstart		For a disk device or partition is the starting sector number of that disk device or partition.
+	disk_devices_nsectors			For a disk device or partitions is the number of sectors in the disk device or partition being instrumented.
+
+	
+	2.3 Example
+
+	  The following is an example of the metrics collected for a disk and one of its partitions
+
+								     Metric Values for 
+	  Metric column					Whole disk				Each Disk Partition 
+	  -------------------------------------------------------------------------------------------------------------------------
+          disk_devices_type				DISK					PARTITION
+	  disk_devices_filetype				CHARACTER				CHARACTER
+	  disk_devices_nameinstance			sd@75					sd@75
+          disk_devices_logical_name			/dev/rdsk/c4t0d0s2			dev/rdsk/c4t0d0s7
+          disk_devices_inode				8388608-118625				8388608-118630
+	  disk_devices_capacity				12067799040				10813440
+          disk_devices_vendor				EMC					EMC
+          disk_devices_product				SYMMETRIX				SYMMETRIX
+	  disk_devices_configuration			MIRR_2					MIRR_2
+          disk_devices_storage_system_id		000183600564				000183600564
+	  disk_devices_storage_disk_device_id		001					001
+	  disk_devices_storage_system_key		EMC-SYMMETRIX-000183600564		EMC-SYMMETRIX-000183600564
+	  disk_devices_storage_spindles			DA-1A.c.0.6802F132,DA-2B.d.3.13079197	DA-1A.c.0.6802F132,DA-2B.d.3.13079197
+	  disk_devices_partitionstart			0l					589440l
+	  disk_devices_nsectors				23568000l				21120l
+          disk_devices_device_status			READY FORMATTED				READY FORMATTED
+          disk_devices_slice_key			EMC-000183600564-001			EMC-000183600564-001-7
+          disk_devices_disk_key				EMC-000183600564-001			EMC-000183600564-001
+          disk_devices_key				EMC-000183600564-000-38			EMC-000183600564-000-7-43
+
+
+3.	Software Raid
+
+	The Software Raid are instrumented for the following Software Raid entities in the Software raid manager.
+	    - Software raid meta disk
+	    - Any Block and Character partitions on the Software raid meta disk.
+	    - Disk device partition used by the Software raid manager to create software raid disks.
+	    
+	The metrics for the disk device partition used in Software Raid will provide the name of the Software raid meta disk that uses the disk partition.
+
+	The software raid meta disk will have 
+	- One metric set instrumented for the whole meta disk.
+	- A metric set for each block and character partition of the meta disk
+
+	3.1 Metrics
+
+	Metric Name	storage_swraid
+
+	Metric Column 			Mandatory	Use
+	-------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	storage_swraid_type		YES		To identify the type of software raid entity the metrics are instrumented				
+	storage_swraid_vendor											
+	storage_swraid_filetype		YES		To check if the Software raid entity is a BLOCK or CHARACTER device.
+	storage_swraid_name		YES		To uniquely identify the software raid entity being instrumented.
+	storage_swraid_parent		YES		To identify the software raid disk to which used this subdisk , This metric is relevant only for subdisks.
+	storage_swraid_inode		YES		To correlate the use of the file across different storage management layers
+	storage_swraid_size		YES		To calculate the size of software raid in bytes								
+	storage_swraid_diskkey		YES		To identify all partitions of a software raid disk.			
+	storage_swraid_slicekey		YES		To identify the block and character devices of a software raid meta disk partition.
+	storage_swraid_configuration		
+	storage_swraid_key		YES		Key for the mozart repository, can be the logical name of the disk		
+
+
+	3.2 Metric Description
+
+	 Metric Column				Description
+	 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	 storage_swraid_type			Is the name of the Software Raid entity the metrics are instrumented for . It may have one of the following values
+						- DISK for Software RAID Meta Disk
+						- PARTITION for partition of the Software Meta disk
+						- SUBDISK for Operating system disk device partitions used by the Software Raid manager
+						- HOT_SPARE for Operating system disk device partition configured as hot spares in the software raid manager.
+
+	storage_swraid_vendor i			Is the vendor name for the Software raid vendor.								
+	storage_swraid_filetype			Is the operating system file type of the software raid entity being instrumented. It may have one of the following values
+						- BLOCK for block devices
+						- CHARACTER for character or raw devices.
+	storage_swraid_name			File name on the operating system for the software raid entity.		 
+	storage_swraid_parent			This metric is only for a subdisk entity. It is the name of the the swraid metadisk which used this subdisk.
+	storage_swraid_inode			A id to uniquely identify the Software RAid meta disk, partition or a subdisk on the host. On UNIX based systems, a concatenation of the filesystem inode and the file inode will uniquely identify the Software raid meta disk or subdisk on the host.
+	storage_swraid_size			The storage capacity of the software raid entity being instrumented in bytes.
+	storage_swraid_diskkey			This is applicable only to Software Raid Meta disks. The value of this metric will uniquely identify the Software Raid Meta disk device on the host. All partitions of the meta disk have the identical value for this metric.			
+	storage_swraid_slicekey			This is applicable only to Software Raid Meta disks. The value of this metric will uniquely identify the Software Raid Meta Partition on the host. Both the block and character partitions of the meta disk have the identical value for this metric,							
+	storage_swraid_configuration		Is the configuration of the Software raid disk.
+	
+
+
+	3.3 Example
+
+	The following is an example of the metrics collected for a Software RAID Disk and Sub disk.
+							
+	Metric column					Metric values for
+							Oracle RDBMS Server application
+	--------------------------------------------------------------------------------------------------------------------
+	storage_swraid_type		DISK			SUBDISK					
+	storage_swraid_vendor		Linux_Software_Raid	Linux_Software_Raid									
+	storage_swraid_filetype		BLOCK			BLOCK											
+	storage_swraid_name		/dev/md0		/dev/sdb1				 
+	storage_swraid_parent					md0		
+	storage_swraid_inode		2050-65068		2050-66183			
+	storage_swraid_size		12584353792		6292306944						
+	storage_swraid_diskkey		md0			sdb1
+	storage_swraid_slicekey		md0			sdb1
+	storage_swraid_configuration	RAID0_64kb chunks	
+	storage_swraid_key		/dev/md0-0		/dev/sdb1-1
+
+
+
+4.	Volume Manager
+
+	Volume metrics are instrumented for the following entities in the volume manager
+	-  A metric set for each block and character volume in the volume manager
+	-  A metric set for each disk allocated to the volume manager
+	-  A metric set for each disk slice used in the creation of a volume
+	  
+	  The metrics for a disk slice provide the relationship between a volume and disks used in a volume.
+
+	4.1 Metrics 	
+
+	Metric Name	storage_volume_layers
+
+	Metric Column					Mandatory	Use
+	-------------------------------------------------------------------------------------------------------------------------------------------------------------		  
+        storage_volume_layers_vendor									    
+        storage_volume_layers_type			YES		To identify if the metrics are for a VOLUME, DISK OR DISK SLICE
+        storage_volume_layers_name			YES		To uniquely identify the volume entity
+        storage_volume_layers_diskgroup	Disk Group	YES		To identify the disk group of a volume entity
+        storage_volume_layers_size			YES		To calculate the size of a Volume, Disk or Disk slice
+        storage_volume_layers_config												    
+        storage_volume_layers_diskname			YES		For Disk slices, to get the disk to disk slice relationship
+	storage_volume_layers_volumename		YES		For Disk slices, The volume to disk slice relationship
+        storage_volume_layers_path			YES										    		
+	storage_volume_layers_filetype			YES					    
+	storage_volume_layers_inode			YES		To correlate the use of the volume entity across different storage management layers
+	storage_volume_layers_state			YES		
+        storage_volume_layers_key			YES		Unique identifier for each row. Required by the mozart metric framework
+
+
+	4.2 Metric Description
+
+	 Metric Column				Description
+	 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+        storage_volume_layers_vendor		Is the vendor for the volume manager , eg. VERITAS, HPLVM etc.
+        storage_volume_layers_type		Identifies the type of entity in the volume manager. It may be one of the following 
+						- VOLUME for a logical volume,
+						- DISKSLICE for a disk slice used in a volume
+						- DISK for a disk used in a volume or disk group
+        storage_volume_layers_name		Is the name of the entity in the volume manager. For a volume its the volume name, for a disk slice its the slice name, for a disk its the disk name in the volume manager.
+        storage_volume_layers_diskgroup		Disk Group is the disk group to which the Volume, Disk or Disk slice belongs
+        storage_volume_layers_size		Is the storage capacity of the volume entity in bytes.
+        storage_volume_layers_config		Is the configuration of the Volume. This is not relevant for disks and disk slices. The configuration for a volume may be one of the following
+						- Concatenated
+						- Striped
+						- Layered  etc.						    
+        storage_volume_layers_diskname		For disk slice is the name of the disk from which the slice is carved. This is not relevant for disk and volume metrics.
+	storage_volume_layers_volumename	For disk slice is the name of the volume that uses the disk slice. This is not relevant for disk and volume metrics
+        storage_volume_layers_path		Is the path to the volume or disk on the operating system. 							    		
+	storage_volume_layers_filetype		Will indicate if the volume and disk is a block or character device. This is not relevant to a disk slice.The values for storage_volume_layers_filetype may be one of the following
+						- BLOCK for block devices
+						- CHARACTER for character or raw devices
+	storage_volume_layers_inode		A id to uniquely identify the volume or disk on the host. On UNIX based systems, a concatenation of the filesystem inode and the device inode uniquely identifies the device on the host. This is not relevant to a disk slice.
+	storage_volume_layers_state		Is the status of a volume, disk or disk slice.		    
+ 
+ 	
+	4.3 Example
+
+	The following is an example of the metrics collected for a volume , disk and disk slice.
+
+										Metric Values for 
+	Metric column				Volume				Disk				Disk slice	
+	------------------------------------------------------------------------------------------------------------------------------------------------
+        storage_volume_layers_vendor		VERITAS				VERITAS				VERITAS
+        storage_volume_layers_type		VOLUME				DISK			 	DISKSLICE
+        storage_volume_layers_name		u02				c2t10d0s2			disk01-01
+        storage_volume_layers_diskgroup		sm2sun01dg			sm2sun01dg			sm2sun01dg		
+        storage_volume_layers_size		36507222016			36415636992			18254412288
+        storage_volume_layers_config		STRIPE Mirrors=2 Stripe=2/128									    
+        storage_volume_layers_diskname										c2t10d0s2	
+	storage_volume_layers_volumename									u02	
+        storage_volume_layers_path		/dev/vx/rdsk/sm2sun01dg/u02	/dev/rdsk/c2t10d0s2					    		
+	storage_volume_layers_filetype		CHARACTER				    
+	storage_volume_layers_inode		8388608-245819		        8388608-290879
+	storage_volume_layers_state		ACTIVE								ENA			    
+        storage_volume_layers_key		u02_6				c2t10d0s2_2			disk01-01_12						                    
+
+
+5.	Filesystems
+		
+	Filesystem metrics are instrumented for each local filesystem and networked file system. Metrics are instrumented only for the mounted filesystems.
+
+
+       5.1 Metrics
+
+	Metric Name	storage_filesystems
+
+       Metric Column				Mandatory	Use
+       -------------------------------------------------------------------------------------------------------------------------------------------------------------
+       storage_filesystems_fstype		YES		To identify local and networked filesystems
+       storage_filesystems_filesystem		YES				
+       storage_filesystems_inode		YES		To correlate the use of the Local Filesystem across different storage management layers
+       storage_filesystems_mountpoint		YES		
+       storage_filesystems_mountpointinode	YES		To correlate the use of the any Filesystem across different storage management layers
+       storage_filesystems_mount_options	YES		Auditing purposes
+       storage_filesystems_size			YES		To aggregate the size of the filesystem in
+       storage_filesystems_used			YES		To aggregate the used storage space in the filesystem
+       storage_filesystems_free			YES		To aggregate the free storage space in the filesystem
+       storage_filesystems_mounttype		YES		To identify cached filesystems
+       storage_filesystems_nfs_server		YES		To aggregate storage by network file server
+       storage_filesystems_nfs_volume		
+       storage_filesystems_nfs_vendor		YES		To aggregate NFS storage by vendor
+       storage_filesystems_nfs_product		
+       storage_filesystems_nfs_privilege	YES		To identify network filesystems which are writable
+       storage_filesystems_nfs_exclusive	YES		To identify NFS filesystems which are dedicated to a host
+       storage_filesystems_key			YES		Unique identifier for each row. Required by the mozart metric framework
+
+
+	5.2 Metric Description
+
+	 Metric Column				Description
+	 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+       storage_filesystems_fstype		Is the type of filesystem  eg. ufs,vxfs,nfs etc.
+       storage_filesystems_filesystem		Is the operating system name of the filesystem . The filesystem is a block device.
+       storage_filesystems_inode		This metric is only for local filesystems . It is an id to uniquely identify the Local filesystem on the host. On UNIX based systems, a concatenation of the filesystem inode and the file inode will uniquely identify the device on the host. 
+       storage_filesystems_mountpoint		The operating system name of the filesystem mountpoint on the host.
+       storage_filesystems_mountpointinode	A id to uniquely identify the mountpoint on the host. On UNIX based systems, a concatenation of the filesystem inode and the file inode will uniquely identify the mountpoint on the host.
+       storage_filesystems_size			Is the size of the filesystem in bytes
+       storage_filesystems_used			Is the used space in the filesystem in bytes
+       storage_filesystems_free			Is the free space in the filesystem in bytes
+       storage_filesystems_mounttype		Indicates if the filesystem is a cached filesystem. A cached filesystem will have a value of FILESYSTEM_BASED for this metric.
+       storage_filesystems_nfs_server		This metric is only for Network File Systems (NFS). It is the name of the server from which this filesystem has been exported and mounted.
+       storage_filesystems_nfs_volume		This metric is only for NFS. It is the volume name of the filesystem on the NFS server. This is a unique name for a filesystem on the nfs server.
+       storage_filesystems_nfs_vendor		This metric is only for NFS. It is the vendor name of the nfs server. 
+       storage_filesystems_nfs_product		This metric is only for NFS. It is the product name for the nfs server.
+       storage_filesystems_nfs_privilege	This metric is only for NFS. This value indicate if the NFS filesystem is mounted with WRITE privilege. The metric may have the following two values
+						- READ for read only NFS mounts
+						- WRITE for writable NFS mounts
+       storage_filesystems_nfs_exclusive	This metric is only for NFS. It is the count of the distinct number of hosts mounted the filesystem.For dedicated NFS mounts this value should be 1.
+
+       
+       5.3 Example
+
+	The following is an example of the metrics collected for a local and networked filesystem.
+
+								Metric Values for 
+	Metric column				Local Filesystem		  NFS	
+	--------------------------------------------------------------------------------------------------------------------
+       storage_filesystems_fstype		ext2			nfs
+       storage_filesystems_filesystem		/dev/hda7		stnfs1:/vol/local/sparc64/perl5.6.1		
+       storage_filesystems_inode		774-209399		
+       storage_filesystems_mountpoint		/home			/opt/perl5.6.1
+       storage_filesystems_mountpointinode	775-2			73138180-2003874
+       storage_filesystems_size			4800475136		111993696256
+       storage_filesystems_used			4378025984		111993696256
+       storage_filesystems_free			178597888		361220769792
+       storage_filesystems_mounttype					
+       storage_filesystems_nfs_server					stnfs1
+       storage_filesystems_nfs_volume		
+       storage_filesystems_nfs_vendor					NETAPP
+       storage_filesystems_nfs_product					CLUSTERED FILER
+       storage_filesystems_nfs_privilege				READ
+       storage_filesystems_nfs_exclusive				0
+       storage_filesystems_key			/home-1			/opt/perl5.6.1-26
+
+
+6.	Applications
+
+	Metrics are instrumented only for the Oracle RDBMS server application. Metrics are instrumented for each instance of a clustered RDBMS server.
+
+	6.1 Metrics
+	
+	Metric Name	storage_applications
+
+       Metric Column					Mandatory	Use
+       -------------------------------------------------------------------------------------------------------------------------------------------------------------
+       storage_applications_type			YES		To group storage by the type of application
+       storage_applications_name					To group storage by the name of the application
+       storage_applications_id				YES		To group storage by the id of a application instance
+       storage_applications_file			YES		
+       storage_applications_inode			YES		To correlate the use of the file across different storage management layers
+       storage_applications_filetype			YES		To differentiate between regular and special ( character )files when correlating usage between layers.
+       storage_applications_size			YES		To aggregate size of the application in bytes.
+       storage_applications_used			YES		To aggregate the used space in the application in bytes.
+       storage_applications_free			YES		To aggregate the free space in the application in bytes.
+       storage_applications_shared			
+       storage_applications_oracle_database_tablespace			
+       storage_applications_oem_target_name		
+       storage_applications_key				YES		Unique identifier for each row. Required by the mozart metric framework
+
+
+	6.2 Metric Description
+
+	 Metric Column					Description
+	 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+ 	storage_applications_type			Is the type of application. The only application instrumented is the Oracle RDBMS server .The value of this metric is ORACLE_DATABASE.
+        storage_applications_name			Is the name of the application. For Oracle RDBMS server it is the database name or dbname.
+	storage_applications_id				Is a unique identifier for an instance of the application. For Oracle RDBMS server a combination of storage_applications_name and the Oracle SID will uniquely identify an instance of the RDBMS application.
+        storage_applications_file			Is the operating system file name of a file used by the application.
+       storage_applications_inode			A id to uniquely identify the file on the host. On UNIX based systems, a concatenation of the filesystem inode and the file inode will uniquely identify the file on the host.
+       storage_applications_filetype			Will indicate if the file is a block device. A block device file will have a value FILESYSTEM_BASED
+       storage_applications_size			Is the size of the file in bytes. 
+       storage_applications_used			Is the used storage space in the file in bytes.
+       storage_applications_free			Is the free storage space in the file in bytes.
+       storage_applications_shared			Will indicate if the application is clustered. For clustered applications this value is YES else NO.
+       storage_applications_oracle_database_tablespace	For a Oracle RDBMS server application is the name of the tablespace in the Oracle database to which the file belongs. This metric is specific to Oracle RDBMS server.
+       storage_applications_oem_target_name		This is the name of the database target in the 9i repository. This metric is loaded to relate the database metrics to the database target name for OEM 9i.
+ 
+
+	6.3 Example
+
+	The following is an example of the metrics collected for a Oracle RDBMS application.
+							
+	Metric column					Metric values for
+							Oracle RDBMS Server application
+	--------------------------------------------------------------------------------------------------------------------
+        storage_applications_type			ORACLE_DATABASE
+        storage_applications_name			SMMDEV
+        storage_applications_id				SMMDEV-smmdev
+        storage_applications_file			/u02/app/oracle/product/9i/oradata/smmdev/user_idx01.dbf
+        storage_applications_inode			775-2003874
+        storage_applications_filetype			FILESYSTEM_BASED
+        storage_applications_size			1073741824
+        storage_applications_used			541130752
+        storage_applications_free			532611072.
+        storage_applications_shared			NO
+        storage_applications_oracle_database_tablespace	USER_IDX		
+        storage_applications_oem_target_name		smmdev_sm2sun01
+        storage_applications_key			SMMDEV-smmdev-/u02/app/oracle/product/9i/oradata/smmdev/user_idx01.dbf-16
+
+

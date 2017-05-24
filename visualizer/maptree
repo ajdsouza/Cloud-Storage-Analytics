@@ -1,0 +1,165 @@
+#!/usr/local/git/perl/bin/perl
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+use Monitor::Utilities;
+
+
+
+# Test repository connection
+$ENV{'UPLOAD_DB_USER'}='em_4';
+$ENV{'UPLOAD_DB_PASSWORD'}='em_4';
+$ENV{'UPLOAD_DB_TNS'}="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))";
+
+my $sql1 = "SELECT * FROM MGMT_STORAGE_DATA";
+my $sql2 = "SELECT * FROM  MGMT_STORAGE_KEYS";
+
+my %dbh = dbconnect( $ENV{UPLOAD_DB_USER}, $ENV{UPLOAD_DB_PASSWORD}, $ENV{UPLOAD_DB_TNS}, 10, 3, 30) or warn "\nERROR: Failed to get a connection to the repository. aborting job \n" ;
+$dbh{dbh}->{FetchHashKeyName} = 'NAME_lc';
+
+my $sth1 = $dbh{dbh}->prepare($sql1) or die "Failed to prepare statement $sql1";
+my $sth2 = $dbh{dbh}->prepare($sql2) or die "Failed to prepare statement sql2 ";
+
+$sth1->execute or die "Failed to execute $sql1";
+
+my $key_master_data_ref = $sth1->fetchall_hashref('key_value');
+
+my %mgmt_storage_data;
+my %top_nodes;
+my @botton_nodes;
+
+my $file = '/home/ajdsouza/stormon/mozart/mapfile.txt';
+
+open(FH,$file) or die "Failed to open the mapfile $file \n";
+
+while ( <FH> ){
+    
+    chomp;
+    
+    s/^\s+|\s+$//g;
+    
+    s/^-+//g;
+    
+    s/^\s+|\s+$//g;
+    
+    next unless $_;
+    
+    next if $_ =~ /^\#/;
+    
+    my @results;
+    my @values = split, $_;
+    my %node;
+    my %parent_node;
+    
+    for my $eachcol( @values ){
+	
+	$eachcol =~ s/^\s+|\s+$//g;
+	$eachcol =~ s/^-+$//g;
+	
+	push @results,$eachcol;
+	
+    }
+    
+    die "Results are nither 8 nor 7, dont fit both tables " unless  @results == 7 or @results == 8;
+        
+    # if @results == 8 , we are in the key master data
+    $mgmt_storage_data{$results[0]}{$results[2]}{$results[3]}{$results[1]} = { 
+	target_guid=>$results[0],
+	storage_layer=>$results[2],
+	entity=>$results[3],
+	key_value=>$results[1],
+	sizeb=>$results[5] , 
+	usedb=>$results[6] , 
+	freeb=>$results[7] } and next if @results == 8;
+    
+    # If @results == 7 , we are in the key map data
+    # If there is a entry in key master for node
+    die "Unable to find the entry in key master for node $results[0],$results[1],$results[2],$results[3] " and exit unless $mgmt_storage_data{$results[0]}{$results[1]}{$results[2]}{$results[3]};
+
+    # If there is no parent node then this is a top node
+    push @{$top_nodes{$results[0]}}, $mgmt_storage_data{$results[0]}{$results[1]}{$results[2]}{$results[3]} and next unless $results[4];
+    
+    # If there is a parent node and if there is a entry in key master for parent node
+    die " Unable to find the entry in key master for parent node $results[0],$results[4],$results[5],$results[6] " and exit unless defined $mgmt_storage_data{$results[0]}{$results[4]}{$results[5]}{$results[6]};
+    
+    # Keep the link between the parent node and child node 
+    push @{$mgmt_storage_data{$results[0]}{$results[4]}{$results[5]}{$results[6]}->{node_list}}, $mgmt_storage_data{$results[0]}{$results[1]}{$results[2]}{$results[3]};
+    
+}
+
+close(FH);
+
+sub print_master_data( $ ){
+
+    my ( $mgmt_storage_data_ref ) = @_;
+        
+    for my $target ( keys %{$mgmt_storage_data_ref} ) {
+	for my $storage_layer ( keys %{$mgmt_storage_data_ref->{$target}} ) {
+	    for my $entity ( keys %{$mgmt_storage_data_ref->{$target}{$storage_layer}} ) {
+		for my $key_value ( keys %{$mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}} ) {
+		    
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{target_guid};
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{storage_layer};
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{entity};
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{key_value};
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{sizeb}; 
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{usedb}; 
+		    print $mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{freeb};
+		    
+		    print "\n";
+		    
+		    for my $node ( @{$mgmt_storage_data_ref->{$target}{$storage_layer}{$entity}{$key_value}->{node_list}} ){
+			print " $node->{storage_layer} \n";
+		    }
+		    
+		}
+	    }
+	}
+    }    
+}
+
+
+# Traverse the node top down to the bottom of the tree
+sub top_down_node_traverse( $$ ){
+    
+    my ( $node, $indent ) = @_;
+   
+    for ( 0..$indent )
+    {
+	print "\t" and next if $_ < $indent ;
+	print "       |" and next if $_ < $indent;   
+	print "|------>";
+    }
+       
+    #print $node->{target_guid};
+    print " $node->{storage_layer} $node->{entity} $node->{key_value} ";
+    print " ( s $node->{sizeb} , u $node->{usedb} , f $node->{freeb} )";
+    
+    print "\n";
+
+    print "\n" unless defined $node->{node_list} and $node->{node_list} and @{$node->{node_list}};
+    
+    for my $child_node ( @{$node->{node_list}} ){	
+	bless $child_node;
+	top_down_node_traverse $child_node $indent+1 if $child_node;	
+    }
+    
+}
+
+# Top down traverse
+for my $target_guid ( keys %top_nodes ) {
+    
+    print "\tHost $target_guid \n";
+
+    for my $node ( @{$top_nodes{$target_guid}} ){
+	
+	top_down_node_traverse $node,1;
+	
+    }
+
+}
+
+
+# From the node List get the nodes which are the top ones

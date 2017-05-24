@@ -1,0 +1,98 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+#
+#  $Id: disks,v 1.5 2002/05/23 00:00:24 ajdsouza Exp $ 
+#
+#  $Log: disks,v $
+#  Revision 1.5  2002/05/23 00:00:24  ajdsouza
+#
+#  Modify on GIT feedback
+#  Call functions from Monitor::Storage to execute and print the metrics
+#
+#  Revision 1.4  2002/05/04 08:20:28  ajdsouza
+#  Optimized
+#
+#  Revision 1.3  2002/04/23 23:35:18  ajdsouza
+#  Wrap long lines
+#
+#  Revision 1.2  2002/04/23 07:01:52  ajdsouza
+#  Changed Module directory to Monitor
+#
+#  Revision 1.1  2002/04/22 18:50:15  ajdsouza
+#  STDOUT Metrics for all disk devices on host
+#
+#  Revision 1.1  2002/04/19 22:50:06  ajdsouza
+#  Renamed from stormon_disks.pl
+#
+#
+#
+# NAME  
+#	 disks
+#
+# DESC 
+# 	List all the disk devices on the host
+#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/17/02 - Changes to meet GIT requirements
+# ajdsouza	04/03/02 - MOved print functions to stormon_utilities, pass ref to print function
+# ajdsouza	04/02/02 - Removed check for Solaris before fetching /print slice informatio
+# 			 - Switch between 9I and Mozart print formats on ENV
+#			   variable EMD_PRINT_ENV, added function printLis
+# ajdsouza	10/01/01 - Created
+#
+#
+# METRIC DESC
+#
+#	Metric Name  	disk_devices
+#
+#	  Metric Column 			Description
+#	  --------------------------------------------------------------------------------
+#          disk_devices_type			Type  eg. DISK, PARTITION, PSEUDOPARENT 
+#          disk_devices_filetype		File Type eg. BLOCK, CHARCATER 
+#          disk_devices_controller		Disk Controller 
+#          disk_devices_physical_name		Disk physical path 
+#          disk_devices_capacity		Disk/Parition size in bytes 
+#          disk_devices_logical_name		Logical Path for the disk device/partition
+#          disk_devices_inode			Link inode
+#          disk_devices_vendor			Vendor 
+#          disk_devices_product			Product 
+#          disk_devices_serial_no		Serial#
+#          disk_devices_storage_vendor		External storage system Vendor 
+#          disk_devices_storage_product		External storage system Product 
+#          disk_devices_storage_id		External storage system Id 
+#	   disk_devices_storage_system_key	Unique key for identifying the external Storage system 
+#							eg. vedor_product_id
+#          disk_devices_storage_disk_device_id	Device Id for this LUN in the external storage system
+#          disk_devices_configuration		Configuration of the LUN in the external storage system 
+#							eg. 3WAY Mirrored, RAID 0 
+#          disk_devices_device_status		Device status of the disk in the External storage system
+#          disk_devices_path_count		Number of paths to this LUN 
+#          disk_devices_multipath_pseudo_parent	Path of the psuedo parent device , if one exists
+#          disk_devices_multipath_inode		Link inode# for the psuedo parent device
+#          disk_devices_slice_key		Slice Key, unique for a disk partition 
+#							eg. <Vendor>_<Product>_<Serial#>_<Slice>
+#          disk_devices_disk_key		Disk Key  , unique for  LUN <Vendor>_<Product>_<Serial#>
+#          disk_devices_key			Key , to identify each record in EMD, 
+#							logical name can be used for this
+#
+
+
+require v5.6.1;
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+disks();
+
+exit 0;
+

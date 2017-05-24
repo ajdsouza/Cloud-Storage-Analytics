@@ -1,0 +1,23 @@
+
+
+<!-- ******* Collection for Storage utilization Metrics ******* -->
+
+  <CollectionItem NAME = "storage_filesystems">
+     <Schedule>
+        <IntervalSchedule INTERVAL = "30" TIME_UNIT = "Min"/>
+     </Schedule>
+  </CollectionItem>
+
+  <CollectionItem NAME = "storage_volume_layers">
+     <Schedule>
+        <IntervalSchedule INTERVAL = "30" TIME_UNIT = "Min"/>
+     </Schedule>
+  </CollectionItem>
+
+  <CollectionItem NAME = "disk_devices">
+     <Schedule>
+        <IntervalSchedule INTERVAL = "30" TIME_UNIT = "Min"/>
+     </Schedule>
+  </CollectionItem>
+
+<!-- ******* End of Storage utilization Metrics ******* -->

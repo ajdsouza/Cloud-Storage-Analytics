@@ -1,0 +1,3 @@
+##!/bin/sh
+#/bin/sh -c "cd $SRCHOME/emcore/sysman/admin/emdrep/sql/core/latest/storage"
+cd $SRCHOME/emcore/sysman/admin/emdrep/sql/core/latest/storage

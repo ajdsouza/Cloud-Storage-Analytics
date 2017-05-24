@@ -1,0 +1,374 @@
+
+<!-- ************* Metrics related to Storage utilization *********** -->
+<!-- ************* Metric 1. Filesystem information *********** -->
+
+  <Metric NAME="storage_filesystems" TYPE="TABLE">
+    <Display>
+      <Label NLSID="storage_filesystems">Local Filesystems</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_fstype" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_filesystems_fstype">Filesystem Type </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_filesystem" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_filesystems_filesystem">Filesystem</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_inode" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_filesystems_inode">Inode#</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_mountpoint" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="storage_filesystems_mountpoint">Mount Point</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_size" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_filesystems_size">Size</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_used" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_filesystems_used">Used  </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_filesystems_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_filesystems_free">Free  </Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+         %perlBin%/perl -I %scriptsDir%/stormon %scriptsDir%/stormon/stormon_files.pl
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property> 
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property> 
+    </QueryDescriptor>
+  </Metric>
+
+
+<!-- ******************* Metric 2. Volume  information *********** -->
+
+  <Metric NAME="storage_volume_layers" TYPE="TABLE">
+    <Display>
+      <Label NLSID="storage_volumes">Volumes </Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_vendor" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_vendor">Vendor </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_type" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_type">Type </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_name" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_name">Name </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_diskgroup" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_diskgroup">Disk Group</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_size" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_size">Size </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_config" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_config">Configuration</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_stripeconfig" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_stripeconfig">Stripe Configuration </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_mirrors" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_mirrors"> Mirrors </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_parent" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_parent"> Parent </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_filesystem" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_filesystem"> Filesystem </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_path" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_path"> Volume Path (Block) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_inode" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_inode"> Inode(Block) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_path_raw" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_path_raw"> Volume Path (Character) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_inode_raw" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_inode_raw"> Inode(Character) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_disk_path" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_disk_path"> Disk Path </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_volume_layers_disk_inode" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_volume_layers_disk_inode"> Disk Inode </Label>
+        </Display>
+      </ColumnDescriptor>
+       <ColumnDescriptor NAME="storage_volume_layers_key" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="storage_volume_layers_key">Key </Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+         %perlBin%/perl -I %scriptsDir%/stormon %scriptsDir%/stormon/stormon_volumes.pl
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property> 
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property> 
+    </QueryDescriptor>
+  </Metric>
+
+
+<!-- ******************* Metric 3. Disk Information *********** -->
+
+  <Metric NAME="disk_devices" TYPE="TABLE">
+    <Display>
+      <Label NLSID="disk_devices">Disk Devices</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="disk_devices_type" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_type">Type </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_filetype" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_filetype">File Type </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_controller" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_controller">Controller </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_physical_name" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_physical_name">Physical Path </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_capacity" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_capacity">Capacity </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_logical_name" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_logical_name">Logical Name</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_inode" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_inode">Inode</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_vendor" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_vendor">Vendor </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_product" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_product">Product </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_serial_no" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_serial_no">Serial#</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_storage_system_key" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_storage_system_key">Storage System Key</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_storage_system_vendor" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_storage_system_vendor">Storage System Vendor</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_storage_system_product" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_storage_system_product">Storage System Product</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_storage_id" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_storage_id">External Storage Id </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_device_id" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_device_id">Device ID (External)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_configuration" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_configuration">Disk Configuration</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_status" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_status">Device status</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_path_count" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_path_count">Path Count</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_multipath_pseudo_parent" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_multipath_pseudo_parent">Multipath Parent</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_multipath_inode" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_multipath_inode">Inode#</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_path_backupslice" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_path_backupslice">Backup Slice</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_slice_key" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_slice_key">Slice Key</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_disk_key" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="disk_devices_disk_key">Disk Key</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="disk_devices_key" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="disk_devices_key">Key </Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="solarisPerlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+         %solarisPerlBin%/perl -I %scriptsDir%/stormon %scriptsDir%/stormon/stormon_disks.pl 
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">"|"</Property>
+    </QueryDescriptor>
+  </Metric>
+
+ 
+<!-- ************* Metric 4. Storage Summary *********** -->
+
+  <Metric NAME="storage_summary" TYPE="TABLE">
+    <Display>
+      <Label NLSID="storage_summary">Storage Summary</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="storage_summary_key" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="storage_summary_key">Key </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_total_storage" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_total_storage">Total Storage </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_database_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_database_free">Database Free </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_filesystem_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_filesystem_free">Filesystem Free </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_volumemanager_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_volumemanager_free">Volume Manager Free </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_ospartitions_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_ospartitions_free">OS Partitions Free </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_disk_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_disk_free">Unused Disks </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_total_free" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_total_free">Total Free </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_vendor_emc_host_side" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_vendor_emc_host_side">EMC Host Side </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_vendor_emc_storage_side" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_vendor_emc_storage_side">EMC Storage Side </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="storage_summary_vendor_others" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="storage_summary_vendor_others">Others </Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+    </QueryDescriptor>
+  </Metric>
+
+<!-- ************* End of Metric Storage Summary *********** -->
+
+
+
+<!-- ******************* End of Storage Utilization Metrics *********** -->

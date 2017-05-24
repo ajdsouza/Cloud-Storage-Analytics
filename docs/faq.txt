@@ -1,0 +1,183 @@
+Storage FAQ
+
+This application attempts to provide storage capacity utilization and trending information for the group of Hosts being monitored.
+
+What is Rawsize ?
+How is Rawsize computed ?
+What is Host Visible storage ?
+What is Total Available storage ?
+What is Allocated storage at a given level of Storage Management ? 
+What are the Storage Management Layers reported under Allocated Storage ?
+What is Used Storage at a given level of Storage Management ?
+What is Backup storage ?
+What is Total Used storage in a system ?
+How is %Used for the system computed ? 
+What is Free storage at a given level of Storage Management ?
+What is Total Free storage in a system ?
+What is allocatable storage ?
+What is Database storage ?
+What is Local File System ?
+What is NFS storage ?
+What is Dedicated NFS ?
+What is Shared NFS ?
+What is Volume Manager storage ?
+What is SW Raid Manager storage ?
+What is Disks storage ?
+What is EMC Symmetrix storage ?
+What is Network Appliance storage ?
+What is SUN storage ?
+What is Hitachi storage ?
+What are Other Vendors storage ?
+What is group storage summary ?
+What are 'Hosts Summarized' ?
+How do I view storage reports for Hosts with valid summary's ?
+What are 'Hosts Not Scheduled' ?
+How do I view list of Not Scheduled Hosts?
+How do I view the Storage Summary reports for all Hosts ?
+What are Issues?
+What are Warnings?
+Is it important to resolve issues?
+Is it important to resolve warnings?
+How do I view issues?
+How do I view warnings ?
+How do I resolve Issues and/or warnings ?
+What is a History ?
+What history can I view ?
+What is a Storage Detail Report ?
+
+
+What is Rawsize ?
+Rawsize is the actual storage consumed taking into account any rollups. The rollups may occur because of a RAID configuration like mirroring, parity etc.Rawsize will account for the storage that is rolledup.
+
+How is Rawsize computed ?
+Rawsize is computed by considering the factor by which storage is rolled up. eg. For a 18GB disk on a Host with hardware Raid configuration of RAID1 the rawsize will be computed as 36GB,( 2 * 18GB )
+
+What is Host Visible storage ?
+All storage mounted on the Host through disks and dedicated NFS. Host Visible Storage = Sum of the size of all disks on the Host + Sum of the size of all dedicated NFS mounted on the Host. 
+
+What is Total Available storage ?
+The actual storage available for the use of an end application or user. It is the effective storage available after rollups at different levels of storage management on the Host. 
+
+What is Allocated Storage at a given level of storage management ?
+Storage on the Host is managed at multiple levels thorough different storage management technologies. Each level can consume some or all of the storage available to it. Allocated storage is all storage managed by the given storage management technology . eg. For a volume manager  allocated storage is all disks managed my a volume manager. Allocated storage = Used storage + Free storage
+
+What are the Storage Management Layers reported under Allocated Storage ?
+The layers reported in the top down order are database (top level), {file systems, nfs}, volume manager, software raid and disks managed by OS. Some or all of the layers may be present in a given Host.
+
+What is Used Storage at a given level of Storage Management ?
+Used storage is storage utilized at the given storage management layer. The storage may be utilized by the storage management layer or by any level above it. Used storage includes backup storage . At a given storage management technology level, Used storage = Allocated storage at that level - Free storage at that level.
+
+What is Backup Storage ?
+Disk storage used in conjunction with a backup server exclusively for the purpose of backing up data from the Host , currently EMC Symmetrix disks configured as BCV's are accounted as backup storage.
+
+What is Total Used storage in a system?
+Total Used storage can be computed for either of the Total visible storage or the Total Available storage on the Host. Total Used storage = ( Total Visible Storage or Total Available Storage ) - Total Free Storage.Currently Total Used storage is computed for the Host visible storage.
+
+How is %Used computed for a given system?
+%Used can computed  for either of the Host visible storage or the Total Available storage on the Host. %Used = ((( Total Visible Storage or Total Available Storage )- Total Free Storage )/( Total Visible Storage or Total Available Storage ))*100. Currently %Used storage is computed for the Host visible storage.
+
+What is Free storage at a given level of Storage Management ?
+Free storage at any storage management layer is part of the storage managed in that layer that has not been utilized at any layer on the Host. Free storage at Oracle database level is the free space in oracle tablespaces of all databases on the given Host. Free storage at file system level is the free space across all file systems as seen by the OS. Free storage at NFS level is the free space across all dedicated NFS as seen by the OS. Free storage at Volume Manager level is the sum of size of all free volumes and free space in all the disk groups of the Host. Free storage at Software Raid Manager level is the sum of the size of all free metadisks in the Host. Free storage at disk level is the sum of the size of all free partitions and all free disks in the Host.
+
+What is Total Free storage in a system?
+Sum of the Free storage at all storage management layers on the given system. Free storage = Host Visible storage - Used storage at all levels of storage management.
+
+What is allocatable storage?
+Allocatable storage is part of the free storage that has not been allocated to any use. eg. Free volumes , Free meta disks, Free disk partitions. Allocatable storage can be allocated to an application for use.
+
+What is Database storage ?
+Storage managed by the Oracle Database application in data file(s).
+
+What is Local File System storage ?
+Storage managed by all the local filesystems on the Host.
+
+What is NFS storage ?
+Storage provided by dedicated NFS filesystems to the Host. 
+
+What is Dedicated NFS ?
+NFS filesystem mounted exclusively write mode to this Host.
+
+What is Shared NFS ?
+NFS filesystems which are mounted on multiple Hosts.
+
+What is Volume Manager storage ?
+All storage managed by Volume Manager to create volumes on the Host. It includes all disks or raid disks managed by the Volume Manager.
+
+What is SW Raid Manager storage ?
+All storage managed by the Software Raid Manager to create software raid disks. It includes all disks managed by the Software Raid Manager.
+
+What is Disk storage ?
+Storage from all disks mounted on the Host, Disks may be internal disks, external disks connected thru Fibre channel or SCSI.
+
+What is EMC Symmetrix storage ?
+Disk storage mounted on the Host from EMC Symmetrix storage system(s). To detect the configuration of a EMC disk ensure that a EMC gatekeeper device is configured for your Host.
+
+What is Network Appliance storage ?
+Dedicated NFS storage mounted on the Host from Network Appliance(s) filers.
+
+What is SUN storage ?
+Disk storage mounted on the Host from SUN external storage arrays. 
+
+What is Hitachi storage ?
+Disk storage mounted on the Host from Hitachi external storage arrays. 
+
+What is Other Vendors storage ?
+Disk and dedicated NFS storage mounted on the Host from all but the Vendors mentioned above ( EMC Symmetrix, SUN , Hitachi, Network Appliance).
+
+What is group storage summary ?
+The aggregated storage summary for a group of Hosts. Group summary will ensure that shared storage between Hosts is counted once.
+
+What are 'Hosts Summarized' ?
+'Hosts Summarized' are the Hosts for which storage summary's have been successfully computed and have valid storage reports. These Hosts have no inconsistencies across various layers of storage management. They are aggregated at group level (such as Data Center Level)
+
+How do I view storage reports for Hosts with valid Storage Summary's ?
+To navigate to the Storage Summary's of only Hosts with valid reports click on the 'Hosts Summarized' link.
+
+What are 'Hosts Not Scheduled; ?
+Hosts not yet scheduled for data collection through OEM job system. 
+
+How do I view the list of Not Scheduled Hosts?
+To navigate to the list of Hosts for which storage metrics are not scheduled , click on the Hosts Not Collected link at that level.
+
+How do I view the Summary report for all Hosts ?
+To navigate to the summary report for all Hosts , click on the  Hosts Total link at that level.
+
+What are Issues?
+Issues are raised for the following conditions.
+(1) When an inconsistency is found between one layer of storage manager (for eg: volume manager) to another layer of storage management (for eg: OS level disks). Storage space from Hosts with issues is not aggregated in the generated reports.
+(2) Latest collection failed for a Host with successful collection in the past.
+
+What are Warnings?
+Warnings are raised for the following conditions.
+(1) When the space is allocated inconsistently with in a given layer of storage management software (for eg: Disk could have partitions that are overlapping with each other)
+(2) Storage entity such as disk is configured, but it is not physically present or currently valid
+
+Is it important to resolve issues?
+Yes. Unless they are resolved, the given Host can not be aggregated in group level reports.
+
+Is it important to resolve warnings?
+If collection is failing, it is important to resolve it. It is desirable that the other types of warnings are resolved.
+
+How do I view issues?
+To view Issues for all Hosts in a group, click on the Hosts with Issues link for that group. To view Issues for a particular Host, click on the Issues link in the storage summary report for that Host.
+
+How do I view warnings ?
+To view Warnings for all Hosts in a group, click on the Warnings link for that group. To view all Warnings for a particular Host, click on the Warnings link in the storage summary report for that Host.
+
+How do I resolve Issues and/or warnings ?
+<insert the correct table below>
+
+What is a History ?
+Storage summaries are chronologically rolled up . To graphically view the rolled up summaries click on the History link. History can be viewed for a group as well as an individual Host.
+A daily rollup can be viewed for the last 30 days and a weekly rollup can be viewed for the last 52 weeks. 
+
+What history can I view ?
+The following history can be viewed at either the individual Host or group level.
+Total Used		-  History of Total and Used for all Host Visible storage. 
+All Disks		-  History of Total and Used for storage from All Disks.
+Dedicated NFS		-  History of Total and Used for storage from Dedicated NFS. 
+Local Filesystems	-  History of Total and Used for storage in Local Filesystems. 
+Oracle Database		-  History of Total and Used for storage Managed by the Oracle Database Server.
+
+What is a Storage Detail Report ?
+The detailed report for a Host , providing the break up of storage on the Host. The storage details are provided for all the disks, raid disks, volumes, file systems, dedicated nfs and oracle databases on the Host. You can navigate to the detailed report for a Host from the summary report by clicking on the Host name.

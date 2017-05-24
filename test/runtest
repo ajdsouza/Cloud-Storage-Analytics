@@ -1,0 +1,267 @@
+#!/bin/sh
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+# Author: Vijay Swamidass
+#
+#  $Id: runtest,v 1.16 2002/07/25 00:53:57 vswamida Exp $
+#
+#  $Log: runtest,v $
+#  Revision 1.16  2002/07/25 00:53:57  vswamida
+#  Fixed the failure handling.  Break out of loop instead of 'exit' so that the failure message can be printed.
+#
+#  Revision 1.15  2002/07/25 00:24:23  vswamida
+#  Added runtime status indicators.  Added a record count in the Report.
+#  Exit immediately if there is an Error.
+#
+#  Revision 1.14  2002/07/22 18:57:23  vswamida
+#  Added counter for script failures.
+#
+#  Revision 1.13  2002/07/20 00:26:15  vswamida
+#  Added option to run all tests for the current OS.
+#  Rearranged test files by OS.
+#
+#  Revision 1.11  2002/07/03 00:06:56  vswamida
+#  Added run_sympd to list of commands.
+#  Added blddir to support new directory replicating process.
+#
+#  Revision 1.10  2002/06/28 20:18:40  vswamida
+#  *** empty log message ***
+#
+#  Revision 1.9  2002/06/27 20:38:50  vswamida
+#  Fixed 'cut' for files.
+#
+#  Revision 1.8  2002/06/26 20:37:28  vswamida
+#  Modified cut operation for files script and added error checking/removal in several places.
+#
+#  Revision 1.6  2002/06/25 23:00:42  vswamida
+#  ls -d */ doesn't work in Solaris - removed it.
+#
+#  Revision 1.5  2002/06/25 22:14:17  vswamida
+#  Changed the test detection to elimiate files from being listed as tests.
+#
+#  Revision 1.4  2002/06/25 20:44:56  vswamida
+#  Modified the fields 'cut' from the volumes output.
+#
+#  Revision 1.3  2002/06/24 23:14:14  vswamida
+#  The inode is now removed from all test results.  This allows us to compare results with a "gold" file and verify the test.
+#
+#  Revision 1.2  2002/06/20 22:51:41  vswamida
+#  Ask user for testname if not provided.  Added support for moving /dev and /devices with tar.
+#
+#  Revision 1.1  2002/06/14 20:51:48  vswamida
+#  Modified to support Solaris.
+#
+#  Revision 1.1  2002/06/07 23:45:46  vswamida
+#  Copies the input files created by running 'testmake' to a chroot'ed area.
+#  It then runs the desired stormon script within chroot to test the script
+#  with those inputs.
+#
+
+# Set the Mode - either RUN or MAKE.  We export it because the pretender script
+# will use it below.
+MODE=RUN
+export MODE
+
+# CHROOT is the 'root' of the chrooted environment
+CHROOT=/export/home/smontest
+GITDIR=/usr/local/git/oem
+CHRDIR=$CHROOT$GITDIR
+OS=`uname`
+SCRDIR=`pwd`
+
+scripts="disks swraid volumes files";
+
+# These are the system commands we will simulate with links and the 'pretender'
+# script
+commands="getdiskinfo scsiinq run_vxprint run_prtvtoc run_sympd sysdef lvdisplay pvdisplay vgdisplay mount showmount df ioscan"
+
+while getopts "a" opt;
+do
+	case $opt in
+	a ) RUNALL=true ;;
+	
+	esac
+done
+shift `expr $OPTIND - 1`
+
+if [ "$CHROOT" = "/" ];
+then
+	echo "CHROOT = '/'. This could cause serious problems or destroy"  
+	echo "this system.  Check this script.";
+	exit;
+fi
+if [ ! -d "$CHROOT" ]; 
+then
+	echo "CHROOT directory $CHROOT not found."
+	exit;
+fi
+
+#
+# Determine how to suppress newline with echo command.
+#
+N=
+C=
+if echo "\c" | grep c >/dev/null 2>&1; then
+    N='-n'
+else
+    C='\c'
+fi
+
+# This is the list of the tests we have for the OS we are running on.
+TESTLIST=`cd $GITDIR/test/$OS; ls -p | grep '\/' | tr -d '\/'`
+
+tput clear
+if [ "$RUNALL" = "true" ];
+then
+	echo "Running all available tests for $OS..."
+	TESTSTORUN=$TESTLIST
+else
+echo
+echo "			STORMON Testing Environment"
+echo
+
+	X=1
+	echo "Available Tests:"
+	for test in $TESTLIST
+	do
+		echo "$X> $test"
+		X=`expr $X + 1`
+	done
+	echo;
+	echo $N "Enter the test number you want to run: $C";
+	read TESTNUM;
+
+        X=1
+        for test in $TESTLIST
+        do
+		if [ "$X" = "$TESTNUM" ];
+		then
+			TESTSTORUN=$test
+		fi
+                X=`expr $X + 1`
+        done
+fi
+
+# Check to see if we have a test to run
+if [ "$TESTSTORUN" = "" ];
+then
+	echo "Test not found.  Please try again.";
+	exit;
+fi
+
+tput clear
+echo
+echo "			   Stormon Test Report"
+echo "------------------------------------------------------------------------"
+echo " TEST		disks		swraid		volumes		files"
+echo "------------------------------------------------------------------------"
+
+# Count of script failures
+FAILURES=0
+for TESTNAME in $TESTSTORUN
+do
+tput sc
+
+TESTDIR=$GITDIR/test/$OS/$TESTNAME
+export TESTDIR
+
+tput rc
+tput el
+echo $N "$TESTNAME: Copying test files to local chroot...$C"
+rm -rf $CHRDIR/test/$OS/$TESTNAME
+cd $SCRDIR
+cp pretender $CHRDIR/storage
+chmod 700 $CHRDIR/storage/pretender
+cd $TESTDIR
+rm -f $TESTNAME.tar
+tar cf $TESTNAME.tar *
+mkdir -p $CHRDIR/test/$OS/$TESTNAME
+cp $TESTNAME.tar $CHRDIR/test/$OS/$TESTNAME
+cd $CHRDIR/test/$OS/$TESTNAME
+tar xf $TESTNAME.tar
+
+tput rc
+tput el
+echo $N "$TESTNAME: Builing dev and/or devices trees...$C"
+$SCRDIR/blddir $TESTDIR/input/_dev.list $CHRDIR/test/$OS/$TESTNAME
+if [ -r "$TESTDIR/input/_devices.list" ];
+then
+	$SCRDIR/blddir $TESTDIR/input/_devices.list $CHRDIR/test/$OS/$TESTNAME
+fi
+
+for link in $commands
+do
+	rm -f $CHRDIR/storage/$link
+	ln -s $GITDIR/storage/pretender $CHRDIR/storage/$link
+done
+
+# Some files such as 'raidtab' and 'partitions' are stored in /etc/ or /proc.
+# These directories are stored under the 'test/$TESTNAME' directory.
+# Here we link the /etc and /proc in the chroot area to the /etc and /proc for
+# our test
+rm $CHROOT/etc
+rm $CHROOT/proc
+rm $CHROOT/dev
+rm $CHROOT/devices
+rm $CHROOT/sbin
+ln -s $TESTDIR/etc $CHROOT/etc
+ln -s $TESTDIR/proc $CHROOT/proc
+ln -s $TESTDIR/sbin $CHROOT/sbin
+ln -s $TESTDIR/dev $CHROOT/dev
+ln -s $TESTDIR/devices $CHROOT/devices
+
+tput rc
+tput el
+COL=0
+echo $N "$TESTNAME$C"
+for script in $scripts
+do
+	case "$script" in
+	disks)
+		chroot $CHROOT $GITDIR/storage/$script 2>/dev/null | cut -d'|' -f 1-6,8-19,21-24 > $TESTDIR/run/$script
+		;;
+	swraid)
+		chroot $CHROOT $GITDIR/storage/$script 2>/dev/null | cut -d'|' -f 1-3,5-8 > $TESTDIR/run/$script
+		;;
+	volumes)
+		chroot $CHROOT $GITDIR/storage/$script 2>/dev/null | cut -d'|' -f 1-11,13,15,17-20>$TESTDIR/run/$script
+		;;
+	files)
+		chroot $CHROOT $GITDIR/storage/$script 2>/dev/null | cut -d'|' -f 1-2,4-9,12-15 >$TESTDIR/run/$script
+		;;
+	esac
+
+	lines=`wc -l $TESTDIR/run/$script |cut -b0-8|tr -d ' '`
+	COL=`expr $COL + 16`
+	tput rc
+	tput cuf $COL
+	if [ -f $TESTDIR/gold/$script ];
+	then
+		diff=`diff $TESTDIR/run/$script $TESTDIR/gold/$script`;
+		if [ "$diff" = "" ]
+		then
+			echo $N "YES ($lines)$C";
+		else
+			echo $N "NO ($lines)$C";
+			FAILURES=`expr $FAILURES + 1`;
+		fi
+	else
+		echo $N "NO GOLD FILE$C";
+	fi
+done
+echo 
+if [ "$FAILURES" != 0 ];
+then
+	break
+fi
+
+done
+echo
+if [ "$FAILURES" = 0 ];
+then
+	echo "All Tests Successful!"
+else
+	echo "Test Failed."
+	echo "See the output files under $TESTDIR/run."
+fi
+exit

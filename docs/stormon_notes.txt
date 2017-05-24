@@ -1,0 +1,44 @@
+
+TABLE OF CONTENTS
+
+1    MAC Address.
+1.1  Obtaining the MAC address.
+1.2  Lookup the ARP Cache Table
+1.3  Packet Filtering at the Data Link Layer
+1.4  To be looked at
+1.5  Conculsion
+
+							1. MAC Address
+
+      NFS is storage provided over IP. The mounting server will know the IP address of the NFS Sever. It is required to identify the server providing the NFS storage. A better identifier than the IP is desirable. The MAC address of the network card is one such. It is burned in by the Vendor and can be assumed to be unique.. A NFS server may have multiple network cards. It is assumed that the EM repository will have the MAC addresses of all network interfaces for a host or storage target.
+
+      1.1  Obtaining the MAC address
+
+	  MAC address for a NFS server IP address can be obtained if the NFS server is routed directly from the host. If the NFS server is in a different subnet than the host , the route is indirect. If one or more routers do the routing the MAC address of the NFS server will only be known to the last router in the subnet of the NFS server.In other words if the IP routing is indirect then there is no way to get the MAC address of the NFS server.
+	   
+	  For direct routing MAC address can be obtained using two ways. 
+	  -   A look up of the arp cache table on the host or 
+	  -   Filtering the network packets at the data link layer on the host. 
+
+
+1.2 Look up the ARP cache Table
+
+    For direct routing the ARP module will cache the MAC address for the IP addresses of the NFS server. A ping to the IP address will update the cache with eh MAC address. the arp command will display the arp cache stored on the host.
+    eg.
+	$ ping <host_name or ip address>
+	$ arp
+
+1.3 Packet filtering at the Data Link Layer
+
+    MAC address is part of the ethernet header for a IP packet. To view a packet before the ethernet header is stripped one needs to be able to get the packet at the data link layer in the IP atack. Raw sockets will let the user skip the kernel header stripping and directly send and recieve packets at the data link layer. However the implementation of raw sockets at the data link layer is not portable across Operating Systems. HP and Solaris have an implementation of DLPI ( Data Link Provider Interface Specification ) standard for communication at the data link layer. On Linux platforms the implementation is to use raw sockets with SOCK_PACK, on Windows NT one has to use the winsock raw sockets implementation.
+
+1.4 To be looked at
+
+    Using the ICMP protocol with raw sockets at the IP level. Traceroute uses this to get the list of routers to a IP address.This is somethig we can look at. Raw sockets at the IP level in the IP stack are far more portable.    
+
+1.5 Conculsion
+
+    Use the ARP cache look up to get the MAC address of the NFS server.  Check if the IP routing to the NFS server is direct. If its direct get the MAC address, if its not direct leave the MAC address field blank.In this case the IP address is to be used to do the correlation in the repository.
+
+
+

@@ -1,0 +1,3989 @@
+<!-- $Header: rac_database.xml 22-jul-2004.14:47:49 ajdsouza Exp $
+   MODIFIED    (MM/DD/YY)
+      ajdsouza  07/22/04 - Changed the db_datafiles, db_redologs, db_controlfiles to oslinetoken executions
+      rreilly   07/16/04 - bug 3548431 db_recSegmentSettings_sysseg perf fix 
+      ychan     07/09/04 - Remove 10gBeta 
+      jstone    06/11/04 - composite key for db_FeatureUsage (3669601) 
+      jochen    05/26/04 - Add 10gR2 
+      sbadrina  05/24/04 - comment out cfsize for 10gR1
+      sbadrina  05/06/04 - add used tbsp size col and cfsize metric 
+      jochen    04/30/04 - Add minSegSize to wastedSpace
+      pbantis   04/05/04 - Update ha_init_params metric 
+      xshen     02/18/04 - fix bug 3451403 
+      hmulling  01/07/04 - do not report default pwd of expired accounts 
+      abodge    12/29/03 - Fix JAVASNM ref in invalid objects query 
+      abodge    11/13/03 - Add KEYS_ONLY to invalidObjects policy metric 
+      abodge    11/06/03 - Perf improvement to recseq query 
+      abodge    11/03/03 - Add Storage, Objects metrics to RAC 
+      xshen     11/04/03 - split db_datafiles query to hidden metrics 
+      ysun      11/03/03 - update statistics_level
+      ysun      10/31/03 - add statistics level
+      jsoule    10/30/03 - revert Recovery_Area.Free_Space one last time 
+      jochen    10/27/03 - Add wastedSpace 
+      pbantis   10/24/03 - Add log_mode column to ha_info 
+      gallison  10/19/03 - Add DataGuardStatus to metadata (3202444) 
+      jaysmith  10/16/03 - add Role property to PushDescriptors 
+      jsoule    10/14/03 - remove key attribute from recovery area 
+      kmckeen   10/14/03 - Bug 3191581 - update problemTbsp 10i SQL query to 
+                           use new view 
+      ysun      10/13/03 - fix ilint srgs
+      jsoule    10/10/03 - 
+      hmulling  10/10/03 - undo removal of validif because of oci bug 
+      jsoule    10/04/03 - support beta2 and release 
+      ysun      10/08/03 - add UserBlock
+      hmulling2 10/03/03 - remove ValidIf from testPrivileges 
+      gallison  09/30/03 - Add dataguardstatus dynprop 
+      ysun      10/03/03 - remove unecessary preferre column
+      eujang    09/22/03 - ESM integration 
+      kmckeen   09/17/03 - Bug 3115742 - fix performance of 10i problemTbsp 
+      skini     09/02/03 - Add credential info 
+      jsoule    08/27/03 - add Recovery_Area data, problemTbsp reversion
+      jaysmith  08/21/03 - add KeyColumn property to AQ PushDescriptor 
+      kmckeen   08/20/03 - Add tbspc space-used metric for 10i db dictionary 
+                           mngd tbspc 
+      ysun      08/13/03 - NLS handling
+      ysun      08/11/03 - add database level server generated alerts
+-->
+
+<!DOCTYPE TargetMetadata SYSTEM "../dtds/TargetMetadata.dtd">
+
+<TargetMetadata META_VER="3.0" TYPE="rac_database" CATEGORY_PROPERTIES="VersionCategory;DataGuardStatus">
+  <Display>
+    <Label NLSID="rac_database_name">Cluster Database</Label>
+  </Display>
+
+  <MonitoringMode MEDIATOR="OMSMediated" CLUSTERDESCRIPTOR="">
+  </MonitoringMode>
+
+  <AltSkipCondition METRIC="AgentSideResponse" COLUMN="Status">
+  </AltSkipCondition>
+
+<!--
+  <MonitoringMode MEDIATOR="AgentMediated" CLUSTERDESCRIPTOR="clusterac">
+   <ValidIf>
+     <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+   </ValidIf>
+  </MonitoringMode>
+-->
+
+
+  <!--
+  ======================================================================
+  == Category:         Agent_Side_Response
+  == Collection Level: Minimum
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+ <Metric NAME="AgentSideResponse" TYPE="TABLE">
+    <Display>
+      <Label NLSID="agent_resp">Agent Side Response</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="userLogon" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="resp_userLogon">User Logon Time (msec)</Label>
+          <ShortName NLSID="resp_userLogon_short">Logon Time(ms)</ShortName>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="Status" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="resp_status">Status</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="State" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="resp_state">State</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="oraerr" TYPE="STRING" IS_KEY="FALSE" TRANSIENT="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="resp_oraerr">ORA- Error</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+         %perlBin%/perl %scriptsDir%/db/dbresp.pl
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))
+      </Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Tablespaces Full - 9i and earlier
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+  <Metric NAME="problemTbsp" TYPE="TABLE">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2"/>
+    </ValidIf>
+
+    <Display>
+      <Label NLSID="problemTbsp">Tablespaces Full</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="tbspName">Tablespace Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="pctUsed" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="pctUsed">Tablespace Space Used (%)</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+        %perlBin%/perl %scriptsDir%/fullTbsp.pl
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_TABLESPACE_CONDITION_CLAUSE" SCOPE="USER" OPTIONAL="TRUE">targetTbspCondition</Property>
+      <Property NAME="ENVEM_TARGET_SEGMENT_CONDITION_CLAUSE" SCOPE="USER" OPTIONAL="TRUE">targetSegCondition</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))
+      </Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Tablespaces Full - 10i - locally managed
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+  <Metric NAME="problemTbsp" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+    </ValidIf>
+
+    <Display>
+      <Label NLSID="problemTbsp">Tablespaces Full</Label>
+    </Display>
+
+    <TableDescriptor>
+      <ColumnDescriptor NAME="name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="tbspName">Tablespace Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="pctUsed" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="pctUsed">Tablespace Space Used (%)</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+        <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+      </ValidIf>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+      <![CDATA[
+SELECT tablespace_name, used_percent FROM sys.dba_tablespace_usage_metrics 
+       WHERE :1 != 'BASIC'
+      ]]>
+      </Property>
+	  <Property NAME="SQLINPARAM1" SCOPE="INSTANCE">StatisticsLevel</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+
+    <PushDescriptor RECVLET_ID="AQMetrics">
+      <Property NAME="QueueName" SCOPE="GLOBAL">ALERT_QUE</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="KeyField" SCOPE="GLOBAL">OBJECT_NAME</Property>
+      <Property NAME="KeyColumn" SCOPE="GLOBAL">name</Property>
+    </PushDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Tablespaces Full - 10i - dictionary managed
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+  <Metric NAME="problemTbsp10iDct" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+    </ValidIf>
+
+    <Display>
+      <Label NLSID="problemTbsp10iDct">Tablespaces Full (dictionary managed)</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="tbspName">Tablespace Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="pctUsed" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="pctUsed10iDct">Tablespace Space Used (%) (dictionary managed)</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+        %perlBin%/perl %scriptsDir%/fullTbsp.pl
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_TABLESPACE_CONDITION_CLAUSE" SCOPE="USER" OPTIONAL="TRUE">targetTbspCondition</Property>
+      <Property NAME="ENVEM_TARGET_SEGMENT_CONDITION_CLAUSE" SCOPE="USER" OPTIONAL="TRUE">targetSegCondition</Property>
+      <Property NAME="ENVEM_TARGET_EXTENT_MGMT_CONDITION_CLAUSE" SCOPE="GLOBAL">='DICTIONARY'</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))
+      </Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Tablespaces With Problem Segments
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+	<Metric NAME="problemSegTbsp" TYPE="TABLE">
+		<Display>
+			<Label NLSID="problemSegTbsp">Tablespaces With Problem Segments</Label>
+		</Display>
+		<TableDescriptor>
+			<ColumnDescriptor NAME="name" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="tbspName">Tablespace Name</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="segsChunkSmlCnt" TYPE="NUMBER" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="segsChunkSmlCnt">Segments Not Able to Extend Count</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="segsChunkSmlMessage" TYPE="STRING" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="segsChunkSmlMessage">Segments Not Able to Extend</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="segsMaxExtsCnt" TYPE="NUMBER" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="segsMaxExtsCnt">Segments Approaching Maximum Extents Count</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="segsMaxExtsMessage" TYPE="STRING" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="segsMaxExtsMessage">Segments Approaching Maximum Extents</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="OSLineToken">
+			<Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+			<Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+			<Property NAME="command" SCOPE="GLOBAL">
+        %perlBin%/perl %scriptsDir%/problemTbsp.pl
+      </Property>
+			<Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+			<Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+			<Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+			<Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+			<Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			<Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="ENVEM_TARGET_TABLESPACE_CONDITION_CLAUSE" SCOPE="USER" OPTIONAL="TRUE">targetTbspCondition</Property>
+			<Property NAME="ENVEM_TARGET_SEGMENT_CONDITION_CLAUSE" SCOPE="USER" OPTIONAL="TRUE">targetSegCondition</Property>
+			<Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))
+      </Property>
+		</QueryDescriptor>
+	</Metric>
+
+  <!--
+  ============================================================================
+  == Category:         Storage (Performance): Unused Space in Object
+  == Collection Level: Complete
+  == Purpose:          Storage Problems report
+  == Description:      Determines % unused space in a segment
+  == Usage Notes:      The tsNames and schema properties should be set to ";"
+  ==                   if no tablespaces or schemas are to be checked.
+  ==                   Otherwise, send a ; separated lists of tablespaces
+  ==                   and a ; separated of schemas
+  ==                   wasteMinValue - any segment with unused% less than
+  ==                                   wasteMinValue is not reported at all.
+  ==                   rcMinValue - any segment with row chain % less than
+  ==                                rcMinValue is not reported at all.
+  ==                   ckWasteSpc - 'true' to check wasted space
+  ==                   ckRowChain - 'true' to check row chaining
+  ==                   minSegSize - if seg space in MB under HWM is below
+  ==                                this value, don't bother checking it
+  ==                                for wasted space.
+============================================================================
+  -->
+  <Metric NAME="wastedSpace" TYPE="RAW">
+    <Display>
+      <Label NLSID="stgPerf">Segment Findings</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_space_metrics">
+      <ColumnDescriptor NAME="obj_type_schema_name" COLUMN_NAME="object" TYPE="STRING" IS_KEY="TRUE">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="seg_type" COLUMN_NAME="segment_type" TYPE="NUMBER" IS_KEY="TRUE">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="tablespace" COLUMN_NAME="tablespace" TYPE="STRING" IS_KEY="FALSE">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="problem" COLUMN_NAME="problem_code" TYPE="NUMBER" IS_KEY="TRUE">
+        <!-- Numeric value is bitwise OR of specific problems:  -->
+        <!--   1 = wasted space                                 -->
+        <!--   2 = excess row chaining                          -->
+      </ColumnDescriptor>
+      <!-- Numeric value is bitwise OR of specific problems:  -->
+      <!--   1 = shrink                                       -->
+      <!--   2 = reorg                                        -->
+      <ColumnDescriptor NAME="recommendations" COLUMN_NAME="recommendations" TYPE="NUMBER" IS_KEY="FALSE">
+      </ColumnDescriptor>
+      <!-- Value1 - Supporting data for problem (; separated)   -->
+      <!-- Wasted Space problem values                          -->
+      <!--      %unused space;#MB unused;#MB allocated          -->
+      <ColumnDescriptor NAME="problemValue" COLUMN_NAME="value1" TYPE="STRING" IS_KEY="FALSE">
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <!--
+        Making the item properties optional="FALSE" causes problems because
+        a collection without any item properties is initiated on demand
+        when the metrics are viewed from the All Metrics page and no data
+        is being collected.
+      -->
+      <Property NAME="tsNames" SCOPE="USER" OPTIONAL="TRUE">tsNames</Property>
+      <Property NAME="schemas" SCOPE="USER" OPTIONAL="TRUE">schemas</Property>
+      <Property NAME="wasteMinValue" SCOPE="USER" OPTIONAL="TRUE">wasteMinValue</Property>
+      <Property NAME="rcMinValue" SCOPE="USER" OPTIONAL="TRUE">rcMinValue</Property>
+      <Property NAME="ckWasteSpc" SCOPE="USER" OPTIONAL="TRUE">ckWasteSpc</Property>
+      <Property NAME="ckRowChain" SCOPE="USER" OPTIONAL="TRUE">ckRowChain</Property>
+			<Property NAME="minSegSize" SCOPE="USER" OPTIONAL="TRUE">minSegSize</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+        %perlBin%/perl %scriptsDir%/wastedSpace.pl %tsNames% %schemas% %wasteMinValue% %rcMinValue% %ckWasteSpc% %ckRowChain% %minSegSize%
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))
+      </Property>
+      <Property NAME="ENVVersionCategory" SCOPE="INSTANCE">VersionCategory</Property>
+    </QueryDescriptor>
+  </Metric>
+
+	<!--
+  ======================================================================
+  == Category:         Recommended User Settings
+  == Collection Level: Recommended
+  == Purpose:          Storage Advisor
+  ======================================================================
+  -->
+	<Metric NAME="db_recUserSettings" TYPE="RAW" CONFIG="TRUE">
+		<TableDescriptor TABLE_NAME="mgmt_db_recUserSettings_ecm">
+			<ColumnDescriptor NAME="name" COLUMN_NAME="user_name" TYPE="STRING" IS_KEY="TRUE"/>
+			<ColumnDescriptor NAME="problem" COLUMN_NAME="problem_code" TYPE="NUMBER" IS_KEY="TRUE">
+				<!-- Numeric values correspond to specific problems and recommendations:        -->
+				<!--   1    User uses permanent tablespace as a temporary tablespace            -->
+				<!--   2    Non-system user uses system tablespace as a default tablespace      -->
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="tablespace" COLUMN_NAME="tablespace" TYPE="STRING" IS_KEY="FALSE"/>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="SQL">
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+SELECT username, 1, temporary_tablespace
+  FROM dba_users u, dba_tablespaces t
+  WHERE u.temporary_tablespace = t.tablespace_name and t.contents != 'TEMPORARY'
+  AND u.account_status = 'OPEN'
+UNION ALL
+SELECT username, 2, default_tablespace
+  FROM dba_users
+  WHERE username not in ('SYS', 'SYSTEM', 'SYSMAN', 'CTXSYS', 'MDSYS', 'ORDSYS', 'ORDPLUGINS',
+  'OLAPSYS', 'DBSNMP', 'MGMT_VIEW', 'OUTLN', 'ANONYMOUS', 'DMSYS', 'EXFSYS',
+  'LBACSYS', 'SI_INFORMTN_SCHEMA', 'SYSMAN', 'WKPROXY', 'WKSYS', 'WK_TEST',
+  'WMSYS', 'XDB', 'TRACESVR')
+    AND account_status = 'OPEN'
+    AND default_tablespace in ('SYSTEM', 'SYSAUX')
+]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+	</Metric>
+	<!--
+  ======================================================================
+  == Category:         Recommended Tablespace Settings
+  == Collection Level: Recommended
+  == Purpose:          Storage Advisor
+  ======================================================================
+  -->
+	<Metric NAME="db_recTablespaceSettings" TYPE="RAW" CONFIG="TRUE">
+		<TableDescriptor TABLE_NAME="mgmt_db_recTSSettings_ecm">
+			<ColumnDescriptor NAME="tablespace" COLUMN_NAME="tablespace" TYPE="STRING" IS_KEY="TRUE"/>
+			<ColumnDescriptor NAME="problem" COLUMN_NAME="problem_code" TYPE="NUMBER" IS_KEY="TRUE">
+				<!-- Numeric values correspond to specific problems and recommendations:        -->
+				<!--   1    [NO LONGER USED]                                                    -->
+				<!--   2    Tablespace is dictionary-managed                                    -->
+				<!--   3    Tablespace contains both rollback and data segments                 -->
+				<!--        NOTE: Overlaps with Config check for rollback segs in SYSTEM        -->
+				<!--   4    Tablespace has non-zero PctIncrease value                           -->
+				<!--   5    Tablespace's NextExtent not a multiple of InitialExtent             -->
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="value1" COLUMN_NAME="value1" TYPE="NUMBER" IS_KEY="FALSE"/>
+			<ColumnDescriptor NAME="value2" COLUMN_NAME="value2" TYPE="NUMBER" IS_KEY="FALSE"/>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="SQL">
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+SELECT tablespace_name, 2, 0, 0
+  FROM dba_tablespaces
+  WHERE tablespace_name NOT IN ('SYSTEM', 'SYSAUX')
+    AND extent_management = 'DICTIONARY'
+UNION ALL
+SELECT * FROM (
+  SELECT tablespace, 3, count(rbs) "RBS_COUNT", count(ds) "DS_COUNT" FROM (
+    SELECT t.name "TABLESPACE",
+           decode(s.type#, 1, un.name, null) "RBS",
+           decode(s.type#, 1, null, s.file#*s.block#) "DS"
+    FROM sys.ts$ t, sys.undo$ un, sys.seg$ s
+    WHERE t.ts# = s.ts#
+      AND un.file#(+) = s.file#
+      AND un.block#(+) = s.block#
+      AND un.name(+) != 'SYSTEM'
+      AND s.type# != 10)
+    GROUP BY tablespace)
+WHERE rbs_count > 0 AND ds_count > 0
+UNION ALL
+SELECT tablespace_name, 4, 0, 0
+  FROM dba_tablespaces
+  WHERE pct_increase != 0 AND extent_management = 'DICTIONARY'
+UNION ALL
+SELECT tablespace_name, 5, 0, 0
+  FROM dba_tablespaces
+  WHERE extent_management = 'DICTIONARY'
+  AND initial_extent > 0
+  AND MOD(next_extent, initial_extent) != 0
+]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+	</Metric>
+	<!--
+  ======================================================================
+  == Category:         Recommended Segment Settings - Extent Growth Policy Violation
+  == Collection Level: Recommended
+  == Purpose:          Storage Advisor
+  ======================================================================
+  -->
+	<Metric NAME="db_recSegmentSettings" TYPE="RAW" CONFIG="TRUE">
+		<TableDescriptor TABLE_NAME="mgmt_db_recSegmentSettings_ecm">
+			<ColumnDescriptor NAME="obj_type" COLUMN_NAME="obj_type" TYPE="NUMBER" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_type">Object Type</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_owner" COLUMN_NAME="obj_owner" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_owner">Object Owner</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_name" COLUMN_NAME="obj_name" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_name">Object Name</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_partition" COLUMN_NAME="obj_partition" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_partition">Partition</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_lob_col" COLUMN_NAME="obj_lob_col" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_lob_col">LOB Column</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="seg_type" COLUMN_NAME="segment_type" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_segment_type">Segment Type</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="tablespace" COLUMN_NAME="tablespace" TYPE="STRING" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_tablespace">Tablespace</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="recommendation" COLUMN_NAME="problem_code" TYPE="NUMBER" IS_KEY="TRUE">
+				<!-- Numeric value is bitwise OR of specific problems:            -->
+				<!--   1    PCTINCREASE is not 0                                  -->
+				<!--   2    NEXT not multiple of INITIAL                          -->
+				<Display>
+					<Label NLSID="db_recSegmentSettings_problem_code">Problem</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+                <!--
+Query to get segments with settings that violate best-practices
+recommendations.  Result columns are:
+1. Object type ::=
+      1 (Table) | 2 (Index) | 3 (Cluster)
+2. Object schema
+3. Object name
+4. Partition name or ' ' if not partitioned
+5. LOB Column name or ' ' if not a LOB column
+6. Segment type (Number):
+   1       TABLE
+   2       INDEX
+   3       TABLE PARTITION
+   4       INDEX PARTITION
+   5       IOT OVERFLOW
+   6       LOB INDEX (not used)
+   7       LOB COLUMN
+   8       LOB PARTITION
+   9       TABLE SUBPARTITION
+   10      INDEX SUBPARTITION
+   11      LOB SUBPARTITION (not used, but should be)
+   12      CLUSTER
+   13      IOT OVERFLOW PARTITION
+7. Name of tablespace containing the segment (String)
+8. Violations (Number) - Bitwise OR of problem codes:
+   1       PCTINCREASE not 0
+   2       NEXTEXTENT not multiple of INITIALEXTENT
+
+Index of Queries in the Union
+1. Obj type=1, seg type=1, no ptn or LOB column:
+   Nonpartitioned tables.
+2. Obj type=2, seg type=2, no ptn or LOB column:
+   Nonpartitioned indexes
+3. Obj type=3, seg type=12, no ptn or LOB column:
+   Clusters
+4. Obj type=1, seg type=1, no ptn or LOB column:
+   Non-partitioned IOTs (returned as type TABLE)
+5. Obj type=1, seg type=3, ptn, no LOB column:
+   Table partitions
+6. Obj type=2, seg type=4, ptn, no LOB column:
+   Index partitions (no LOB or IOT partitions)
+7. Obj type=1, seg type=5, no ptn or LOB column:
+   IOT overflow segments
+8. Obj type=1, seg type=8, no ptn, LOB column:
+   Unpartitioned LOB columns
+9. Obj type=1, seg type=3, ptn, no LOB column:
+   IOT Partitions (returned as type TABLE PARTITION)
+10. Obj type=1, seg type=13, ptn, no LOB column:
+    IOT Overflow partitions
+11. Obj type=1, seg type=8, ptn, LOB column:
+    LOB column partitions (The Final Frontier)
+12. Obj type=1, seg type=9, ptn, no LOB column:
+    Table subpartitions
+13. Obj type=2, seg type=10, ptn, no LOB column:
+    Index subpartitions
+                -->
+		<QueryDescriptor FETCHLET_ID="SQL">
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+SELECT * FROM (
+SELECT /*+ ordered */  1 "OBJECT_TYPE", u.name "USER_NAME", o.name "OBJECT_NAME", ' ' "PARTITION",
+  ' ' "LOB_COLUMN", 1 "SEG_TYPE", tts.name "TABLESPACE",
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2) "PROBLEM"
+FROM
+(SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts, sys.tab$ t, sys.seg$ s,
+      sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = t.obj#
+  AND t.ts# = tts.ts#
+  AND t.file# = s.file#
+  AND t.block# = s.block#
+  AND t.ts# = s.ts#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+  AND decode (bitand (t.property, 1), 1, 1, 0) = 0
+  AND decode (bitand (t.property, 32), 32, 1, 0) = 0
+  AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+  AND decode (bitand (t.property, 512), 512, 1, 0) = 0
+  AND decode (bitand (t.property, 1024), 1024, 1, 0) = 0
+UNION ALL
+SELECT  /*+ ordered */ 2, u.name, o.name, ' ', ' ', 2, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM  
+(SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.ind$ i, sys.seg$ s,sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = i.obj#
+  AND i.ts# = tts.ts#
+  AND i.file# = s.file#
+  AND i.block# = s.block#
+  AND i.ts# = s.ts#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+  AND decode (bitand (i.property, 2), 2, 1, 0) = 0
+  AND i.type# not in (4, 8)
+UNION ALL
+SELECT /*+ ordered */  3, u.name, o.name, ' ', ' ', 12, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.clu$ c, sys.seg$ s, sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = c.obj#
+  AND c.ts# = tts.ts#
+  AND c.file# = s.file#
+  AND c.block# = s.block#
+  AND c.ts# = s.ts#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT  /*+ ordered */ 1, u.name, tn.name, ' ', ' ', 1, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#, name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.ind$ i, sys.seg$ s, sys.tab$ t, sys.obj$ tn,sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = i.obj#
+  AND i.ts# = tts.ts#
+  AND i.file# = s.file#
+  AND i.block# = s.block#
+  AND i.ts# = s.ts#
+  AND i.bo# = tn.obj#
+  AND tn.obj# = t.obj#
+  AND decode (bitand (i.property, 2), 2, 1, 0) = 0
+  AND i.type# = 4
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT /*+ ordered */  1, u.name, o.name, o.subname, ' ', 3, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.tabpart$ tp, sys.seg$ s, sys.tab$ t, sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = tp.obj#
+  AND tp.ts# = tts.ts#
+  AND tp.file# = s.file#
+  AND tp.block# = s.block#
+  AND tp.ts# = s.ts#
+  AND t.obj# = tp.bo#
+  AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+  AND decode (bitand (t.property, 512), 512, 1, 0) = 0
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT  /*+ ordered */ 2, u.name, o.name, o.subname, ' ', 4, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.indpart$ ip, sys.seg$ s, sys.ind$ i, sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = ip.obj#
+  AND ip.ts# = tts.ts#
+  AND ip.file# = s.file#
+  AND ip.block# = s.block#
+  AND ip.ts# = s.ts#
+  AND i.obj# = ip.bo#
+  AND decode (bitand (i.property, 2), 2, 1, 0) = 1
+  AND i.type# not in (4, 8)
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT  /*+ ordered */ 1, u.name, tn.name, ' ', ' ', 5, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.tab$ t, sys.seg$ s, sys.tab$ iot,sys.obj$ tn, sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = t.obj#
+  AND t.ts# = tts.ts#
+  AND t.file# = s.file#
+  AND t.block# = s.block#
+  AND t.ts# = s.ts#
+  AND tn.obj# = t.bobj#
+  AND tn.obj# = iot.obj#
+  AND decode (bitand (t.property, 32), 32, 1, 0) = 0
+  AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+  AND decode (bitand (t.property, 512), 512, 1, 0) = 1
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT  /*+ ordered */  1, u.name, tn.name, ' ',
+  decode(bitand(c.property, 1), 1, ac.name, c.name), 8, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM    (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.lob$ l, sys.seg$ s, sys.col$ c, sys.attrcol$ ac, sys.obj$ tn, sys.user$ u
+WHERE tn.owner# = u.user#
+  AND tn.obj# = c.obj#
+  AND c.obj# = l.obj#
+  AND c.intcol# = l.intcol#
+  AND l.ts# = tts.ts#
+  AND l.file# = s.file#
+  AND l.block# = s.block#
+  AND l.ts# = s.ts#
+  AND c.obj# = ac.obj#(+)
+  AND c.intcol# = ac.intcol#(+)
+  AND bitand(c.property,32768) != 32768
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT  /*+ ordered */ 1, u.name, tn.name, o.subname, ' ', 3, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.indpart$ ip, sys.seg$ s, sys.ind$ i, sys.obj$ tn, sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = ip.obj#
+  AND ip.ts# = tts.ts#
+  AND ip.file# = s.file#
+  AND ip.block# = s.block#
+  AND ip.ts# = s.ts#
+  AND i.obj# = ip.bo#
+  AND decode (bitand (i.property, 2), 2, 1, 0) = 1
+  AND i.type# = 4
+  AND i.bo# = tn.obj#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT  /*+ ordered */ 1, u.name, tbo.name, o.subname, ' ', 13, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM  (SELECT ts#, name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.tabpart$ tp, sys.seg$ s, sys.tab$ t, sys.obj$ tbo, sys.obj$ o, sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = tp.obj#
+  AND tp.ts# = tts.ts#
+  AND tp.file# = s.file#
+  AND tp.block# = s.block#
+  AND tp.ts# = s.ts#
+  AND t.obj# = tp.bo#
+  AND decode (bitand (t.property, 32), 32, 1, 0) = 1
+  AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+  AND decode (bitand (t.property, 512), 512, 1, 0) = 1
+  AND tbo.obj# = t.bobj#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT /*+ ordered */ 1, u.name, tbo.name, po.subname,
+    decode(bitand(c.property, 1), 1, a.name, c.name), 8,  tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#,name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+       sys.lobfrag$ lf, sys.seg$ s, sys.lob$ l, sys.partobj$ pobj,
+        sys.obj$ po, sys.obj$ tbo, sys.attrcol$ a, sys.col$ c, sys.user$ u
+WHERE tbo.owner# = u.user#
+  AND pobj.obj# = tbo.obj#
+  AND lf.ts# = tts.ts#
+  AND lf.file# = s.file#
+  AND lf.block# = s.block#
+  AND lf.ts# = s.ts#
+  AND mod(pobj.spare2, 256) = 0
+  AND tbo.obj# = c.obj#
+  AND c.obj# = l.obj#
+  AND c.intcol# = l.intcol#
+  AND l.lobj# = lf.parentobj#
+  AND lf.tabfragobj# = po.obj#
+  AND bitand(c.property,32768) != 32768
+  AND c.obj# = a.obj#(+)
+  AND c.intcol# = a.intcol#(+)
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT /*+ ordered */ 1, u.name, bo.name, o.subname, ' ', 9, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM 
+  (SELECT ts#, name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+     sys.tabsubpart$ tsp,sys.seg$ s, sys.obj$ bo,sys.obj$ o,sys.user$ u
+WHERE o.owner# = u.user#
+  AND o.obj# = tsp.obj#
+  AND bo.owner# = o.owner#
+  AND bo.name = o.name
+  AND bo.type# = 2
+  AND tsp.ts# = tts.ts#
+  AND tsp.file# = s.file#
+  AND tsp.block# = s.block#
+  AND tsp.ts# = s.ts#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+UNION ALL
+SELECT /*+ ordered */ 2, u.name, bo.name, o.subname, ' ', 10, tts.name,
+  decode (s.extpct, 0, 0, 1) + decode(mod(s.extsize, s.iniexts), 0, 0, 2)
+FROM   (SELECT ts#, name
+    FROM sys.ts$
+    WHERE bitmapped = 0
+      AND online$ != 3
+      AND name != 'SYSTEM' AND name != 'SYSAUX'
+      AND dflextpct = 0
+      AND (dflinit = 0 OR MOD(dflincr, dflinit) = 0)) tts,
+      sys.indsubpart$ isp, sys.seg$ s, sys.user$ u,  sys.obj$ o, sys.obj$ bo
+WHERE o.owner# = u.user#
+  AND o.obj# = isp.obj#
+  AND bo.owner# = o.owner#
+  AND bo.name = o.name
+  AND bo.type# = 1
+  AND isp.ts# = tts.ts#
+  AND isp.file# = s.file#
+  AND isp.block# = s.block#
+  AND isp.ts# = s.ts#
+  AND (s.extpct > 0 OR (s.iniexts > 0 AND (mod(s.extsize, s.iniexts) != 0) ) )
+) where rownum < 201 AND LENGTH(lob_column) <= 30]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+	</Metric>
+
+	<!--
+  ======================================================================
+  == Category:         Recommended Segment Settings - Non-Sys Segs in Sys TS
+  == Collection Level: Recommended
+  == Purpose:          Storage Advisor
+  == Notes:            BEWARE!  Very similar to db_recSegmentSettings (for extent growth policy)
+  ======================================================================
+  -->
+	<Metric NAME="db_recSegmentSettings_sysseg" TYPE="RAW" CONFIG="TRUE">
+		<TableDescriptor TABLE_NAME="mgmt_db_recSegmentSettings_ecm">
+			<ColumnDescriptor NAME="obj_type" COLUMN_NAME="obj_type" TYPE="NUMBER" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_type">Object Type</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_owner" COLUMN_NAME="obj_owner" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_owner">Object Owner</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_name" COLUMN_NAME="obj_name" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_name">Object Name</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_partition" COLUMN_NAME="obj_partition" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_partition">Partition</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="obj_lob_col" COLUMN_NAME="obj_lob_col" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_lob_col">LOB Column</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="seg_type" COLUMN_NAME="segment_type" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_segment_type">Segment Type</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="tablespace" COLUMN_NAME="tablespace" TYPE="STRING" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_recSegmentSettings_tablespace">Tablespace</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="recommendation" COLUMN_NAME="problem_code" TYPE="NUMBER" IS_KEY="TRUE">
+				<!-- Numeric value is bitwise OR of specific problems:            -->
+				<!--   4    Non-system segment in system tablespace               -->
+				<Display>
+					<Label NLSID="db_recSegmentSettings_problem_code">Problem</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+                <!--
+Query to get segments with settings that violate best-practices
+recommendations.  Result columns are:
+1. Object type ::=
+      1 (Table) | 2 (Index) | 3 (Cluster)
+2. Object schema
+3. Object name
+4. Partition name or ' ' if not partitioned
+5. LOB Column name or ' ' if not a LOB column
+6. Segment type (Number):
+   1       TABLE
+   2       INDEX
+   3       TABLE PARTITION
+   4       INDEX PARTITION
+   5       IOT OVERFLOW
+   6       LOB INDEX (not used)
+   7       LOB COLUMN
+   8       LOB PARTITION
+   9       TABLE SUBPARTITION
+   10      INDEX SUBPARTITION
+   11      LOB SUBPARTITION (not used, but should be)
+   12      CLUSTER
+   13      IOT OVERFLOW PARTITION
+7. Name of tablespace containing the segment (String)
+8. Violations (Number) - Bitwise OR of problem codes:
+   4       Non-system segment in system tablespace
+
+Index of Queries in the Union
+1. Obj type=1, seg type=1, no ptn or LOB column:
+   Nonpartitioned tables.
+2. Obj type=2, seg type=2, no ptn or LOB column:
+   Nonpartitioned indexes
+3. Obj type=3, seg type=12, no ptn or LOB column:
+   Clusters
+4. Obj type=1, seg type=1, no ptn or LOB column:
+   Non-partitioned IOTs (returned as type TABLE)
+5. Obj type=1, seg type=3, ptn, no LOB column:
+   Table partitions
+6. Obj type=2, seg type=4, ptn, no LOB column:
+   Index partitions (no LOB or IOT partitions)
+7. Obj type=1, seg type=5, no ptn or LOB column:
+   IOT overflow segments
+8. Obj type=1, seg type=8, no ptn, LOB column:
+   Unpartitioned LOB columns
+9. Obj type=1, seg type=3, ptn, no LOB column:
+   IOT Partitions (returned as type TABLE PARTITION)
+10. Obj type=1, seg type=13, ptn, no LOB column:
+    IOT Overflow partitions
+11. Obj type=1, seg type=8, ptn, LOB column:
+    LOB column partitions (The Final Frontier)
+12. Obj type=1, seg type=9, ptn, no LOB column:
+    Table subpartitions
+13. Obj type=2, seg type=10, ptn, no LOB column:
+    Index subpartitions
+                -->
+		<QueryDescriptor FETCHLET_ID="SQL">
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+SELECT /*+ INDEX(ts) */
+   o.object_type, u.name, o.object_name, o.partition, o.lob_column, o.seg_type, ts.name, 4
+FROM (
+  SELECT 1 "OBJECT_TYPE", o.owner# "USER_NAME#", o.name "OBJECT_NAME", ' ' "PARTITION", ' ' "LOB_COLUMN", 1 "SEG_TYPE", t.ts#
+"TABLESPACE#"
+  FROM sys.obj$ o, sys.tab$ t, sys.seg$ s
+  WHERE o.obj# = t.obj#
+    AND t.ts# in (:1,:2)
+    AND t.file# = s.file#
+    AND t.block# = s.block#
+    AND t.ts# = s.ts#
+    AND decode (bitand (t.property, 1), 1, 1, 0) = 0
+    AND decode (bitand (t.property, 32), 32, 1, 0) = 0
+    AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+    AND decode (bitand (t.property, 512), 512, 1, 0) = 0
+    AND decode (bitand (t.property, 1024), 1024, 1, 0) = 0
+ UNION ALL
+ SELECT 2, o.owner#, o.name, ' ', ' ', 2, i.ts#
+  FROM sys.obj$ o, sys.ind$ i, sys.seg$ s
+  WHERE o.obj# = i.obj#
+    AND i.ts# in (:1,:2)
+    AND i.file# = s.file#
+    AND i.block# = s.block#
+    AND i.ts# = s.ts#
+    AND decode (bitand (i.property, 2), 2, 1, 0) = 0
+    AND i.type# not in (4, 8)
+ UNION ALL
+ SELECT 3, o.owner#, o.name, ' ', ' ', 12, c.ts#
+  FROM sys.obj$ o, sys.clu$ c, sys.seg$ s
+  WHERE o.obj# = c.obj#
+    AND c.ts# IN (:1,:2)
+    AND c.file# = s.file#
+    AND c.block# = s.block#
+    AND c.ts# = s.ts#
+ UNION ALL
+  SELECT 1, o.owner#, tn.name, ' ', ' ', 1, i.ts#
+  FROM sys.obj$ o, sys.seg$ s, sys.tab$ t, sys.obj$ tn, sys.ind$ i
+  WHERE o.obj# = i.obj#
+    AND i.ts# IN (:1,:2)
+    AND i.file# = s.file#
+    AND i.block# = s.block#
+    AND i.ts# = s.ts#
+    AND i.bo# = tn.obj#
+    AND tn.obj# = t.obj#
+    AND decode (bitand (i.property, 2), 2, 1, 0) = 0
+    AND i.type# = 4
+ UNION ALL
+  SELECT 1, o.owner#, o.name, o.subname, ' ', 3, tp.ts#
+  FROM sys.obj$ o, sys.seg$ s, sys.tab$ t, sys.tabpart$ tp
+  WHERE o.obj# = tp.obj#
+    AND tp.ts# IN (:1,:2)
+    AND tp.file# = s.file#
+    AND tp.block# = s.block#
+    AND tp.ts# = s.ts#
+    AND t.obj# = tp.bo#
+    AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+    AND decode (bitand (t.property, 512), 512, 1, 0) = 0
+ UNION ALL
+  SELECT 2, o.owner#, o.name, o.subname, ' ', 4, ip.ts#
+  FROM sys.obj$ o, sys.seg$ s, sys.ind$ i, sys.indpart$ ip
+  WHERE o.obj# = ip.obj#
+    AND ip.ts# IN (:1,:2)
+    AND ip.file# = s.file#
+    AND ip.block# = s.block#
+    AND ip.ts# = s.ts#
+    AND i.obj# = ip.bo#
+    AND decode (bitand (i.property, 2), 2, 1, 0) = 1
+    AND i.type# not in (4, 8)
+ UNION ALL
+  SELECT 1, o.owner#, tn.name, ' ', ' ', 5, t.ts#
+  FROM sys.obj$ o, sys.seg$ s, sys.tab$ t, sys.obj$ tn, sys.tab$ iot
+  WHERE o.obj# = t.obj#
+    AND t.ts# IN (:1,:2)
+    AND t.file# = s.file#
+    AND t.block# = s.block#
+    AND t.ts# = s.ts#
+    AND tn.obj# = t.bobj#
+    AND tn.obj# = iot.obj#
+    AND decode (bitand (t.property, 32), 32, 1, 0) = 0
+    AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+    AND decode (bitand (t.property, 512), 512, 1, 0) = 1
+ UNION ALL
+  SELECT 1, tn.owner#, tn.name, ' ', decode(bitand(c.property, 1), 1, ac.name, c.name), 8, l.ts#
+  FROM sys.seg$ s, sys.obj$ tn, sys.attrcol$ ac,  sys.col$ c, sys.lob$ l
+  WHERE tn.obj# = c.obj#
+    AND c.obj# = l.obj#
+    AND c.intcol# = l.intcol#
+    AND l.ts# IN (:1,:2)
+    AND l.file# = s.file#
+    AND l.block# = s.block#
+    AND l.ts# = s.ts#
+    AND c.obj# = ac.obj#(+)
+    AND c.intcol# = ac.intcol#(+)
+    AND bitand(c.property,32768) != 32768
+ UNION ALL
+  SELECT 1, o.owner#, tn.name, o.subname, ' ', 3, ip.ts#
+  FROM sys.seg$ s, sys.obj$ o, sys.ind$ i, sys.obj$ tn, sys.indpart$ ip
+  WHERE o.obj# = ip.obj#
+    AND ip.ts# IN (:1,:2)
+    AND ip.file# = s.file#
+    AND ip.block# = s.block#
+    AND ip.ts# = s.ts#
+    AND i.obj# = ip.bo#
+    AND decode (bitand (i.property, 2), 2, 1, 0) = 1
+    AND i.type# = 4
+    AND i.bo# = tn.obj#
+ UNION ALL
+  SELECT 1, o.owner#, tbo.name, o.subname, ' ', 13, tp.ts#
+  FROM sys.seg$ s, sys.obj$ o, sys.obj$ tbo, sys.tab$ t, sys.tabpart$ tp
+  WHERE o.obj# = tp.obj#
+    AND tp.ts# IN (:1,:2)
+    AND tp.file# = s.file#
+    AND tp.block# = s.block#
+    AND tp.ts# = s.ts#
+    AND t.obj# = tp.bo#
+    AND decode (bitand (t.property, 32), 32, 1, 0) = 1
+    AND decode (bitand (t.property, 64), 64, 1, 0) = 0
+    AND decode (bitand (t.property, 512), 512, 1, 0) = 1
+    AND tbo.obj# = t.bobj#
+ UNION ALL
+  SELECT 1, tbo.owner#, tbo.name, po.subname, decode(bitand(c.property, 1), 1, a.name, c.name), 8, lf.ts#
+  FROM  sys.seg$ s, sys.obj$ tbo, sys.attrcol$ a, sys.col$ c, sys.lob$ l, sys.obj$ po, sys.partobj$ pobj, sys.lobfrag$ lf
+  WHERE pobj.obj# = tbo.obj#
+    AND lf.ts# IN (:1,:2)
+    AND lf.file# = s.file#
+    AND lf.block# = s.block#
+    AND lf.ts# = s.ts#
+    AND mod(pobj.spare2, 256) = 0
+    AND tbo.obj# = c.obj#
+    AND c.obj# = l.obj#
+    AND c.intcol# = l.intcol#
+    AND l.lobj# = lf.parentobj#
+    AND lf.tabfragobj# = po.obj#
+    AND bitand(c.property,32768) != 32768
+    AND c.obj# = a.obj#(+)
+    AND c.intcol# = a.intcol#(+)
+ UNION ALL
+  SELECT 1, o.owner#, bo.name, o.subname, ' ', 9, tsp.ts#
+  FROM sys.seg$ s, sys.obj$ o, sys.obj$ bo, sys.tabsubpart$ tsp
+  WHERE o.obj# = tsp.obj#
+    AND bo.owner# = o.owner#
+    AND bo.name = o.name
+    AND bo.type# = 2
+    AND tsp.file# = s.file#
+    AND tsp.block# = s.block#
+    AND tsp.ts# IN (:1,:2)
+ UNION ALL
+  SELECT 2, o.owner#, bo.name, o.subname, ' ', 10, isp.ts#
+  FROM sys.seg$ s, sys.obj$ o, sys.obj$ bo, sys.indsubpart$ isp
+  WHERE o.obj# = isp.obj#
+    AND bo.owner# = o.owner#
+    AND bo.name = o.name
+    AND bo.type# = 1
+    AND isp.file# = s.file#
+    AND isp.block# = s.block#
+    AND isp.ts# IN (:1,:2)
+) o, sys.ts$ ts, sys.user$ u
+WHERE o.USER_NAME# = u.user#
+  AND u.name NOT IN
+      ('SYS', 'SYSTEM', 'SYSMAN', 'CTXSYS', 'MDSYS', 'ORDSYS', 'ORDPLUGINS',
+       'OLAPSYS', 'DBSNMP', 'MGMT_VIEW', 'OUTLN', 'ANONYMOUS', 'DMSYS', 'EXFSYS',
+       'LBACSYS', 'SI_INFORMTN_SCHEMA', 'SYSMAN', 'WKPROXY', 'WKSYS', 'WK_TEST',
+       'WMSYS', 'XDB', 'TRACESVR')
+  AND o.TABLESPACE# = ts.ts#
+  AND ts.ts# IN (:1,:2)
+  AND rownum < 201
+]]></Property>
+			<Property NAME="SQLINPARAM1" SCOPE="INSTANCE">SystemTs#</Property>
+			<Property NAME="SQLINPARAM2" SCOPE="INSTANCE">SysauxTs#</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+	</Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Recommended Settings Purge
+  == Collection Level: Recommended
+  == Purpose:          Storage Advisor
+  == Note:             This metric fires after the recXxxSettingsRaw
+  ==                   metrics to purge old records.
+  ======================================================================
+  -->
+  <Metric NAME="recSettingsPurge" TYPE="RAW">
+    <TableDescriptor TABLE_NAME="mgmt_space_purge" SKIP_METRIC_COLUMN="TRUE" SKIP_COLLTIME_COLUMN="TRUE">
+      <ColumnDescriptor NAME="mgmt_space_purge_metric_name" COLUMN_NAME="metric_name" TYPE="STRING" IS_KEY="FALSE"/>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="metricName" SCOPE="USER" OPTIONAL="FALSE">metricName</Property>
+      <Property NAME="command" SCOPE="GLOBAL">
+        %perlBin%/perl %scriptsDir%/spacePurge.pl %metricName%
+      </Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+    </QueryDescriptor>
+  </Metric>
+  
+
+  <!--
+  ======================================================================
+  == Category:  Segment Findings Privilege check
+  == Purpose:   Determine whether the monitor user has enough
+  ==            privileges to perform the wastedSpace check.
+  == Note:      This is only collected on-demand from the
+  ==            segment findings configuration page to determine
+  ==            whether the monitor user needs to be granted
+  ==            more privileges.  It is not loaded in the repository.
+  ======================================================================
+    -->
+  <Metric NAME="seg_find_privs" TYPE="TABLE" USAGE_TYPE="HIDDEN"
+          HELP="NO_HELP">
+
+    <TableDescriptor>
+      <ColumnDescriptor NAME="hasPriv" TYPE="NUMBER">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+      <![CDATA[
+        SELECT 1 hasPriv FROM session_privs
+        WHERE privilege = 'ANALYZE ANY'
+      ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:  Segment Findings Grant Privilege
+  == Purpose:   Grant the ANALYZE ANY priv to the monitor user
+  == Note:      This is only collected on-demand from the
+  ==            segment findings configuration page to determine
+  ==            whether the monitor user needs to be granted
+  ==            more privileges.  It is not loaded in the repository.
+  ==
+  ==            We return a useless cursor since the metric must return
+  ==            a result.
+  ======================================================================
+    -->
+  <Metric NAME="seg_grant_privs" TYPE="TABLE" USAGE_TYPE="HIDDEN"
+          HELP="NO_HELP">
+
+    <TableDescriptor>
+      <ColumnDescriptor NAME="dummy" TYPE="NUMBER">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+      <![CDATA[
+        DECLARE
+            TYPE        data_cursor_type IS REF CURSOR;
+            dummyCursor data_cursor_type;
+        BEGIN
+            EXECUTE IMMEDIATE 'GRANT ANALYZE ANY TO ' || :1;
+            OPEN dummyCursor FOR
+                SELECT 1 dummy from DUAL;
+            :2 := dummyCursor;
+
+        END;
+      ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="USER">UserName</Property>
+      <Property NAME="password" SCOPE="USER">password</Property>
+      <Property NAME="SQLINPARAM1" SCOPE="USER">monitorUser</Property>
+      <Property NAME="Role" SCOPE="USER" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="SQLOUTPARAMPOS" SCOPE="GLOBAL">2</Property>
+      <Property NAME="SQLOUTPARAMTYPE" SCOPE="GLOBAL">SQL_CURSOR</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Data Guard
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+
+  <Metric NAME="dataguard" TYPE="TABLE">
+    <ValidIf>
+      <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+			<CategoryProp NAME="DataGuardStatus" CHOICES="Primary"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="dg">Data Guard</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="dg_name" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+        <Display>
+          <Label NLSID="dg_name">Name</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="dg_dnr1" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="dg_dnr1">Data Not Received (logs)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="dg_dnr2" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="dg_dnr2">Data Not Received (MB)</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="dg_dna1" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="dg_dna1">Data Not Applied (logs) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="dg_dna2" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="dg_dna2">Data Not Applied (MB) </Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="dg_status" TYPE="STRING" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="dg_status">Data Guard Status</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL"> %perlBin%/perl %scriptsDir%/db/dg/dgDatabases.pl</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))</Property>
+      <Property NAME="ENVVersionCategory" SCOPE="INSTANCE">VersionCategory</Property>
+    </QueryDescriptor>
+  </Metric>
+
+
+  <!--
+  ======================================================================
+  == Category:         Deferred Transactions
+  == Collection Level: Recommended
+  == Purpose:          Alerts
+  ======================================================================
+    -->
+
+  <Metric NAME="DeferredTrans" TYPE="TABLE">
+    <Display>
+      <Label NLSID="deferredTrans_count">Deferred Transactions</Label>
+    </Display>
+
+    <TableDescriptor>
+      <ColumnDescriptor NAME="errortrans_count" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="errortrans_error">Deferred Transaction Error Count</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="deftrans_count" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="deftrans_count_name">Deferred Transaction Count</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="transpose" SCOPE="GLOBAL">TRUE</Property>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT trans_count
+  FROM (SELECT 'def_trans_err' name, COUNT(*) trans_count
+          FROM sys.deferror
+         UNION ALL
+        SELECT 'def_trans_noerr' name, COUNT(*) trans_count
+          FROM sys.deftran)
+ ORDER BY name
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+ <!-- RAC Configuration snapshot metadata -->
+  <!-- Instance and Database Info - oracle_database and rac_database -->
+  <Metric NAME="db_dbNInstanceInfo" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="db_dbNInstanceInfo">mgmt_db_dbNInstanceInfo</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_db_dbNInstanceInfo_ecm">
+      <ColumnDescriptor NAME="database_name" COLUMN_NAME="database_name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_database_name">DB Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="global_name" COLUMN_NAME="global_name" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_global_name">Global Name</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="banner" COLUMN_NAME="banner" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_banner">DB Version</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="host_name" COLUMN_NAME="host_name" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_host_name">Host Name</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="instance_name" COLUMN_NAME="instance_name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_instance_name">Instance Name</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="startup_time" COLUMN_NAME="startup_time"  TYPE="STRING" IS_DATE="TRUE" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_startup_time">Instance Startup Time</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="logins" COLUMN_NAME="logins" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_logins">Restricted Mode</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="log_mode" COLUMN_NAME="log_mode" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_log_mode">Log Mode</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="open_mode" COLUMN_NAME="open_mode" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_dbNInstanceInfo_open_mode">Read Only Mode</Label>
+          </Display>
+        </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+    SELECT  a.name "DB Name",
+            e.global_name "Global Name",
+            b.banner "DB Version",
+            c.host_name "Host Name",
+            c.instance_name "Instance Name" ,
+            to_char(c.startup_time,'yyyy-MM-dd HH:mm:ss') "Instance Start Time",
+            decode(c.logins,'RESTRICTED','YES','NO') "Restricted Mode",
+            a.log_mode  "Archive Log Mode" ,
+            decode(a.open_mode,'READ ONLY','YES','NO') "Read Only Mode"
+    FROM    v$database a,
+            v$version b,
+            v$instance c,
+            global_name e
+    WHERE   b.banner LIKE '%Oracle%'
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+
+  <!--
+  ======================================================================
+  == Category:         User Block
+  == Collection Level: Minimum
+  == Purpose:          Alerts
+  ======================================================================
+    -->
+	<Metric NAME="UserBlock" TYPE="TABLE">
+		<Display>
+			<Label NLSID="userBlock">User Block</Label>
+		</Display>
+		<TableDescriptor>
+			<ColumnDescriptor NAME="sid" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="userBlock_blocking_sid">Instance Name - Blocking Session ID</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="count" TYPE="NUMBER" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="userBlock_count">Blocking Session Count</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="SQL">
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+            SELECT blocking_sid, num_blocked 
+            FROM ( SELECT blocking_sid, SUM(num_blocked) num_blocked 
+            FROM ( SELECT l.id1, l.id2,
+                          MAX(DECODE(l.block, 1, i.instance_name||'-'||l.sid, 
+                          2, i.instance_name||'-'||l.sid, 0 )) blocking_sid,
+                          SUM(DECODE(l.request, 0, 0, 1 )) num_blocked
+                    FROM gv$lock l, gv$instance i
+                    WHERE ( l.block!= 0 OR l.request > 0 ) AND 
+                            l.inst_id = i.inst_id 
+                            GROUP BY l.id1, l.id2)
+            GROUP BY blocking_sid 
+            ORDER BY num_blocked DESC) 
+            WHERE num_blocked != 0
+]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+	</Metric>
+
+
+  <!-- ***************************************** -->
+  <!-- Start Feature Usage Metric Definitions    -->
+  <!-- ***************************************** -->
+  <Metric 
+    NAME="db_FeatureUsage" TYPE="RAW">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label 
+        NLSID="db_FeatureUsage">Feature Usage</Label>
+    </Display>
+    <TableDescriptor 
+      TABLE_NAME="mgmt_db_featureusage" 
+      SKIP_COLLTIME_PK="TRUE"  
+      SKIP_METRIC_COLUMN="TRUE">
+
+      <!-- DBID -->
+      <ColumnDescriptor 
+        NAME="DBID" 
+        COLUMN_NAME="DBID"
+        TYPE="NUMBER"
+        IS_KEY="TRUE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_database_name">DBID</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Feature Name -->
+      <ColumnDescriptor 
+        NAME="name" 
+        COLUMN_NAME="name" 
+        TYPE="STRING"
+        IS_KEY="TRUE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_feature_name">Feature Name</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Currently Used -->
+      <ColumnDescriptor 
+        NAME="currently_used" 
+        COLUMN_NAME="currently_used" 
+        TYPE="STRING"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_currently_used">Currently Used</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Detected Usages -->
+      <ColumnDescriptor 
+        NAME="detected_usages" 
+        COLUMN_NAME="detected_usages" 
+        TYPE="NUMBER"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_detected_usages">Detected Usages</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- First Usage Date -->
+      <ColumnDescriptor 
+        NAME="first_usage_date" 
+        COLUMN_NAME="first_usage_date" 
+        TYPE="STRING"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_first_usage_date">First Usage Date</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Last Usage Date -->
+      <ColumnDescriptor 
+        NAME="last_usage_date" 
+        COLUMN_NAME="last_usage_date" 
+        TYPE="STRING"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_last_usage_date">Last Usage Date</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Version -->
+      <ColumnDescriptor 
+        NAME="version" 
+        COLUMN_NAME="version" 
+        TYPE="STRING"
+        IS_KEY="TRUE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_version">Version</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Last Sample Date -->
+      <ColumnDescriptor 
+        NAME="last_sample_date" 
+        COLUMN_NAME="last_sample_date" 
+        TYPE="STRING"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_last_sample_date">Last Sample Date</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Last Sample Period  -->
+      <ColumnDescriptor 
+        NAME="last_sample_period" 
+        COLUMN_NAME="last_sample_period" 
+        TYPE="NUMBER"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_last_sample_period">Last Sample Period</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Total Samples  -->
+      <ColumnDescriptor 
+        NAME="total_samples" 
+        COLUMN_NAME="total_samples" 
+        TYPE="NUMBER"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_total_samples">Total Samples</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Aux Count  -->
+      <ColumnDescriptor 
+        NAME="aux_count" 
+        COLUMN_NAME="aux_count" 
+        TYPE="NUMBER"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_aux_count">Count</Label>
+        </Display>
+      </ColumnDescriptor>
+
+      <!-- Description -->
+      <ColumnDescriptor 
+        NAME="description" 
+        COLUMN_NAME="description" 
+        TYPE="STRING"
+        IS_KEY="FALSE"
+        >
+        <Display>
+          <Label 
+            NLSID="db_FeatureUsage_description">Description</Label>
+        </Display>
+      </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+        SELECT
+            dbid               ,
+            name               ,
+            currently_used     ,
+            detected_usages    ,
+            first_usage_date   ,
+            last_usage_date    ,
+            version            ,
+            last_sample_date   ,
+            last_sample_period ,
+            total_samples      ,
+            aux_count          ,
+            description
+        FROM
+            dba_feature_usage_statistics 
+        WHERE :1 != 'BASIC'
+]]>
+      </Property>
+	  <Property NAME="SQLINPARAM1" SCOPE="INSTANCE">StatisticsLevel</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+  <!-- ***************************************** -->
+  <!-- End of Feature Usage Metric Definitions   -->
+  <!-- ***************************************** -->
+
+
+  <!-- Redo Logs -->
+  <Metric NAME="db_redoLogs" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="db_redoLogs">mgmt_db_redoLogs</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_db_redoLogs_ecm">
+
+      <ColumnDescriptor NAME="group_num" COLUMN_NAME="group_num" TYPE="NUMBER" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_redoLogs_group_num">Group</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="status" COLUMN_NAME="status" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_redoLogs_status">Status</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="members" COLUMN_NAME="members" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_redoLogs_members">Members</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="file_name" COLUMN_NAME="file_name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_redoLogs_file_name">File Name</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="archived" COLUMN_NAME="Archived" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_redoLogs_archived">Archived</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="logsize" COLUMN_NAME="logsize" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_redoLogs_logsize">Log Size</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="sequence_num" COLUMN_NAME="sequence_num" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_redoLogs_sequence_num">Sequence Number</Label>
+          </Display>
+       </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="first_change_scn" COLUMN_NAME="first_change_scn" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_redoLogs_first_change">First Change</Label>
+          </Display>
+       </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="os_storage_entity" COLUMN_NAME="os_storage_entity" TYPE="STRING" IS_KEY="FALSE">
+	  <Display>
+	    <Label NLSID="db_redoLogs_os_storage_entity">Storage Entity</Label>
+	  </Display>
+       </ColumnDescriptor>
+      </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl %scriptsDir%/oracle_db_files.pl db_redologs</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))</Property>
+      <Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+      <Property NAME="ENVEM_AGENT_STATE" SCOPE="SYSTEMGLOBAL">agentStateDir</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- Modified / added fields -->
+  <!-- Data files -->
+
+  <!-- Datafile -->
+	<Metric NAME='db_datafiles_1' TYPE='TABLE' USAGE_TYPE='HIDDEN'>
+		<TableDescriptor>
+			<ColumnDescriptor NAME='file_name' TYPE='STRING' IS_KEY='TRUE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='status' TYPE='STRING' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='tablespace_name' TYPE='STRING' IS_KEY='TRUE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='file_size' TYPE='NUMBER' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='autoextensible' TYPE='STRING' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='increment_by' TYPE='NUMBER' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='max_file_size' TYPE='NUMBER' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID='SQL'>
+			<Property NAME='STATEMENT' SCOPE='GLOBAL'><![CDATA[
+    SELECT ddf.file_name,
+           vdf.status,
+           ddf.tablespace_name,
+           NVL(ddf.bytes,0),
+           ddf.autoextensible,
+           ddf.increment_by,
+           ddf.maxbytes
+      FROM sys.dba_data_files ddf,
+           v$datafile vdf
+     WHERE (ddf.file_name = vdf.name)
+  ]]></Property>
+			<Property NAME='MachineName' SCOPE='INSTANCE'>MachineName</Property>
+			<Property NAME='Port'        SCOPE='INSTANCE'>Port</Property>
+			<Property NAME='SID'         SCOPE='INSTANCE'>SID</Property>
+			<Property NAME='UserName'    SCOPE='INSTANCE'>UserName</Property>
+			<Property NAME='password'    SCOPE='INSTANCE'>password</Property>
+			<Property NAME='Role'        SCOPE='INSTANCE' OPTIONAL='TRUE'>Role</Property>
+		</QueryDescriptor>
+	</Metric>
+
+  <!-- Temporary datafile  -->
+	<Metric NAME='db_datafiles_2' TYPE='TABLE' USAGE_TYPE='HIDDEN'>
+		<TableDescriptor>
+			<ColumnDescriptor NAME='file_name' TYPE='STRING' IS_KEY='TRUE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='status' TYPE='STRING' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='tablespace_name' TYPE='STRING' IS_KEY='TRUE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='file_size' TYPE='NUMBER' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='autoextensible' TYPE='STRING' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='increment_by' TYPE='NUMBER' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME='max_file_size' TYPE='NUMBER' IS_KEY='FALSE'>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID='SQL'>
+			<Property NAME='STATEMENT' SCOPE='GLOBAL'><![CDATA[
+    SELECT dtf.file_name,
+           vtf.status,
+           dtf.tablespace_name,
+           NVL(dtf.bytes,0),
+           dtf.autoextensible,
+           dtf.increment_by,
+           dtf.maxbytes
+      FROM sys.dba_temp_files dtf,
+           v$tempfile vtf
+     WHERE (dtf.file_id = vtf.file#)
+  ]]></Property>
+			<Property NAME='MachineName' SCOPE='INSTANCE'>MachineName</Property>
+			<Property NAME='Port'        SCOPE='INSTANCE'>Port</Property>
+			<Property NAME='SID'         SCOPE='INSTANCE'>SID</Property>
+			<Property NAME='UserName'    SCOPE='INSTANCE'>UserName</Property>
+			<Property NAME='password'    SCOPE='INSTANCE'>password</Property>
+			<Property NAME='Role'        SCOPE='INSTANCE' OPTIONAL='TRUE'>Role</Property>
+		</QueryDescriptor>
+	</Metric>
+
+	<Metric NAME="db_datafiles" TYPE="RAW" CONFIG="TRUE">
+		<Display>
+			<Label NLSID="db_datafiles">mgmt_db_datafiles</Label>
+		</Display>
+		<TableDescriptor TABLE_NAME="mgmt_db_datafiles_ecm">
+			<ColumnDescriptor NAME="file_name" 
+                        COLUMN_NAME="file_name" 
+                        TYPE="STRING" 
+                        IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_datafiles_name">Datafile Name</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="status" 
+                        COLUMN_NAME="status" 
+                        TYPE="STRING" 
+                        IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_datafiles_status">Status</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="tablespace_name" 
+                        COLUMN_NAME="tablespace_name" 
+                        TYPE="STRING" 
+                        IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_datafiles_tablespace_name">Tablespace</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="file_size" 
+                        COLUMN_NAME="file_size" 
+                        TYPE="NUMBER" IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_datafiles_file_size">File Size</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="autoextensible" 
+                        COLUMN_NAME="autoextensible" 
+                        TYPE="STRING" 
+                        IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_datafiles_autoextensible">Autoextensible</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="increment_by" 
+                        COLUMN_NAME="increment_by" 
+                        TYPE="NUMBER" 
+                        IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_datafiles_increment_by">Increment By</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="max_file_size" 
+                        COLUMN_NAME="max_file_size" 
+                        TYPE="NUMBER" 
+                        IS_KEY="FALSE">
+				<Display>
+					<Label NLSID="db_datafiles_max_file_size">Max File Size</Label>
+				</Display>
+			</ColumnDescriptor>
+                        <ColumnDescriptor NAME="os_storage_entity" COLUMN_NAME="os_storage_entity" TYPE="STRING" IS_KEY="FALSE">
+				<Display>
+                                	  <Label NLSID="db_datafiles_os_storage_entity">Storage Entity</Label>
+	                        </Display>
+                        </ColumnDescriptor>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="OSLineToken">
+			<Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+			<Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+			<Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl %scriptsDir%/oracle_db_files.pl db_datafiles</Property>
+			<Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+			<Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+			<Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+			<Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+			<Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))</Property>
+			<Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+                        <Property NAME="ENVEM_AGENT_STATE" SCOPE="SYSTEMGLOBAL">agentStateDir</Property>
+		</QueryDescriptor>
+	</Metric>
+
+  <Metric NAME="db_controlfiles_size" TYPE="RAW" CONFIG="TRUE">
+		
+		<Display>
+			<Label NLSID="db_controlfiles_size">mgmt_db_controlfiles_size</Label>
+		</Display>
+		<TableDescriptor TABLE_NAME="mgmt_db_controlfiles_size_ecm">
+			<ColumnDescriptor NAME="cf_size" COLUMN_NAME="cf_size" TYPE="NUMBER" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_controlfiles_size">Controlfile Size</Label>
+				</Display>
+			</ColumnDescriptor>
+		 </TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+				<CategoryProp NAME="VersionCategory" CHOICES="8i;8iR2;9i"/>
+			</ValidIf>
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+       DECLARE
+        blocksize NUMBER := 0;
+        TYPE data_cursor_type IS REF CURSOR;
+        data_cursor data_cursor_type;
+      BEGIN
+        SELECT VALUE INTO blocksize FROM v$parameter where NAME = 'db_block_size';
+         OPEN data_cursor FOR
+          SELECT (SUM(FLOOR((a.record_size * a.records_total + blocksize -24 -1) / (blocksize -24)) * 2) * blocksize)/1024/1024 CF_SIZE FROM v$controlfile_record_section a;
+          
+        :1 := data_cursor;
+      END;
+  ]]></Property>
+      <Property NAME="SQLOUTPARAMPOS" SCOPE="GLOBAL">1</Property>
+			<Property NAME="SQLOUTPARAMTYPE" SCOPE="GLOBAL">SQL_CURSOR</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+				<CategoryProp NAME="VersionCategory" CHOICES="9iR2"/>
+			</ValidIf>
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+       DECLARE
+        blocksize NUMBER := 0;
+        TYPE data_cursor_type IS REF CURSOR;
+        data_cursor data_cursor_type;
+      BEGIN
+        SELECT VALUE INTO blocksize FROM v$parameter where NAME = 'db_block_size';
+         OPEN data_cursor FOR   
+          SELECT (SUM(FLOOR((a.record_size * a.records_total + blocksize -24 -1) / (blocksize -24)) * 2) + 4) * blocksize/1024/1024 CF_SIZE from v$controlfile_record_section a;
+      
+      :1 := data_cursor;
+      END;
+  ]]></Property>
+      <Property NAME="SQLOUTPARAMPOS" SCOPE="GLOBAL">1</Property>
+			<Property NAME="SQLOUTPARAMTYPE" SCOPE="GLOBAL">SQL_CURSOR</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+    <!-- The database team exposed the controlfile size information in 10gR1 
+         only in x$kcccf table, which is not accessible by the 'dbsnmp' user in emagent metric 
+         collections. There is no workaround for now. in 10gR2, its going to be exposed in
+         v$database. we have to query these tables as from 10gR1 onwards, cf block size is not
+         the same as db_block_size -->
+    <!--QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+				<CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+			</ValidIf>
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+      SELECT (cfbsz * cffsz)/1024/1024 "CF_SIZE" from x$kcccf
+  ]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor-->
+	</Metric>
+  
+  <!-- Modified / added fields -->
+  <!-- Table Spaces -->
+   <Metric NAME="db_tablespaces" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="db_tablespaces">mgmt_db_tablespaces</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_db_tablespaces_ecm">
+      <ColumnDescriptor NAME="tablespace_name" COLUMN_NAME="tablespace_name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_tablespaces_name">Tablespace Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="status" COLUMN_NAME="status" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_status">Status</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="contents" COLUMN_NAME="contents" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_contents">Type</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="extent_management" COLUMN_NAME="extent_management" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_extent_management">Extent Management</Label>
+          </Display>
+        </ColumnDescriptor>
+
+	<ColumnDescriptor NAME="allocation_type" COLUMN_NAME="allocation_type" TYPE="STRING" IS_KEY="FALSE">
+	<Display>
+             <Label NLSID="db_tablespaces_allocation_type">Allocation Type</Label>
+           </Display>
+         </ColumnDescriptor>
+
+         <ColumnDescriptor NAME="logging" COLUMN_NAME="logging" TYPE="STRING" IS_KEY="FALSE">
+           <Display>
+             <Label NLSID="db_tablespaces_logging">Logging</Label>
+           </Display>
+         </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="tablespace_size" COLUMN_NAME="tablespace_size" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_tablespace_size">Size</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="tablespace_used_size" COLUMN_NAME="tablespace_used_size" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_tablespace_used_size">Size</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="initial_ext_size" COLUMN_NAME="initial_ext_size" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_initial_ext_size">Initial Ext Size</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="next_extent" COLUMN_NAME="next_extent" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_next_extent">Next Extent</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="increment_by" COLUMN_NAME="increment_by" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_increment_by">Increment By</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="max_extents" COLUMN_NAME="max_extents" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_tablespaces_max_extents">Max Extents</Label>
+          </Display>
+        </ColumnDescriptor>
+
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+    SELECT  dtp.tablespace_name "TABLESPACE_NAME",
+            dtp.status "STATUS",
+            dtp.contents "CONTENTS",
+            dtp.extent_management "EXTENT MANAGEMENT",
+            dtp.allocation_type "ALLOCATION TYPE",
+            dtp.logging "LOGGING",
+            NVL(ts.bytes, 0) "SIZE (M)",
+            NVL(ts.bytes - NVL(f.bytes,0),0),
+            dtp.initial_extent "INITIAL EXT SIZE (K)",
+            dtp.next_extent "Next Extent",
+            dtp.pct_increase "INCREMENT PCT",
+            dtp.max_extents "MAX EXTENTS"
+    FROM    sys.dba_tablespaces dtp,
+            (SELECT 	tablespace_name,
+                        sum(bytes) bytes
+             FROM	dba_data_files
+             GROUP BY	tablespace_name) ts,
+             (SELECT tablespace_name,sum(bytes) bytes from dba_free_space GROUP BY tablespace_name) f 
+    WHERE   dtp.tablespace_name = ts.tablespace_name (+) AND 
+            dtp.tablespace_name = f.tablespace_name (+) AND 
+            NOT (dtp.extent_management LIKE 'LOCAL' AND
+                 dtp.contents LIKE 'TEMPORARY')
+    UNION ALL
+    SELECT  dtp.tablespace_name "TABLESPACE_NAME",
+            dtp.status "STATUS",
+            dtp.contents "CONTENTS",
+            dtp.extent_management "EXTENT MANAGEMENT",
+            dtp.allocation_type "ALLOCATION TYPE",
+            dtp.logging "LOGGING",
+            NVL(a.bytes, 0) "SIZE (M)",
+            NVL(t.cached,0),
+            dtp.initial_extent "INITIAL EXT SIZE (K)",
+            dtp.next_extent "Next Extent",
+            dtp.pct_increase "INCREMENT PCT",
+            dtp.max_extents "MAX EXTENTS"
+    FROM    sys.dba_tablespaces dtp,
+            (SELECT 	tablespace_name,
+                        sum(bytes) bytes
+             FROM		  dba_temp_files
+             GROUP BY	tablespace_name) a,
+             (SELECT tablespace_name,sum(bytes_cached) cached from v$temp_extent_pool GROUP BY tablespace_name ) t 
+    WHERE   dtp.tablespace_name = a.tablespace_name (+) AND 
+            dtp.tablespace_name = t.tablespace_name (+) AND
+            dtp.extent_management LIKE 'LOCAL' AND
+            dtp.contents LIKE 'TEMPORARY'
+]]>
+  </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- Added new Metrics -->
+  <!-- Control files -->
+  <Metric NAME="db_controlfiles" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="db_controlfiles">mgmt_db_controlfiles</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_db_controlfiles_ecm">
+
+      <ColumnDescriptor NAME="file_name" COLUMN_NAME="file_name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_controlfiles_file_name">File Name</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="status" COLUMN_NAME="status" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_controlfiles_status">Status</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="creation_date" COLUMN_NAME="creation_date" TYPE="STRING" IS_DATE="TRUE" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_controlfiles_creation_date">Creation Date</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="sequence_num" COLUMN_NAME="sequence_num" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_controlfiles_sequence_num">Sequence Number</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="change_num" COLUMN_NAME="change_num" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_controlfiles_change_num">Change Number</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="mod_date" COLUMN_NAME="mod_date" TYPE="STRING" IS_DATE="TRUE" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_controlfiles_mod_date">Modification Date</Label>
+          </Display>
+       </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="os_storage_entity" COLUMN_NAME="os_storage_entity" TYPE="STRING" IS_KEY="FALSE">
+	<Display>
+	  <Label NLSID="db_controlfiles_os_storage_entity">Storage Entity</Label>
+	</Display>
+      </ColumnDescriptor>
+      </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="OSLineToken">
+      <Property NAME="perlBin" SCOPE="SYSTEMGLOBAL">perlBin</Property>
+      <Property NAME="scriptsDir" SCOPE="SYSTEMGLOBAL">scriptsDir</Property>
+      <Property NAME="command" SCOPE="GLOBAL">%perlBin%/perl %scriptsDir%/oracle_db_files.pl db_controlfiles</Property>
+      <Property NAME="startsWith" SCOPE="GLOBAL">em_result=</Property>
+      <Property NAME="delimiter" SCOPE="GLOBAL">|</Property>
+      <Property NAME="ENVEM_TARGET_NAME" SCOPE="INSTANCE">NAME</Property>
+      <Property NAME="STDINEM_TARGET_USERNAME" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="STDINEM_TARGET_PASSWORD" SCOPE="INSTANCE">password</Property>
+      <Property NAME="ENVEM_TARGET_ROLE" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="ENVEM_TARGET_ADDRESS" SCOPE="GLOBAL">(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=%MachineName%)(Port=%Port%))(CONNECT_DATA=(SID=%SID%)))</Property>
+      <Property NAME="ENVEM_TARGET_ORACLE_HOME" SCOPE="INSTANCE">OracleHome</Property>
+      <Property NAME="ENVEM_AGENT_STATE" SCOPE="SYSTEMGLOBAL">agentStateDir</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- Rollback Segments -->
+  <Metric NAME="db_rollback_segs" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="db_rollback_segs">mgmt_db_rollback_segs</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_db_rollback_segs_ecm">
+
+      <ColumnDescriptor NAME="rollname" COLUMN_NAME="rollname" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_rollback_segs_rollname">Name</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="status" COLUMN_NAME="status" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_status">Status</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="tablespace_name" COLUMN_NAME="tablespace_name" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_tablespace_name">Tablespace Name</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="extents" COLUMN_NAME="extents" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_extents">Extents</Label>
+          </Display>
+        </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="rollsize" COLUMN_NAME="rollsize" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_rollsize">Size</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="initial_size" COLUMN_NAME="initial_size" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_initial_size">Initial Size</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="next_size" COLUMN_NAME="next_size" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_next_size">Next Size</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="maximum_extents" COLUMN_NAME="maximum_extents" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_maximum_size">Maximum Size</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="minimum_extents" COLUMN_NAME="minimum_extents" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_minimum_extents">Minimum Extents</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="pct_increase" COLUMN_NAME="pct_increase" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_pct_increase">Pct Increase</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="optsize" COLUMN_NAME="optsize" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_optsize">Optsize</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="aveactive" COLUMN_NAME="aveactive" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_aveactive">Aveactive</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="wraps" COLUMN_NAME="wraps" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_wraps">Wraps</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="shrinks" COLUMN_NAME="shrinks" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_shrinks">Shrinks</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="aveshrink" COLUMN_NAME="aveshrink" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_aveshrink">Aveshrink</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      <ColumnDescriptor NAME="hwmsize" COLUMN_NAME="hwmsize" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_rollback_segs_hwmsize">Hwmsize</Label>
+          </Display>
+       </ColumnDescriptor>
+
+      </TableDescriptor>
+          <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+      SELECT  drs.segment_name "NAME",
+              drs.status "STATUS",
+              drs.tablespace_name "TABLESPACE",
+              ds.extents "EXTENTS",
+              ds.bytes "SIZE (M)",
+              drs.initial_extent "INITIAL SIZE (K)",
+              drs.next_extent "NEXT SIZE (K)",
+              drs.max_extents "MAXIMUM EXTENTS",
+              drs.min_extents "MINIMUM EXTENTS",
+              drs.pct_increase "PCT INCREASE",
+              rs.optsize "OPTSIZE",
+              rs.aveactive "AVEACTIVE",
+              rs.wraps "WRAPS",
+              rs.shrinks "SHRINKS",
+              rs.aveshrink "AVESHRINK",
+              rs.hwmsize "HWMSIZE"
+      FROM    sys.dba_rollback_segs drs,
+              sys.dba_segments ds,
+              v$rollstat rs
+      WHERE   drs.segment_name = ds.segment_name AND
+              drs.segment_id   = rs.usn
+  ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- Add License Info Metric -->
+  <Metric NAME="db_license" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="db_license">mgmt_db_license</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_db_license_ecm">
+
+      <ColumnDescriptor NAME="sessions_max" COLUMN_NAME="sessions_max" TYPE="NUMBER" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="db_license_sessions_max">Maximum Sessions</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="sessions_warning" COLUMN_NAME="sessions_warning" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_license_sessions_warning">Warning Sessions</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="sessions_current" COLUMN_NAME="sessions_current" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_license_sessions_current">Current Sessions</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="sessions_highwater" COLUMN_NAME="sessions_highwater" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_license_sessions_highwater">Highwater Sessions</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="users_max" COLUMN_NAME="users_max" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_license_users_max">Maximum Users</Label>
+          </Display>
+        </ColumnDescriptor>
+     </TableDescriptor>
+          <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+	SELECT  sessions_max "Maximum Sessions",
+		sessions_warning "Warning Sessions",
+		sessions_current "Current Sessions",
+		sessions_highwater "Highwater Sessions",
+		users_max "Maximum Users"
+	FROM    v$license
+  ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- High Availability - Data Guard (DG) -->
+  <Metric NAME="ha_info" TYPE="RAW" CONFIG="TRUE">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="8i;8iR2;9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="ha_info">mgmt_ha_info</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_ha_info_ecm">
+        <ColumnDescriptor NAME="dbid" COLUMN_NAME="dbid" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_ha_dbid">Database ID</Label>
+          </Display>
+        </ColumnDescriptor>
+
+       <ColumnDescriptor NAME="log_mode" COLUMN_NAME="log_mode" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_ha_log_mode">Log Mode</Label>
+          </Display>
+       </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="force_logging" COLUMN_NAME="force_logging" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_ha_force_logging">Force Logging</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="database_role" COLUMN_NAME="database_role" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_ha_database_role">Database Role</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="flashback_on" COLUMN_NAME="flashback_on" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="db_ha_flashback_on">Flashback On</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="8i;8iR2;9i"/>
+      </ValidIf>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+    SELECT  dbid "Database ID",
+            log_mode "Log Mode"
+    FROM    v$database
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="9iR2"/>
+      </ValidIf>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+    SELECT  dbid "Database ID",
+            log_mode "Log Mode",
+            force_logging "Force Logging",
+            database_role "Database Role"
+    FROM    v$database
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+      </ValidIf>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+    SELECT  dbid "Database ID",
+            log_mode "Log Mode",
+            force_logging "Force Logging",
+            database_role "Database Role",
+            flashback_on "Flashback On"
+    FROM    v$database
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- High Availability - Initialization Parameters -->
+  <Metric NAME="ha_init_params" TYPE="RAW" CONFIG="TRUE">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="ha_init_params">mgmt_ha_init_params</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_ha_init_params_ecm">
+      <ColumnDescriptor NAME="name" COLUMN_NAME="name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="ha_init_params_name">Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="ha_init_params_value">Value</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    
+		<QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="9i"/>
+      </ValidIf>
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+(select name, value from v$parameter where name='db_create_file_dest')
+]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+
+		<QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="9iR2;10gR1;10gR2"/>
+      </ValidIf>
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+(select name, value from v$parameter where name='dg_broker_start')
+UNION
+(select name, value from v$parameter where name='db_recovery_file_dest')
+UNION
+(select name, value from v$parameter where name='db_recovery_file_dest_size')
+UNION
+(select name, value from v$parameter where name='db_create_file_dest')
+]]></Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+  </Metric>
+
+  <!-- High Availability - Database Files -->
+  <Metric NAME="ha_files" TYPE="RAW" CONFIG="TRUE">
+    <Display>
+      <Label NLSID="ha_files">mgmt_ha_files</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_ha_files_ecm">
+      <ColumnDescriptor NAME="filetype" COLUMN_NAME="name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="ha_files_type">File Type Name</Label>
+          </Display>
+        </ColumnDescriptor>
+        <ColumnDescriptor NAME="filessize" COLUMN_NAME="totalsize" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="ha_files_size">Total Size</Label>
+          </Display>
+        </ColumnDescriptor>
+     </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+(SELECT 	'Data Files (MB)' "NAME",
+          NVL(sum(bytes)/1024/1024,0) "TOTAL SIZE"
+ FROM 		v$datafile)
+UNION
+(SELECT		'Online Redo Logs (MB)' "NAME",
+          NVL(sum(bytes)/1024/1024,0) "TOTAL SIZE"
+ FROM		  v$log)
+UNION
+(SELECT 	'Temporary Files (MB)' "NAME",
+          NVL(sum(bytes)/1024,0) "TOTAL SIZE"
+ FROM		  v$tempfile)
+  ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- High Availability - RMAN Backup -->
+  <Metric NAME="ha_backup" TYPE="RAW">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="8i;8iR2;9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="ha_backup">mgmt_ha_backup</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_ha_backup" SKIP_COLLTIME_PK="TRUE"  SKIP_METRIC_COLUMN="TRUE">
+        <ColumnDescriptor NAME="end_time" COLUMN_NAME="end_time" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="ha_backup_end_time">End Time</Label>
+          </Display>
+        </ColumnDescriptor>
+
+        <ColumnDescriptor NAME="status" COLUMN_NAME="status" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="ha_backup_status">Status</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="8i;8iR2;9i;9iR2"/>
+      </ValidIf>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+  SELECT MAX(completion_time)
+  FROM
+  (SELECT completion_time FROM v$backup_set
+   UNION
+   SELECT completion_time FROM v$datafile_copy)
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <ValidIf>
+         <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+      </ValidIf>
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+  SELECT  end_time,
+          status
+  FROM    v$rman_status
+  WHERE   end_time = (select max(end_time) from v$rman_status where OPERATION='BACKUP')
+  AND     operation='BACKUP'
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!-- High Availability - RMAN Configuration -->
+  <Metric NAME="ha_rman_config" TYPE="RAW" CONFIG="TRUE">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="ha_rman_config">mgmt_ha_rman_config</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="mgmt_ha_rman_config_ecm">
+      <ColumnDescriptor NAME="name" COLUMN_NAME="name" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="ha_rman_config_name">Name</Label>
+          </Display>
+        </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="ha_rman_config_value">Value</Label>
+          </Display>
+        </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+(select 'CONTROLFILE AUTOBACKUP', 
+      nvl((select value from v$rman_configuration where name='CONTROLFILE AUTOBACKUP'),'') from dual)
+UNION
+(select name, value from v$rman_configuration where name='CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE')
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+	<!--
+  ======================================================================
+  == Category:         Invalid Objects (Policy Framework metric)
+  == Collection Level: Recommended
+  == Purpose:          Objects Policy - Invalid Objects
+  ======================================================================
+  -->
+	<Metric NAME="db_invalidObjects" TYPE="RAW" KEYS_ONLY="TRUE" CONFIG="TRUE">
+		<TableDescriptor TABLE_NAME="mgmt_db_invobjs_ecm">
+			<ColumnDescriptor NAME="object_type" COLUMN_NAME="object_type" TYPE="NUMBER" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_invObjects_type">Object Type</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="object_owner" COLUMN_NAME="object_owner" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_invObjects_owner">Object Owner</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="object_name" COLUMN_NAME="object_name" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="db_invObjects_name">Object Name</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<QueryDescriptor FETCHLET_ID="SQL">
+			<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+DECLARE
+  javasnm_exists  NUMBER := 0;
+  TYPE        data_cursor_type IS REF CURSOR;
+  data_cursor data_cursor_type;
+
+BEGIN
+  SELECT count(*) INTO javasnm_exists 
+    FROM sys.all_views WHERE view_name='JAVASNM';
+
+IF javasnm_exists >= 1 THEN
+
+ OPEN data_cursor FOR
+ 'SELECT /*+ all_rows */ o.type# object_type, u.name object_owner, o.name object_name ' ||
+ 'FROM sys.obj$ o, sys.user$ u ' ||
+ 'WHERE u.user# = o.owner# AND o.status NOT IN (0,1) AND o.type# IN (4, 7, 8, 9, 11, 12, 42) ' ||
+ 'UNION ALL ' ||
+ 'SELECT * FROM ( ' ||
+   'SELECT o.type# object_type, u.name object_owner, nvl(l.longname, o.name) object_name ' ||
+   'FROM sys.obj$ o, javasnm l, sys.user$ u ' ||
+   'WHERE o.name = l.short AND o.type# = 29 AND o.owner# = u.user# AND o.status NOT IN (0,1)) ' ||
+   'WHERE LENGTH(object_name) <= 1000';
+
+ELSE
+
+ OPEN data_cursor FOR
+ 'SELECT /*+ all_rows */ o.type# object_type, u.name object_owner, o.name object_name ' ||
+ 'FROM sys.obj$ o, sys.user$ u ' ||
+ 'WHERE u.user# = o.owner# AND o.status NOT IN (0,1) AND o.type# IN (4, 7, 8, 9, 11, 12, 42)';
+
+END IF;
+
+:1 := data_cursor;
+
+END;
+]]></Property>
+			<Property NAME="SQLOUTPARAMPOS" SCOPE="GLOBAL">1</Property>
+			<Property NAME="SQLOUTPARAMTYPE" SCOPE="GLOBAL">SQL_CURSOR</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+		</QueryDescriptor>
+	</Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Invalid Objects
+  == Collection Level: Recommended
+  == Purpose:          Alerts
+  ======================================================================
+    -->
+  <Metric NAME="invalid_objects" TYPE="TABLE">
+    <Display>
+      <Label NLSID="invalid_objects">Invalid Objects by Schema</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="owner" TYPE="STRING" IS_KEY="TRUE">
+          <Display>
+            <Label NLSID="invalid_objects_owner">Invalid Object Owner</Label>
+          </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="count" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="invalid_objects_count">Owner's Invalid Object Count</Label>
+          </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+      <![CDATA[
+SELECT /*+ all_rows */ u.name owner, count(1) invalid_count
+  FROM sys.obj$ o, sys.user$ u
+ WHERE u.user# = o.owner#
+   AND o.status NOT IN (0,1)
+ GROUP BY u.name
+      ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Invalid Objects
+  == Collection Level: Recommended
+  == Purpose:          Alerts
+  ======================================================================
+    -->
+  <Metric NAME="all_invalid_objects" TYPE="TABLE">
+    <Display>
+      <Label NLSID="all_invalid_objects">Invalid Objects</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="total_count" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="all_invalid_objects_total_count">Total Invalid Object Count</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <ExecutionDescriptor>
+      <GetTable NAME="invalid_objects_per_schema"
+                METRIC_NAME="invalid_objects"
+                USE_CACHE="TRUE"/>
+      <GroupBy NAME="all_invalid_objects"
+               FROM_TABLE="invalid_objects_per_schema">
+        <AggregateColumn NAME="total_count"
+                         COLUMN_NAME="count"
+                         OPERATOR="SUM"/>
+      </GroupBy>
+    </ExecutionDescriptor>
+  </Metric>
+
+  <!--
+  ======================================================================
+  == Category:         Database Job Status
+  == Collection Level: Recommended
+  == Purpose:          Alerts
+  ======================================================================
+    -->
+  <Metric NAME="dbjob_status" TYPE="TABLE">
+    <Display>
+      <Label NLSID="oracle_database_dbjob_status">Database Job Status</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="broken" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="oracle_database_dbjob_status_broken">Broken Job Count</Label>
+          </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="failed" TYPE="NUMBER" IS_KEY="FALSE">
+          <Display>
+            <Label NLSID="oracle_database_dbjob_status_failed">Failed Job Count</Label>
+          </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+      <![CDATA[
+SELECT SUM(broken), SUM(failed)
+  FROM (SELECT DECODE(broken, 'N', 0, 1) broken,
+               DECODE(failures, 0, 0, 1) failed
+            FROM dba_jobs
+           )
+      ]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+
+  <!--
+  ======================================================================
+  == Category:         Suspended Session
+  == Collection Level: Recommended
+  == Purpose:          Alerts
+  ======================================================================
+    -->
+  <Metric NAME="suspended_session" TYPE="TABLE">
+     <ValidIf>
+      <CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="suspended_session">Suspended Session</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="count" TYPE="NUMBER" IS_KEY="FALSE">
+        <Display>
+          <Label NLSID="suspended_session_count">Suspended Session Count</Label>
+        </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT COUNT(*)
+  FROM gv$resumable
+ WHERE status = 'SUSPENDED'
+   AND enabled = 'YES'
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+
+<!-- The following metrics Recovery_Area, Snap_Shot_Too_Old, Suspended_Session together with problemTbsp 
+     are categorized by rdbms as database level alerts. ( configuration is not covered )
+ -->
+
+ <!--
+  ======================================================================
+  == Category:         Non-threshold based alert Suspended_Session
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+	<Metric NAME="Suspended_Session" TYPE="TABLE">
+		<ValidIf>
+			<CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+		</ValidIf>
+		<Display>
+			<Label NLSID="Suspended_Session">Session Suspended</Label>
+		</Display>
+		<TableDescriptor>
+			<ColumnDescriptor NAME="Object_Causing" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="Suspended_Session_Object_Causing">Object Causing</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="Tablespace" TYPE="STRING">
+				<Display>
+					<Label NLSID="Suspended_Session_Tablespace">Session Suspended by Tablespace Limitation</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="Rollback_Segment" TYPE="STRING">
+				<Display>
+					<Label NLSID="Suspended_Session_Rollback_Segment">Session Suspended by Rollback Segment Limitation</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="Data_Object" TYPE="STRING">
+				<Display>
+					<Label NLSID="Suspended_Session_Data_Object">Session Suspended by Data Object Limitation</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="Quota" TYPE="STRING">
+				<Display>
+					<Label NLSID="Suspended_Session_Quota">Session Suspended by Quota Limitation</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<PushDescriptor RECVLET_ID="AQMetrics">
+			<Property NAME="QueueName" SCOPE="GLOBAL">ALERT_QUE</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			<Property NAME="KeyField" SCOPE="GLOBAL">OBJECT_NAME</Property>
+			<Property NAME="KeyColumn" SCOPE="GLOBAL">Object_Causing</Property>
+		</PushDescriptor>
+	</Metric>
+
+
+  <!--
+  ======================================================================
+  == Category:         Non-threshold based alert Recovery_Area
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+  <Metric NAME="Recovery_Area" TYPE="TABLE">
+    <ValidIf>
+       <CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+    </ValidIf>
+
+    <Display>
+      <Label NLSID="Recovery_Area">Recovery Area</Label>
+    </Display>
+    <TableDescriptor>
+      <ColumnDescriptor NAME="Recovery_Area" TYPE="STRING" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="Recovery_Area_Recovery_Area">Recovery Area</Label>
+        </Display>
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="Free_Space" TYPE="NUMBER">
+          <Display>
+            <Label NLSID="Recovery_Area_Free_Space">Recovery Area Free Space (%)</Label>
+          </Display>
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT 'RECOVERY AREA' recovery_area,
+       CASE WHEN space_limit > 0 AND space_used >= space_reclaimable
+            THEN 100 * (space_used - space_reclaimable)/space_limit
+            ELSE NULL END free_space
+  FROM v$recovery_file_dest
+ WHERE name IS NOT NULL 
+   AND rownum = 1
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+
+     <PushDescriptor RECVLET_ID="AQMetrics">
+       <Property NAME="QueueName" SCOPE="GLOBAL">ALERT_QUE</Property>
+       <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+       <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+       <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+       <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+       <Property NAME="password" SCOPE="INSTANCE">password</Property>
+       <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+       <Property NAME="KeyField" SCOPE="GLOBAL">OBJECT_NAME</Property>
+       <Property NAME="KeyColumn" SCOPE="GLOBAL">Recovery_Area</Property>
+     </PushDescriptor>
+  </Metric>
+
+ <!--
+  ======================================================================
+  == Category:         Non-threshold based alert Snap_Shot_Too_Old
+  == Collection Level: Recommended
+  == Purpose:          Alerts, Trending
+  ======================================================================
+    -->
+	<Metric NAME="Snap_Shot_Too_Old" TYPE="TABLE">
+		<ValidIf>
+			<CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+		</ValidIf>
+		<Display>
+			<Label NLSID="Snap_Shot_Too_Old">Snapshot Too Old</Label>
+		</Display>
+		<TableDescriptor>
+			<ColumnDescriptor NAME="Object_Causing" TYPE="STRING" IS_KEY="TRUE">
+				<Display>
+					<Label NLSID="Snap_Shot_Too_Old_Object_Causing">Object Causing</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="Tablespace" TYPE="STRING" STATELESS_ALERTS="TRUE">
+				<Display>
+					<Label NLSID="Snap_Shot_Too_Old_Tablespace">Snapshot Too Old due to Tablespace Limit</Label>
+				</Display>
+			</ColumnDescriptor>
+			<ColumnDescriptor NAME="Rollback_Segment" TYPE="STRING" STATELESS_ALERTS="TRUE">
+				<Display>
+					<Label NLSID="Snap_Shot_Too_Old_Rollback_Segment">Snapshot Too Old due to Rollback Segment Limit</Label>
+				</Display>
+			</ColumnDescriptor>
+		</TableDescriptor>
+		<PushDescriptor RECVLET_ID="AQMetrics">
+			<Property NAME="QueueName" SCOPE="GLOBAL">ALERT_QUE</Property>
+			<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+			<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+			<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+			<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+			<Property NAME="password" SCOPE="INSTANCE">password</Property>
+			<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			<Property NAME="KeyField" SCOPE="GLOBAL">OBJECT_NAME</Property>
+			<Property NAME="KeyColumn" SCOPE="GLOBAL">Object_Causing</Property>
+		</PushDescriptor>
+	</Metric>
+
+<!-- ESM rac database collection -->
+  <Metric NAME="installAndDemoAcccounts" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP">
+    <ValidIf>
+	<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="install_demo_accounts">Default Install and Demo Accounts</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+select 'default user account', U.username || '(' || LOWER( U.account_status ) || ')'
+from SYS.DBA_USERS U
+where   U.username IN 	(	
+			'ADAMS',
+			'BLAKE',
+			'CLARK',
+			'CTXSYS',
+			'HR',
+			'JONES',
+			'LBACSYS',
+			'MDSYS',
+			'OE',
+			'OLAPDBA',
+			'OLAPSVR',
+			'OLAPSYS',
+			'ORDPLUGINS',
+			'ORDSYS',
+			'PM',
+			'QS',
+			'QS_ADM',
+			'QS_CB',
+			'QS_CBADM',
+			'QS_CS',
+			'QS_ES',
+			'QS_OS',
+			'QS_WS',
+			'SH',
+                        'ANONYMOUSE',
+                        'ODM_MTR',
+                        'ODM',
+                        'OUTLN',
+                        'WKPROXY',
+                        'WKSYS',
+                        'WMSYS',
+                        'XDB'
+			)
+  and   U.account_status <> 'EXPIRED & LOCKED'
+ORDER BY U.username
+]]>
+
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="defaultAccountPasswords" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE"  HELP="NO_HELP">
+    <ValidIf>
+	<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="default_user_password">Default Users and Passwords</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT 
+'Default account uid/pwd', username
+FROM dba_users
+WHERE (username,password) IN (
+('ADAMS',			'72CDEF4A3483F60D'),
+('ADLDEMO',			'147215F51929A6E8'),
+('APPLSYS',			'0F886772980B8C79'),
+('APPLYSYSPUB',			'A5E09E84EC486FC9'),
+('APPS',			'D728438E8A5925E0'),
+('AQDEMO',			'5140E342712061DD'),
+('AQJAVA',			'8765D2543274B42E'),
+('AQUSER',			'4CF13BDAC1D7511C'),
+('AUDIOUSER',			'CB4F2CEC5A352488'),
+('AURORA$ORB$UNAUTHENTICATED',	'80C099F0EADF877E'),
+('BLAKE',			'9435F2E60569158E'),
+('CATALOG',			'397129246919E8DA'),
+('CDEMO82',			'7299A5E2A5A05820'),
+('CDEMOCOR',			'3A34F0B26B951F3F'),
+('CDEMOUCB',			'CEAE780F25D556F8'),
+('CDEMORID',			'E39CEFE64B73B308'),
+('CENTRA',			'63BF5FFE5E3EA16D'),
+('CLARK',			'7AAFE7D01511D73F'),
+('COMPANY',			'402B659C15EAF6CB'),
+('CSMIG',			'09B4BB013FBD0D65'),
+('CTXDEMO',			'CB6B5E9D9672FE89'),
+('CTXSYS',			'24ABAB8B06281B4C'),
+('DBSNMP',			'E066D214D5421CCC'),
+('DEMO',			'4646116A123897CF'),
+('DEMO8',			'0E7260738FDFD678'),
+('EMP',				'B40C23C6E2B4EA3D'),
+('EVENT',			'7CA0A42DA768F96D'),
+('FINANCE',			'6CBBF17292A1B9AA'),
+('FND',				'0C0832F8B6897321'),
+('GPFD',			'BA787E988F8BC424'),
+('GPLD',			'9D561E4D6585824B'),
+('HR',				'4C6D73C3E8B0F0DA'),
+('HLW',				'855296220C095810'),
+('IMAGEUSER',			'E079BF5E433F0B89'),
+('IMEDIA',			'8FB1DC9A6F8CE827'),
+('JONES',			'B9E99443032F059D'),
+('JMUSER',			'063BA85BF749DF8E'),
+('LBACSYS',			'AC9700FD3F1410EB'),
+('MDSYS',			'9AAEB2214DCC9A31'),
+('MFG',				'FC1B0DD35E790847'),
+('MIGRATE',			'5A88CE52084E9700'),
+('MILLER',			'D0EFCD03C95DF106'),
+('MMO2',			'AE128772645F6709'),
+('MODTEST',			'BBFF58334CDEF86D'),
+('MOREAU',			'CF5A081E7585936B'),
+('NAMES',			'9B95D28A979CC5C4'),
+('MTSSYS',			'6465913FF5FF1831'),
+('MXAGENT',			'C5F0512A64EB0E7F'),
+('OCITEST',			'C09011CB0205B347'),
+('ODS',				'89804494ADFC71BC'),
+('ODSCOMMON',			'59BBED977430C1A8'),
+('OE',				'D1A2DFC623FDA40A'),
+('OEMADM',			'9DCE98CCF541AAE6'),
+('OLAPDBA',			'1AF71599EDACFB00'),
+('OLAPSVR',			'AF52CFD036E8F425'),
+('OLAPSYS',			'3FB8EF9DB538647C'),
+('ORAREGSYS',			'28D778112C63CB15'),
+('ORDPLUGINS',			'88A2B2C183431F00'),
+('ORDSYS',			'7EFA02EC7EA6B86F'),
+('OUTLN',			'4A3BA55E08595C81'),
+('PERFSTAT',			'AC98877DE1297365'),
+('PM',				'C7A235E6D2AF6018'),
+('PO',				'355CBEC355C10FEF'),
+('PO8',				'7E15FBACA7CDEBEC'),
+('PO7',				'6B870AF28F711204'),
+('PORTAL30',			'D373ABE86992BE68'),
+('PORTAL30_DEMO',		'CFD1302A7F832068'),
+('PORTAL30_PUBLIC',		'42068201613CA6E2'),
+('PORTAL30_SSO',		'882B80B587FCDBC8'),
+('PORTAL30_SSO_PS',		'F2C3DC8003BC90F8'),
+('PORTAL30_SSO_PUBLIC',		'98741BDA2AC7FFB2'),
+('POWERCARTUSER',		'2C5ECE3BEC35CE69'),
+('PRIMARY',			'70C3248DFFB90152'),
+('PUBSUB',			'80294AE45A46E77B'),
+('QS',				'4603BCD2744BDE4F'),
+('QS_ADM',			'3990FB418162F2A0'),
+('QS_CB',			'870C36D8E6CD7CF5'),
+('QS_CBADM',			'20E788F9D4F1D92C'),
+('QS_CS',			'2CA6D0FC25128CF3'),
+('QS_ES',			'9A5F2D9F5D1A9EF4'),
+('QS_OS',			'0EF5997DC2638A61'),
+('QS_WS',			'0447F2F756B4F460'),
+('RE',				'933B9A9475E882A6'),
+('REPADMIN',			'915C93F34954F5F8'),
+('RMAIL',			'DA4435BBF8CAE54C'),
+('RMAN',			'E7B5D92911C831E1'),
+('SAMPLE',			'E74B15A3F7A19CA8'),
+('SCOTT',			'F894844C34402B67'),
+('SDOS_ICSAP',			'C789210ACC24DA16'),
+('SECDEMO',			'009BBE8142502E10'),
+('SH',				'54B253CBBAAA8C48'),
+('SYS',				'D4C5016086B2DC6A'),
+('SYSADM',			'BA3E855E93B5B9B0'),
+('SYSTEM',			'D4DF7931AB130E37'),
+('TAHITI',			'F339612C73D27861'),
+('TDOS_ICSAP',			'7C0900F751723768'),
+('TRACESVR',			'F9DA8977092B7B81'),
+('TSDEV',			'29268859446F5A8C'),
+('TSUSER',			'90C4F894E2972F08'),
+('USER0',			'8A0760E2710AB0B4'),
+('USER1',			'BBE7786A584F9103'),
+('USER2',			'1718E5DBB8F89784'),
+('USER3',			'94152F9F5B35B103'),
+('USER4',			'2907B1BFA9DA5091'),
+('USER5',			'6E97FCEA92BAA4CB'),
+('USER6',			'F73E1A76B1E57F3D'),
+('USER7',			'3E9C94488C1A3908'),
+('USER8',			'D148049C2780B869'),
+('USER9',			'0487AFEE55ECEE66'),
+('UTLBSTATU',			'C42D1FA3231AB025'),
+('VIDEOUSER',			'29ECA1F239B0F7DF'),
+('VIF_DEVELOPER',		'9A7DCB0C1D84C488'),
+('VIRUSER',			'404B03707BF5CEA3'),
+('VRR1',			'811C49394C921D66'),
+('WEBDB',			'D4C4DCDD41B05A5D'),
+('WKSYS',			'545E13456B7DDEA0'))
+and   account_status <> 'EXPIRED & LOCKED'
+ORDER BY username
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="systemPrivileges" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP" >
+    <ValidIf>
+	<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="system_privileges">System Privileges for Public Role</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT  DISTINCT 'PUBLIC has SYSTEM privilege', privilege 
+FROM	dba_sys_privs d,
+	(	SELECT DISTINCT(granted_role)
+		FROM dba_role_privs
+		START WITH grantee = 'PUBLIC'
+		CONNECT BY PRIOR granted_role = grantee
+	UNION
+		SELECT 'PUBLIC' AS granted_role FROM dual
+	) r
+WHERE r.granted_role = d.grantee
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="executePrivileges" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP" >
+    <ValidIf>
+	<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="execute_privilege">Object Execute Privilege for Public Role</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT 'PUBLIC can execute', d.table_name 
+FROM	dba_tab_privs d,
+	(	SELECT DISTINCT(granted_role)
+		FROM dba_role_privs
+		START WITH grantee = 'PUBLIC'
+		CONNECT BY PRIOR granted_role = grantee
+	UNION
+		SELECT 'PUBLIC' AS granted_role FROM dual
+	) r
+WHERE		r.granted_role = d.grantee
+	AND	d.table_name IN ('DBMS_RANDOM', 'UTL_SMTP', 'UTL_HTTP', 'UTL_TCP', 'UTL_FILE')
+ORDER BY d.table_name
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="unlimitedFailedLoginAttempts" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP" >
+    <ValidIf>
+	<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="unlimited_login_attempts">Number of Failed Login Attempts</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+SELECT 'Unlimited login attempts', u.username 
+FROM dba_users u, dba_profiles p
+WHERE		p.resource_name = 'FAILED_LOGIN_ATTEMPTS'
+	AND	u.profile = p.profile
+	AND	p.limit = 'UNLIMITED'
+ORDER BY u.username
+]]>
+      </Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+  </Metric>
+
+  <Metric NAME="testPrivileges" TYPE="RAW" CONFIG="TRUE" KEYS_ONLY="TRUE" HELP="NO_HELP" >
+    <!-- The use of ValidIf causes the agent to connect to the database 
+         and this metric is designed to indicate if the agent is having
+         problems connecting to the database. As a result, this metric
+         cannot have a ValidIf element because it would prevent the
+         execution of the metric because of the issue the metric was 
+         designed to detect. 
+
+         Well, it turns out that a standby database causes the agent to 
+         crash if the validIf is removed. So we'll add it back until 
+         the bug is fixed.
+    -->
+    <ValidIf>
+	<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+    </ValidIf>
+    <Display>
+      <Label NLSID="sufficient_dbsnmp_privilege">DBSNMP Privilege</Label>
+    </Display>
+    <TableDescriptor TABLE_NAME="esm_collection">
+      <ColumnDescriptor NAME="property" COLUMN_NAME="property" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+      <ColumnDescriptor NAME="value" COLUMN_NAME="value" TYPE="STRING" IS_KEY="TRUE" HELP="NO_HELP">
+      </ColumnDescriptor>
+    </TableDescriptor>
+
+    <QueryDescriptor FETCHLET_ID="SQL">
+      <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+DECLARE
+  property     VARCHAR2(30);
+  value     VARCHAR2(1000);
+
+  TYPE        data_cursor_type IS REF CURSOR;
+  data_cursor    data_cursor_type;
+
+BEGIN
+    -- Metric remoteRolesAndAuthentication
+    -- Metric remoteLoginPasswordFile
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM sys.v_$parameter where ROWNUM = 1';
+
+    -- Metric installAndDemoAcccounts
+    -- Metric defaultAccountPasswords
+    -- Metric unlimitedFailedLoginAttempts
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM dba_users where ROWNUM = 1';
+
+    -- Metric systemPrivileges
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM dba_sys_privs where ROWNUM = 1';
+
+    -- Metric executePrivileges
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM dba_tab_privs where ROWNUM = 1';
+
+    -- Metric systemPrivileges
+    -- Metric executePrivileges
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM dba_role_privs where ROWNUM = 1';
+
+    -- Metric unlimitedFailedLoginAttempts
+    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM dba_profiles where ROWNUM = 1';
+
+    property := 'no_tests';
+      value := 'no_error';
+    OPEN data_cursor FOR
+    SELECT     property,
+        value
+    FROM dual;
+
+    :1 := data_cursor;
+
+EXCEPTION
+  WHEN OTHERS -- goes if ANY errors (should we check for privilege(s) related only ?)
+  THEN
+    BEGIN
+    property := 'no_tests';
+      value := SQLERRM;
+
+      -- DBMS_OUTPUT.PUT_LINE('Caught exception ' || msg);
+
+    -- open the cursor to return
+    OPEN data_cursor FOR
+    SELECT     property,
+        value
+    FROM dual;
+
+    :1 := data_cursor;
+    END;
+END;
+]]>
+      </Property>
+
+      <Property NAME="SQLOUTPARAMPOS" SCOPE="GLOBAL">1</Property>
+      <Property NAME="SQLOUTPARAMTYPE" SCOPE="GLOBAL">SQL_CURSOR</Property>
+      <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+      <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+      <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+      <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+      <Property NAME="password" SCOPE="INSTANCE">password</Property>
+      <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+
+    </QueryDescriptor>
+
+  </Metric>
+
+  <CredentialInfo>
+    <!-- Credential type for database credentials: username/password/role -->
+    <CredentialType NAME="DBCreds" >
+      <Display>
+        <Label NLSID="CREDS_DATABASE_DBCREDS">Database Credentials</Label>
+      </Display>
+
+      <CredentialTypeColumn NAME="DBUserName" IS_KEY="TRUE">
+        <Display>
+          <Label NLSID="CREDS_DATABASE_USERNAME">UserName</Label>
+        </Display>
+      </CredentialTypeColumn>
+
+      <CredentialTypeColumn NAME="DBPassword">
+        <Display>
+          <Label NLSID="CREDS_DATABASE_PASSWORD">Password</Label>
+        </Display>
+      </CredentialTypeColumn>
+
+      <CredentialTypeColumn NAME="DBRole" >
+        <Display>
+          <Label NLSID="CREDS_DATABASE_ROLE">Role</Label>
+        </Display>
+      </CredentialTypeColumn>
+    </CredentialType>
+
+    <!-- Credential type for DB Host credentials, refers to credentials
+       - on the host the database is on
+    -->
+    <CredentialType NAME="DBHostCreds" >
+      <Display>
+        <Label NLSID="CREDS_DATABASE_DBCREDS">Database Host Credentials</Label>
+      </Display>
+
+      <CredentialTypeRef REF_NAME="HostRef" REF_TYPE="HostCreds" 
+                REF_TARGETTYPE="host" ASSOCIATION="host" >
+        <CredentialTypeRefColumn NAME="HostUserName" 
+              REF_TYPECOLUMN="HostUserName" />
+        <CredentialTypeRefColumn NAME="HostPassword" 
+              REF_TYPECOLUMN="HostPassword" />
+      </CredentialTypeRef>
+    </CredentialType>
+
+    <!-- The NORMAL credential set -->
+    <CredentialSet NAME="DBCredsNormal" CREDENTIAL_TYPE="DBCreds" 
+            USAGE="PREFERRED_CRED">
+
+      <CredentialSetColumn TYPE_COLUMN="DBUserName" SET_COLUMN="username">
+        <Display>
+          <Label NLSID="CREDS_NORMAL_USER">UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="DBPassword" SET_COLUMN="password">
+        <Display>
+          <Label NLSID="CREDS_NORMAL_PASSWORD">Password</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="DBRole" SET_COLUMN="role" >
+        <Display>
+          <Label NLSID="CREDS_NORMAL_ROLE">Password</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+
+    <!-- The SYSDBA credential set -->
+    <CredentialSet NAME="DBCredsSYSDBA" CREDENTIAL_TYPE="DBCreds" USAGE="PREFERRED_CRED">
+      <CredentialSetColumn TYPE_COLUMN="DBUserName" SET_COLUMN="sysDBAUserName">
+        <Display>
+          <Label NLSID="CREDS_SYSDBA_USER">SYSDBA UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="DBPassword" SET_COLUMN="sysDBAPassword">
+        <Display>
+          <Label NLSID="CREDS_SYSDBA_PASSWORD">SYSDBA Password</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="DBRole" SET_COLUMN="sysDBARole">
+        <Display>
+          <Label NLSID="CREDS_SYSDBA_ROLE">Password</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+
+    <!-- The monitoring credential set -->
+    <CredentialSet NAME="DBCredsMonitoring" CREDENTIAL_TYPE="DBCreds" USAGE="MONITORING">
+      <CredentialSetColumn TYPE_COLUMN="DBUserName" SET_COLUMN="UserName">
+        <Display>
+          <Label NLSID="CREDS_MON_USER">Monitoring UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+      <CredentialSetColumn TYPE_COLUMN="DBPassword" SET_COLUMN="password">
+        <Display>
+          <Label NLSID="CREDS_MON_PASSWORD">Monitoring Password</Label>
+        </Display>
+      </CredentialSetColumn>
+      <CredentialSetColumn TYPE_COLUMN="DBRole" SET_COLUMN="Role" >
+        <Display>
+          <Label NLSID="CREDS_MON_ROLE">Monitoring Role</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+
+    <!-- The DB host credentials credential set -->
+    <CredentialSet NAME="DBHostCreds" CREDENTIAL_TYPE="DBHostCreds" USAGE="PREFERRED_CRED">
+      <CredentialSetColumn TYPE_COLUMN="HostUserName" 
+           SET_COLUMN="HostUsername">
+        <Display>
+          <Label NLSID="CREDS_HOST_USER">Host UserName</Label>
+        </Display>
+      </CredentialSetColumn>
+
+      <CredentialSetColumn TYPE_COLUMN="HostPassword" 
+          SET_COLUMN="HostPassword">
+        <Display>
+          <Label NLSID="CREDS_HOST_PASSWORD">Host Password</Label>
+        </Display>
+      </CredentialSetColumn>
+    </CredentialSet>
+    
+  </CredentialInfo>
+
+  <InstanceProperties>
+    <InstanceProperty NAME="OracleHome" CREDENTIAL="FALSE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_OracleHome_iprop">Oracle home path</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="UserName" CREDENTIAL="TRUE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_UserName_iprop">Username</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="password" CREDENTIAL="TRUE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_password_iprop">Password</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="Role" CREDENTIAL="FALSE" OPTIONAL="TRUE">
+      <Display>
+        <Label NLSID="rac_database_role_iprop">Role</Label>
+      </Display>
+    </InstanceProperty>    
+    <InstanceProperty NAME="ClusterName" CREDENTIAL="FALSE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_cluster_iprop">Cluster Name</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="MachineName" CREDENTIAL="FALSE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_MachineName_iprop">Machine name</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="Port" CREDENTIAL="FALSE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_Port_iprop">Port</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="SID" CREDENTIAL="FALSE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_SID_iprop">Database SID</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="ServiceName" CREDENTIAL="FALSE" OPTIONAL="FALSE">
+      <Display>
+        <Label NLSID="rac_database_service_iprop">Service Name</Label>
+      </Display>
+    </InstanceProperty>
+    <InstanceProperty NAME="emdPerlTraceLevel" CREDENTIAL="FALSE" OPTIONAL="TRUE">
+      <Display>
+        <Label NLSID="rac_database_trace_iprop">Perl Trace Level</Label>
+      </Display>
+    </InstanceProperty>
+
+   <!--
+   ======================================================================
+   == Dynamic Properties: SYSTEM tablespace numbers
+   == (can be used to improve performance on any query requiring the 
+   ==  SYSTEM tablespaces. currently used in db_recSegmentSettings_sysseg)
+   ======================================================================
+   -->
+		<DynamicProperties NAME="SystemTablespaceNumber" FORMAT="ROW" PROP_LIST="SystemTs#">
+			<QueryDescriptor FETCHLET_ID="SQL">
+				<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+SELECT ts# "SystemTs#" FROM sys.ts$ WHERE name = 'SYSTEM'
+]]></Property>
+				<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+				<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+				<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+				<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+				<Property NAME="password" SCOPE="INSTANCE">password</Property>
+				<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			</QueryDescriptor>
+		</DynamicProperties>  
+
+   <!--
+   ======================================================================
+   == Dynamic Properties: SYSAUX tablespace number
+   == (can be used to improve performance on any query requiring the 
+   ==  SYSAUX tablespaces. currently used in db_recSegmentSettings_sysseg)
+   == NOTE: If the SYSAUX tablespace does not exist -1 is returned
+   ======================================================================
+   -->
+		<DynamicProperties NAME="SysauxTablespaceNumber" FORMAT="ROW" PROP_LIST="SysauxTs#">
+			<QueryDescriptor FETCHLET_ID="SQL">
+				<Property NAME="STATEMENT" SCOPE="GLOBAL"><![CDATA[
+SELECT
+  nvl(a.ts#, -1) "SysauxTs#"
+FROM
+  (select ts#,name from sys.ts$ where name = 'SYSAUX') a,
+  (select 'SYSAUX' name from dual) b
+WHERE
+  a.name(+) = b.name 
+]]></Property>
+				<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+				<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+				<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+				<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+				<Property NAME="password" SCOPE="INSTANCE">password</Property>
+				<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			</QueryDescriptor>
+		</DynamicProperties>  
+
+    <!--
+    ======================================================================
+    == Dynamic Properties: GetD(ata)B(ase)Version
+    ======================================================================
+      -->
+    <DynamicProperties NAME="GetDBVersion" FORMAT="ROW"
+                       PROP_LIST="Version">
+      <QueryDescriptor FETCHLET_ID="SQL">
+        <Property NAME="STATEMENT" SCOPE="GLOBAL">
+<![CDATA[
+select version from v$instance
+]]>
+        </Property>
+        <Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+        <Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+        <Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+        <Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+        <Property NAME="password" SCOPE="INSTANCE">password</Property>
+        <Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+      </QueryDescriptor>
+    </DynamicProperties>
+
+    <!--
+    ======================================================================
+    == Dynamic Properties: ComputeV(ersion)C(ategory)
+    ======================================================================
+      -->
+    <DynamicProperties NAME="ComputeVC" FORMAT="ROW"
+                       PROP_LIST="VersionCategory">
+      <QueryDescriptor FETCHLET_ID="VersionRangeComputer">
+        <Property NAME="Version" SCOPE="INSTANCE">Version</Property>
+        <Property NAME="pre8" SCOPE="GLOBAL">;8.0.0</Property>
+        <Property NAME="8i" SCOPE="GLOBAL">8.0.5;</Property>
+        <Property NAME="8iR2" SCOPE="GLOBAL">8.1.5;9.0.0</Property>
+        <Property NAME="9i" SCOPE="GLOBAL">9.0.1;</Property>
+        <Property NAME="9iR2" SCOPE="GLOBAL">9.2.0;</Property>
+        <Property NAME="10gR1" SCOPE="GLOBAL">10.1.0.2;</Property>
+        <Property NAME="10gR2" SCOPE="GLOBAL">10.2.0;</Property>
+      </QueryDescriptor>
+    </DynamicProperties>
+
+		<DynamicProperties NAME="GetDataGuardRole" FORMAT="ROW" PROP_LIST="DataGuardStatus">
+		<ValidIf>
+			<CategoryProp NAME="VersionCategory" CHOICES="9i;9iR2;10gR1;10gR2"/>
+		</ValidIf>
+			<QueryDescriptor FETCHLET_ID="SQL" >
+				<Property NAME="STATEMENT" SCOPE="GLOBAL" ><![CDATA[
+select case when (((select count(*) from v$archive_dest where target='STANDBY') > 0) OR 
+(database_role like '%STANDBY')) then initcap(database_role) else ' ' end from v$database
+]]></Property>
+				<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+				<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+				<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+				<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+				<Property NAME="password" SCOPE="INSTANCE">password</Property>
+				<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			</QueryDescriptor>
+		</DynamicProperties>
+
+    <!--
+    ======================================================================
+    == Dynamic Properties: Server Manageability
+    ======================================================================
+      -->
+		<DynamicProperties NAME="ServerManageability" FORMAT="ROW" PROP_LIST="StatisticsLevel">
+			<ValidIf>
+				<CategoryProp NAME="VersionCategory" CHOICES="10gR1;10gR2"/>
+			</ValidIf>
+			<QueryDescriptor FETCHLET_ID="SQL">
+				<Property NAME="STATEMENT" SCOPE="GLOBAL">
+				<![CDATA[
+                select value from v$parameter where name='statistics_level'
+                ]]></Property>
+				<Property NAME="MachineName" SCOPE="INSTANCE">MachineName</Property>
+				<Property NAME="Port" SCOPE="INSTANCE">Port</Property>
+				<Property NAME="SID" SCOPE="INSTANCE">SID</Property>
+				<Property NAME="UserName" SCOPE="INSTANCE">UserName</Property>
+				<Property NAME="password" SCOPE="INSTANCE">password</Property>
+				<Property NAME="Role" SCOPE="INSTANCE" OPTIONAL="TRUE">Role</Property>
+			</QueryDescriptor>
+		</DynamicProperties>
+
+   </InstanceProperties>
+
+
+</TargetMetadata>

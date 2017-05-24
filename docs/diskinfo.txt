@@ -1,0 +1,11 @@
+DISK/ARRAY INQUIRY PROGRAM METRICS:
+
+Essential:
+	vendor
+	product
+	serial_no (unique id)
+	Raid Configuration (arrays)
+
+Important:
+	capacity (bytes)
+	cylinders

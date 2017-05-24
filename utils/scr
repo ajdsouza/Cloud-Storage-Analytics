@@ -1,0 +1,2 @@
+##!/bin/sh
+cd $SRCHOME/emagent/sysman/admin/scripts

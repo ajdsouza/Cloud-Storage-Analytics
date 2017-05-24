@@ -1,0 +1,44 @@
+			EMC/Syminfo Information
+============================================================================
+
+
+SYMINFO
+	
+The possible values for the configuration field of syminfo are as follows:
+
+Configuration String	Meaning
+---------------------------------------------------------------- 
+UNPROTECTED		no data protection
+MIRR_2			2 way mirror
+MIRR_3			3 way mirror
+MIRR_4			4 way mirror
+RAID_S			Data w/Parity (RAID-S)
+RAID_S_MIRR	  	Data w/Parity plus local mirror	
+RDF_R1			SRDF master device
+RDF_R2			SRDF slave device
+RDF_R1_RAID_S		SRDF master with local RAID-S protection
+RDF_R2_RAID_S		SRDF slave with RAID-S protection
+RDF_R1_MIRR		SRDF source with local mirror
+RDF_R2_MIRR		SRDF target with mirror
+BCV			Business Continuance Volume (BCV) 
+SPARE			Hot Spare
+BCV_MIRR_2		BCV device with mirror
+BCV_RDF_R1		SRDF master and BCV device
+BCV_RDF_R1_MIRR		SRDF master and BCV device w/mirror
+DRV			Dynamicreallocation device used by SymOptimizer
+DRV_MIRR_2		DRV device w/mirror
+BCV_RDF_R2		SRDF target and BCV device
+BCV_RDF_R2_MIRR		SRDF target and BCV device w/mirror
+UNKNOWN_CONFIG		Unknown disk configuration
+
+
+BCVs
+	Business Continuance Volumes are mirror copies of a disk that
+	have their own lun.  The BCV can be split from its primary volume
+	for a point-in-time image of the primary volume. 
+
+
+LINUX
+	Currently syminfo is not supported on typical linux installations.
+	Syminfo requires the sg driver to be compiled into the kernel, making
+	it difficult to deploy on a large number of machines.

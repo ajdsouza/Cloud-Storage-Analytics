@@ -1,0 +1,186 @@
+#!/usr/local/git/perl/bin/perl
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+#
+#  $Id: atst,v 1.1 2003/04/01 01:02:16 ajdsouza Exp $ 
+#
+# NAME  
+#	testmetrics
+#
+# DESC 
+#
+# Testload data into tge mgmt_metrics table for 9i oem
+#  for host metrics and oracle database metrics, for a list of predefined databases
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/03/02 - Created
+
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+
+$ENV{'PATH'} = "/usr/bin:/usr/sbin:/etc:$ENV{PATH}" 
+    if $ENV{PATH} !~ m|/usr/bin|;
+	
+#A case where target_name is different from .us.oracle.com
+my %hosts;
+
+
+#A list of databases to get metrics from
+my @databases = (  
+		   {
+		       hostname => 'dlsun1170.us.oracle.com',
+		       name =>"emd_dlsun1170",	
+		       username => "system", 
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = dlsun1170)(PORT = 1531)))(CONNECT_DATA=(SID=EMD)(SERVER=DEDICATED)))"
+		       },
+		   {
+		       hostname => 'dlsun1170.us.oracle.com',
+		       name =>"emd_dlsun1170",	
+		       username => "system", 
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = dlsun1170)(PORT = 1531)))(CONNECT_DATA=(SID=EMD)(SERVER=DEDICATED)))"
+		       },	
+		   {	
+		       hostname => 'rmdc-oem01.us.oracle.com',
+		       name=>"oemoltp_rmdc-oem01",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = rmdc-oem01)(PORT = 1521)))(CONNECT_DATA=(SID=oemoltp)(SERVER=DEDICATED)))"
+		       },
+		   {
+		       hostname => 'rmdc-oem01.us.oracle.com',
+		       name=>"emeiat_rmdc-oem01",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = rmdc-oem01)(PORT = 1521)))(CONNECT_DATA=(SID=emeiat)(SERVER=DEDICATED)))"
+		       },
+		   {
+		       hostname => 'labsun1.us.oracle.com',
+		       name=>"oemtest1_labsun1",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS = (PROTOCOL = TCP)(HOST = labsun1.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = oemtest1)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'labsun1.us.oracle.com',
+		       name=>"oemtest2_labsun1",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = labsun1.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = testoem2)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'sm2sun01.us.oracle.com',
+		       name=>"smmdev_sm2sun01",
+		       username=>"OEMADM",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = sm2sun01.us.oracle.com)(PORT = 1522)))(CONNECT_DATA = (SID = smmdev)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"orcl9i_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = orcl9i)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db1_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db1)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db3_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db3)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db4_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db4)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"db5_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = db5)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'lothar.us.oracle.com',
+		       name=>"apps_lothar",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = lothar.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = apps)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'dbs10.us.oracle.com',
+		       name=>"oasisap_dbs10",
+		       username=>"oemadm",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = dbs10.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = oasisap)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'dbs11-c.us.oracle.com',
+		       name=>"ifsap_dbs11",
+		       username=>"oemadm",
+		       password=>"oemv22",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL = TCP)(HOST = dbs11.us.oracle.com)(PORT = 1521)))(CONNECT_DATA = (SID = ifsap)(SERVER = DEDICATED)))"
+		       },
+		   {
+		       hostname => 'eagle1-pc.us.oracle.com',
+		       name=>"iasem_eagle1-pc",
+		       username=>"system",
+		       password=>"manager",
+		       address=>"(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))"
+		       }
+
+		   );
+
+# Test repository connection
+$ENV{'UPLOAD_DB_USER'}='storage_rep';
+$ENV{'UPLOAD_DB_PASSWORD'}='storage_rep';
+$ENV{'UPLOAD_DB_TNS'}="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))";
+
+chop(my $hostname = `hostname 2>/dev/null` || `uname -n 2>/dev/null`);
+
+$hostname .= ".us.oracle.com" if $hostname !~ /\.us\.oracle\.com/;
+$hostname =  $hosts{$hostname} if defined $hosts{$hostname};
+
+foreach ( @databases )
+{
+    my %dbinfo = %$_;
+
+    next unless $dbinfo{hostname} =~ /$hostname/i;
+    
+    $ENV{'EM_TARGET_NAME'}=$dbinfo{name};
+    $ENV{'EM_TARGET_TYPE'}='oracle_sysman_database';
+    $ENV{'EM_TARGET_USERNAME'}=$dbinfo{username};
+    $ENV{'EM_TARGET_PASSWORD'}=$dbinfo{password};
+    $ENV{'EM_TARGET_ADDRESS'}=$dbinfo{address};
+    
+    print "$ENV{EM_TARGET_NAME} \n";
+    print "$ENV{EM_TARGET_TYPE}\n";
+    print "$ENV{EM_TARGET_USERNAME}\n";
+    print "$ENV{EM_TARGET_PASSWORD}\n";
+    print "$ENV{EM_TARGET_ADDRESS}\n";
+    
+    for ( apps() ){
+		print "$_ \n";
+	}
+    my $result = `/usr/local/git/oem/storage/stormon`;
+}

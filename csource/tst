@@ -1,0 +1,392 @@
+#!/usr/local/git/perl/bin/perl
+
+use strict;
+use warnings;
+
+# Variable holding the field to be picked up as unique key for a 
+# disk, based on vendor, product
+my %config;
+
+#*------------------------------------------------------------
+#   HITACHI SPECIAL
+#
+#    For hitachi 12 bytes from offset 36 give the serial number
+#    The serial number is in HEX
+#    This is to be inteprested as 
+#    4 bytes - Model
+#    4 bytes  - Array serial number
+#    1 byte - Port Id
+#    3 Bytes - Device ID
+#    If same disk is mounted on two controllers, multipathed 
+#    the port number would change
+#    So take serial number to be array serial number + device id
+#    -----------------------------------------------------------
+
+$config{key}{emc}="sq_serial_no deviceid";
+$config{key}{hitachi}="sq_hitachi_serial deviceid";
+$config{key}{symbios}="sq_vendorspecific sq_vpd_pagecode_83 deviceid";
+$config{key}{default}="sq_vendorspecific deviceid sq_serial_no";
+
+# Order of choice from among candidates for a field
+$config{fields}{vendor}=[qw(scsivendor sq_vendor)];
+$config{fields}{product}=[qw(scsiproduct sq_product)];
+$config{fields}{serial_no}=[qw(scsiserial sq_serial_no)];
+$config{fields}{volumelabel}=[qw(asciilabel)];
+$config{fields}{storagevendor}=[qw(scsivendor sq_vendor)];
+$config{fields}{storageproduct}=[qw(scsiproduct sq_product)];
+
+# List of fields to be common for each slice of a disk
+$config{diskfields}=
+    [qw(disk_key vendor product serial_no volumelabel storagevendor 
+	storageproduct storage_system_id storage_disk_device_id 
+	configuration device_status)];
+# scsi inquiry fields we are interested in
+$config{scsiinqfields}=
+    "sq_vendor|sq_product|sq_revision|sq_serial_no|sq_capacity|sq_hitachi|sq_vendorspecific|sq_vpd_pagecode_83";
+
+
+#-----------------------------------------------------------------
+# FUNCTIONS : checkKeys 
+# (For future use)
+#
+# DESC : Check if keys pass a few checks, 
+#   
+#
+# ARGUMENTS :
+#  referece to a hash of disk hashes
+#
+#-----------------------------------------------------------------
+
+sub checkKeys(\%){
+    
+    my %count;
+    my %list;
+ 
+    my (%disks) = %{$_[0]};   
+    
+    for my $key( keys %disks ){
+	# Take a count of the keys
+	if ( $disks{$key}->{diskkey} ){
+	    
+	    $count{$disks{$key}->{keytype}}{$disks{$key}->{diskkey}}++;
+	    push @{$list{$disks{$key}->{diskkey}}},$disks{$key};
+	    
+	}
+    }
+
+
+    for my $key ( keys %list ){
+	
+	my %keycheck;
+	
+	for my $disk ( @{$list{$key}} ){
+	    
+	    # Check if controller repeats for the same key
+	    $keycheck{$disk->{controller}}++ if $disk->{controller};
+	    
+	    print " Controller repeats for $key \n" and last 
+		if $keycheck{$disk->{controller}} and  
+		$keycheck{$disk->{controller}} > 1;
+	    
+	    # check if 2 pseudos repeat for the same key
+	    $keycheck{pseudo}++ if $disk->{diskpath} =~ /\/devices\/pseudo/i;
+	    
+	    print "pseudos repeat for $key \n" and last 
+		if $keycheck{pseudo} and $keycheck{pseudo} > 1;
+	    
+	}
+	
+	# check if a pseudo exists if key count > 1
+	print "Multipathed without pseudo parent/layered driver \n" 
+	    if @{$list{$key}} > 1 and grep /\/devices\/pseudo/i, @{$list{$key}};
+	
+    }
+    
+
+    for my $type ( keys %count){
+	
+	print "$type\n";
+	
+	for ( keys %{$count{$type}} ){
+	    
+	    print "\t$_ - $count{$type}{$_} \n";
+	    
+	    for my $disk ( @{$list{$_}} )
+	    {
+		print "\t\t $disk->{diskpath} \n";
+	    }
+	    
+	}
+	
+    }
+    
+}
+
+
+
+#-----------------------------------------------------------------
+# FUNCTIONS : generateKeys 
+#
+#
+# DESC : Generate a key for each disk to consistently 
+# identify the disk
+#
+# ARGUMENTS :
+#  referece to a hash of disk hashes
+#
+#-----------------------------------------------------------------
+sub generateKeys(\%){
+    
+    my (%disks) = %{$_[0]};
+    
+    for my $key( keys %disks ){
+	
+	my @values;
+	
+	#if key is exists then next
+	if ( $config{key}{lc "$disks{$key}->{vendor}_$disks{$key}->{product}"} ){
+	    @values = split /\s+/,$config{key}{lc "$disks{$key}->{vendor}_$disks{$key}->{product}"};
+	}
+	elsif ( $config{key}{lc $disks{$key}->{vendor}} ){
+	    @values = split /\s+/,$config{key}{lc $disks{$key}->{vendor}};
+	}
+	else{
+	    @values = split /\s+/,$config{key}{default};
+	}
+
+	# Generate the key from the list of candiate fields
+	for ( @values ){
+	    
+	    $disks{$key}->{keytype} = $_ 
+		and $disks{$key}->{diskkey} = "$disks{$key}->{vendor}_$disks{$key}->{$_}"
+		and last 
+		if $disks{$key}->{$_};	
+	}
+	
+    }
+    
+}
+
+
+#------------------------------------------------------------------------------------
+# FUNCTION : listsolarisdisks
+#
+#
+# DESC
+# return a array of hashes listing all disks and their configuration 
+#
+# ARGUMENTS:
+#
+#------------------------------------------------------------------------------------
+sub listsolarisdisks{
+    
+# arrays to store disks, disk controllers and hash of disk configuration
+    my %disks; 
+    my @slices;
+    my $discoverdisks;
+    my $isalist;
+    
+#Check the type of kernel and OS version
+#if 64 bit version
+    
+    $discoverdisks = 'kdisks';
+    
+    chomp (my $version = runSystemCmd("uname -r"));
+    chomp (my $isalist = runSystemCmd("isalist"));
+
+    $discoverdisks = 'kdisks64' if $version > 5.7 and $isalist =~ /sparcv9/i;
+    
+    for ( runSystemCmd($discoverdisks) ){
+	
+	my %devinfo;
+	
+	chomp;
+	
+	s/^\s+|\s+$//g;
+	
+	(
+	 $devinfo{recordtype},
+	 $devinfo{name},
+	 $devinfo{instance},
+	 $devinfo{target},
+	 $devinfo{diskpath},
+	 $devinfo{volumelabel},
+	 $devinfo{asciilabel},
+	 $devinfo{lun},
+	 $devinfo{vendor},
+	 $devinfo{product},
+	 $devinfo{scsitarget},
+	 $devinfo{scsilun},
+	 $devinfo{disktype},
+	 $devinfo{class},
+	 $devinfo{scsivendor},
+	 $devinfo{scsiproduct},
+	 $devinfo{scsirevision},
+	 $devinfo{scsiserial},
+	 $devinfo{deviceidtype},
+	 $devinfo{deviceidhint},
+	 $devinfo{deviceid},
+	 $devinfo{layereddriver},
+	 $devinfo{rdriverpatha},
+	 $devinfo{rdriverpathb},
+	 $devinfo{controller},
+	 $devinfo{controllerdriver},
+	 $devinfo{controllernum},
+	 $devinfo{controllertype},
+	 $devinfo{blocksize},
+	 $devinfo{disksize},
+	 $devinfo{mediatype},
+	 $devinfo{formatstatus},
+	 $devinfo{physical_name},
+	 $devinfo{nodename},
+	 $devinfo{majornumber},
+	 $devinfo{minornumber},
+	 $devinfo{nodetype},
+	 $devinfo{nodeclass},
+	 $devinfo{clone},
+	 $devinfo{filetype},
+	 $devinfo{partition},
+	 $devinfo{capacity},
+	 $devinfo{startsector},
+	 $devinfo{partitiontype}
+	 ) = split /\s*\|\s*/; 
+	
+	# Skip CDROM    
+	next if $devinfo{controllertype} =~ /CDROM/i or
+	    $devinfo{nodetype} =~ /DDI_NT_CD_/i;
+	
+	# Deduce the type of slice, if it represents the whole disk or a 
+	# slice
+	if (
+	    $devinfo{partitiontype} =~ /BACKUP/i  or 
+	    $devinfo{partition} = 2  or
+	    $devinfo{diskpath} eq $devinfo{physical_name} or
+	    $devinfo{recordtype} =~ /NO_MINOR/i    
+	    )
+	{
+	    $devinfo{type} = 'DISK';
+	    
+	}
+	else
+	{
+	    $devinfo{type} = 'SLICE';
+	}    
+	
+	# if the line represents the whole RAW disk stack it differently
+	# the check is NOT BLOCK , as sometimes there may be no filetype
+	# if there are no minor nodes
+	$disks{"$devinfo{name}_$devinfo{instance}"} = \%devinfo
+	    if $devinfo{filetype} !~ /BLOCK/i and $devinfo{type} =~ /DISK/i;
+	
+	push @slices,\%devinfo;       
+	
+    }
+    
+# scsi inquiry
+    for my $key ( keys %disks ){
+	
+	next if  $disks{$key}->{disktype} !~ /DISK_SCSI/i;
+	
+	for (  runSystemCmd("scsiinq $disks{$key}->{diskpath}") ){
+	    
+	    chomp;
+	    
+	    s/^\s+|\s+$//g;
+	    
+	    # Skip the scsi fields of no intrest to us
+	    next unless $_ =~ /^($config{scsiinqfields})/i ;	
+	    
+	    my($name,$value) = ( /^\s*(.*)::\s*(.*)/ );
+	
+	    # Regexp is greedy, trailing nulls will be part of value
+	    $value =~ s/\s+$//g;	    	    
+	    
+	    $disks{$key}->{$name} = $value;
+	    
+	}
+	
+    }   
+    
+    
+# validate the information in the fields  information
+    for my $key ( keys %disks ){
+	
+	for my $field( keys %{$config{fields}} ){
+	    
+	    for ( @{$config{fields}{$field}} ){
+		
+	    # If vendor and scsi vendor are different take scsi vendor
+		$disks{$key}->{$field} = $disks{$key}->{$_} 
+		if $disks{$key}->{$_}
+		and (
+		     not $disks{$key}->{$field}
+		     or $disks{$key}->{$field} ne $disks{$key}->{$_}
+		     );
+		
+	    }
+	    
+	}
+	
+    }   
+    
+# Generate keys for each disk
+    generateKeys(%disks);
+    
+    
+# Get vendor information for supported vendors
+    for ( keys %disks ){
+	
+	# If disk size is UNKNOWN the disk is offline
+	$disks{$_}->{device_status} = 'DISK_OFFLINE'
+	    if 	
+	    $disks{$_}->{disksize} != /\D+/ and
+	    $disks{$_}->{capacity} != /\D+/;
+	
+	getDiskVendorData($disks{$_});
+	
+    }
+    
+    
+    for my $sliceref ( @slices ){
+	
+	my $diskref;
+	
+	# If disk and capacity is UNKNOWN take disksize
+	$sliceref->{capacity} = $sliceref->{disksize}
+	if 
+	    $sliceref->{type} =~ /DISK/i 
+	    and $sliceref->{capacity} !~ /\D+/ 
+	    and $sliceref->{disksize} =~ /\D+/;
+	
+	# This is an error that should be handled
+	warn "WARN: Slice with no disk for $sliceref->{name},$sliceref->{instance} \n" 
+	    and next unless $disks{"$sliceref->{name}_$sliceref->{instance}"};
+	
+	$diskref = $disks{"$sliceref->{name}_$sliceref->{instance}"}; 
+	
+	for ( @{$config{diskfields}} ){
+	    
+	    $sliceref->{$_} = $diskref->{$_} if $diskref->{$_};
+	    
+	}
+	
+	# Generate a slicekey for each slice
+	$sliceref->{slice_key}  =  "$sliceref->{disk_key}_$sliceref->{partition}";
+	
+	# Get the inode for the disk, skip if inode not found, implies file not on OS
+	$sliceref->{inode}  =  getinode($sliceref->{physical_name});
+	
+	# Logical name for the disk, ignore if logical name is not found
+	$sliceref->{logical_name} = getLogicalName($sliceref->{physical_name}); 
+	
+	# If size is not numeric , take it as 0
+	$sliceref->{capacity} = 0 if $sliceref->{capacity} !~ /\D+/;
+	
+    }
+
+    return @slices;
+    
+}
+
+
+

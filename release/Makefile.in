@@ -1,0 +1,135 @@
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+#
+#  $Id: Makefile.in,v 1.13 2003/11/18 22:50:23 ajdsouza Exp $ 
+#
+# NAME  
+#	 Makefile
+#
+# DESC 
+# 	Makefile for 9i and mozart releases
+#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/18/02 - Created
+#
+#
+
+
+SHELL = /bin/sh
+
+WK=@wkdir@
+
+SCRIPTSDIR=${WK}/scripts
+MODULESDIR=${WK}/perlmodules
+CSOURCE=${WK}/csource
+RELEASE=${WK}/release
+TEST=${WK}/test9i
+README=${WK}/readme
+EM_4_0_JOBS_DIR=${WK}/configfiles
+REPOSITORY_PACKAGE_DIR=${WK}/repository
+REPOSITORY_MAINTENANCE_DIR=${WK}/repository/maintenance
+
+GITBASE=/usr/local/git
+GITSTORAGE=${GITBASE}/oem/storage
+GITLIB=${GITBASE}/perl-addon/Monitor
+GITLOG=/u01/app/oracle/product/oemagent/network/agent/om/trace
+
+# Directory structure to check into the git CVS
+CVSLIB=git/perl-addon/Monitor
+CVSSTORAGE=git/oem/storage
+GITCVS=${WK}/operations
+GITCVSLIB=${GITCVS}/${CVSLIB}
+GITCVSSTORAGE=${GITCVS}/${CVSSTORAGE}
+
+#Directory for packaging telestra files
+STORMON_PACKAGE=stormon_package
+STORMON_PACKAGE_DIR=${WK}/${STORMON_PACKAGE}
+
+README_FILES=readme/README_repository.txt doc/EM40_DEPLOYMENT_FAQ.txt readme/release_notes.txt readme/README_stormon_package.txt
+EM_4_0_FILES=stormon_jobs.sql StormonHostJob.xml StormonDbJob.xml 
+REPOSITORY_MAINTENANCE_FILES=cr_tbs.sql cr_stormon_user.sql cr_stormon_schema_size.sql drop_stormon_schema.sql cr_stormon_mozart_schema.sql
+REPOSITORY_PACKAGES=storage_summary_load.sql storage_summary_db_9i.sql storage_summary_analysis.sql
+BUILDFILES=configure Makefile.in configure.in config.guess config.sub install.sh
+ALLCSOURCES=@allcsources@
+CSOURCES=@csources@
+EXECUTABLES=@executables@
+SCRIPTS=stormon_root.sh stormon
+BASEMODULES=Storage.pm Utilities.pm Upload.pm
+OSMODULES=Solaris.pm Veritas.pm Filesystem.pm App.pm Linux.pm Hpux.pm
+STORAGEMODULES=Emc.pm Sun.pm Hitachi.pm
+TESTSCRIPTS=testload teststdout
+
+#-----------------------------------------------------------------
+
+all:	clean build install
+
+clean:	
+	- cd  ${CSOURCE};make clean
+	- rm -rf ${GITSTORAGE}/*
+	- rm -rf ${GITLIB}/*
+	- rm -rf ${STORMON_PACKAGE_DIR}/*
+test:	
+	mkdir -m 777 -p ${GITLOG}
+	${GITTEST}/testload
+
+install:
+	mkdir -m 755 -p ${GITSTORAGE}
+	mkdir -m 755 -p ${GITLIB}/OS
+	mkdir -m 755 -p ${GITLIB}/Storage
+	cd ${SCRIPTSDIR}; cp ${SCRIPTS} ${GITSTORAGE}
+	cd ${WK}; cp ${EXECUTABLES} ${GITSTORAGE}
+	cd ${MODULESDIR}; cp ${BASEMODULES}  ${GITLIB}
+	cd ${MODULESDIR}; cp ${OSMODULES}  ${GITLIB}/OS
+	cd ${MODULESDIR}; cp ${STORAGEMODULES}  ${GITLIB}/Storage
+	cd ${README}; cp README9i.txt release_notes.txt ${GITSTORAGE}
+	cd ${TEST}; cp ${TESTSCRIPTS} ${GITSTORAGE}
+	chmod -R 755 ${GITLIB}
+	cd ${GITSTORAGE}; ./stormon_root.sh
+
+build:
+	cd ${CSOURCE};./configure;make 
+
+cvsrelease:
+	mkdir -m 775 -p ${GITCVSLIB}/OS
+	mkdir -m 775 -p ${GITCVSLIB}/Storage
+	mkdir -m 775 -p ${GITCVSSTORAGE}/c-source
+	umask 0002;cd ${MODULESDIR}; cp ${BASEMODULES} ${GITCVSLIB}
+	umask 0002;cd ${MODULESDIR}; cp ${OSMODULES}  ${GITCVSLIB}/OS
+	umask 0002;cd ${MODULESDIR}; cp ${STORAGEMODULES}  ${GITCVSLIB}/Storage
+	umask 0002;cd ${README}; cp README9i.txt release_notes.txt ${GITCVSSTORAGE}
+	umask 0002;cd ${TEST}; cp ${TESTSCRIPTS} ${GITCVSSTORAGE}
+	umask 0002;cd ${SCRIPTSDIR}; cp ${SCRIPTS} ${GITCVSSTORAGE}
+	umask 0002;cd ${CSOURCE}; cp ${BUILDFILES} ${ALLCSOURCES} ${GITCVSSTORAGE}/c-source
+	chown -R ajdsouza ${GITCVSLIB}
+	chown -R ajdsouza ${GITCVSSTORAGE}
+	chmod -R g+rw,o+r ${GITCVS}
+#	cd ${GITCVS}; tar -cvf gitstorage.tar ${CVSLIB} ${CVSSTORAGE};mv gitstorage.tar ${RELEASE}
+
+package:
+	mkdir -m 775 -p ${STORMON_PACKAGE_DIR}/em_4_0_jobs
+	mkdir -m 775 -p ${STORMON_PACKAGE_DIR}/repository/maintenance
+	mkdir -m 775 -p ${STORMON_PACKAGE_DIR}/readme
+	mkdir -m 775 -p ${STORMON_PACKAGE_DIR}/bin/c-source
+	mkdir -m 775 -p ${STORMON_PACKAGE_DIR}/Monitor/OS
+	mkdir -m 775 -p ${STORMON_PACKAGE_DIR}/Monitor/Storage
+	umask 0002;cd ${EM_4_0_JOBS_DIR}; cp ${EM_4_0_FILES} ${STORMON_PACKAGE_DIR}/em_4_0_jobs
+	umask 0002;cd ${REPOSITORY_MAINTENANCE_DIR}; cp ${REPOSITORY_MAINTENANCE_FILES} ${STORMON_PACKAGE_DIR}/repository/maintenance
+	umask 0002;cd ${REPOSITORY_PACKAGE_DIR}; cp ${REPOSITORY_PACKAGES}  ${STORMON_PACKAGE_DIR}/repository
+	umask 0002;cd ${MODULESDIR}; cp ${BASEMODULES} ${STORMON_PACKAGE_DIR}/Monitor
+	umask 0002;cd ${MODULESDIR}; cp ${OSMODULES}  ${STORMON_PACKAGE_DIR}/Monitor/OS
+	umask 0002;cd ${MODULESDIR}; cp ${STORAGEMODULES}  ${STORMON_PACKAGE_DIR}/Monitor/Storage
+	umask 0002;cd ${WK}; cp ${README_FILES} ${STORMON_PACKAGE_DIR}/readme
+	umask 0002;cd ${TEST}; cp ${TESTSCRIPTS} ${STORMON_PACKAGE_DIR}/bin
+	umask 0002;cd ${SCRIPTSDIR}; cp ${SCRIPTS} ${STORMON_PACKAGE_DIR}/bin
+	umask 0002;cd ${CSOURCE}; cp ${BUILDFILES} ${ALLCSOURCES} ${STORMON_PACKAGE_DIR}/bin/c-source
+	chown -R ajdsouza ${STORMON_PACKAGE_DIR}
+	chmod -R g+rw,o+r ${STORMON_PACKAGE_DIR}
+	cd ${WK}; tar -cvf stormon_package.tar ${STORMON_PACKAGE};mv stormon_package.tar ${RELEASE}
+

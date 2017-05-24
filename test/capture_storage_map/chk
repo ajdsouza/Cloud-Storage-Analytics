@@ -1,0 +1,5 @@
+use strict;
+use warnings;
+use storage::Register;
+
+my $array_ref = storage::Register::get_filesystem_metrics();

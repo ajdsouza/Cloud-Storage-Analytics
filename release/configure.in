@@ -1,0 +1,26 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT()
+
+AC_CANONICAL_HOST
+case "$host_os" in
+*hpux*) 
+	    csources="hpux_swapinfo.c scsiinq.c stormon.c stormon.h syminfo.c runcmd.c"
+            executables="scsiinq syminfo runcmd hpux_swapinfo" ;;
+*linux*)
+	    csources="ccissinfo.c idainfo.c ideinfo.c mdinfo.c runcmd.c run_pvdisplay.c run_raw.c run_sfdisk.c scsiinq.c stormon.c stormon.h"
+            executables="ccissinfo idainfo ideinfo mdinfo run_pvdisplay run_raw run_sfdisk runcmd scsiinq" ;;
+*solaris*) 
+	    csources="kdisks.c runcmd.c run_vxprint.c scsiinq.c stormon.c stormon.h syminfo.c"
+            executables="kdisks kdisks64 run_vxprint runcmd scsiinq syminfo" ;;
+esac
+
+allcsources="kdisks.c run_vxprint.c ccissinfo.c idainfo.c ideinfo.c mdinfo.c runcmd.c run_pvdisplay.c run_raw.c run_sfdisk.c scsiinq.c stormon.c stormon.h hpux_swapinfo.c syminfo.c"
+
+wkdir=`pwd | sed -e 's/\/release//'`
+
+AC_SUBST(wkdir)
+AC_SUBST(csources)
+AC_SUBST(executables)
+AC_SUBST(allcsources)
+
+AC_OUTPUT(Makefile)

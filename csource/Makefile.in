@@ -1,0 +1,67 @@
+#
+# Copyright  (c) 2001,2002  Oracle Corporation All rights reserved
+#
+#  $Id: Makefile.in,v 1.11 2002/12/06 23:30:03 vswamida Exp $ 
+#
+# NAME  
+#	 Makefile
+#
+# DESC 
+# 	Makefile for 9i and mozart releases
+#
+#
+# FUNCTIONS
+#
+#
+# NOTES
+#
+#
+# MODIFIED	(MM/DD/YY)
+# ajdsouza	04/18/02 - Created
+#
+#
+
+SHELL = /bin/sh
+
+WK=@wkdir@
+CSOURCE=${WK}
+
+CC=@CC@
+SUNCC=@suncc@
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@
+LDFLAGS=
+LIBS=@LIBS@
+DEFS=@DEFS@
+EXECUTABLES=@executables@
+OBJECTS=@objects@
+
+VPATH=${CSOURCE}
+
+#-----------------------------------------------------------------
+
+all:	clean build
+
+clean:	 
+	- rm -f ${WK}/*.o
+	- cd ${WK}/../;rm -f ${EXECUTABLES};
+
+build: ${EXECUTABLES} 
+	mv ${EXECUTABLES} ../
+
+${EXECUTABLES}: ${OBJECTS}
+
+kdisks: kdisks.c
+	${SUNCC} ${LDFLAGS} -lkvm $< -o $@
+
+kdisks64: kdisks.c
+	${SUNCC} ${LDFLAGS} -xarch=v9 -lkvm $< -o $@
+
+syminfo: syminfo.c
+	${CC} ${CFLAGS} ${LDFLAGS} ${DEFS} ${OBJECTS} -lsymapi43 $< -o $@
+
+% : %.c
+	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} ${DEFS} ${OBJECTS} $< -o $@
+
+%.o: %.c %.h
+	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} ${DEFS} -c $< -o $@

@@ -1,0 +1,150 @@
+
+Metric Name  	disk_devices
+
+	  Metric Column 			Required	Description						                          Use
+	  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+          disk_devices_type			YES		Type  eg. DISK, SLICE					                            
+          disk_devices_filetype			YES		File Type , BLOCK, CHARCATER 
+	  disk_devices_nameinstance				Name instance for the disk device
+          disk_devices_logical_name		YES		Logical Path for the disk device/partition
+          disk_devices_inode			YES		Link inode						                          Uniquely identify the device on the system
+	  disk_devices_capacity			YES		Disk/Parition size in bytes							     
+          disk_devices_vendor			YES		Vendor							                          To identify the vendor for external storage 
+          disk_devices_product			YES		Product										  To identify the type of external storage system
+	  disk_devices_configuration		YES		Configuration of the disk eg. Layered,3WAY Mirrored, RAID 0			     
+          disk_devices_storage_system_id			External storage system Id							     
+	  disk_devices_storage_disk_device_id			Device Id for this LUN in the external storage system				     
+	  disk_devices_storage_system_key	YES		Unique key for identifying the external Storage system eg. vedor_product_id	  To uniquely identify the external storage system
+	  disk_devices_storage_spindles				Physical /Logical Location of the disk or disks in the external storage system	  
+	  disk_devices_partitionstart				Start sector for a partition
+	  disk_devices_nsectors					Number of sectors in the partition	   
+          disk_devices_device_status		YES		Device status of the disk eg. OFFLINE,  FORMATTED|UNFORMATTED     
+          disk_devices_slice_key		YES		Slice Key, unique for a disk partition <Vendor>_<Product>_<Serial#>_<Slice>       Uniquely Identfy the disk slice across systems
+          disk_devices_disk_key			YES		Disk Key  , unique for  LUN <Vendor>_<Product>_<Serial#>                          Uniquely Identfy the disk device across systems
+          disk_devices_key			YES		Key , to identify each record in EMD, logical name can be used for this             
+
+
+Metric Name	storage_swraid
+
+	Metric Column 			Required	Description							                                                    Use
+	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	storage_swraid_type		YES		Type of data record eg. DISK, SLICE, SUBDISK				
+	storage_swraid_vendor				Swraid Vendor								
+	storage_swraid_filetype		YES		File type , BLOCK or CHARACTER					         
+	storage_swraid_name		YES		Logical Name for the Raid volume, slice or physical disk		 
+	storage_swraid_parent		YES		This is for a subdisk, its the swraid name to which the subdisk belongs	
+	storage_swraid_inode		YES		Link inode# for the logical path					 
+	storage_swraid_size		YES		Size in bytes
+	storage_swraid_diskkey		YES		Key value for the disk, common for all slices of the disk,logical name of the backupslice can be the diskkey			
+	storage_swraid_slicekey		YES		Key value for the slice, common for the block and char counterparts of a slice eg. diskkey_slice
+	storage_swraid_configuration	YES		The raid configuration
+	storage_swraid_key		YES		Key for the mozart repository, can be the logical name of the disk
+
+
+
+
+Metric Name	storage_volume_layers
+
+	Metric Column					Required	Description						                          Use
+	-------------------------------------------------------------------------------------------------------------------------------------------------------------		  
+        storage_volume_layers_vendor					Vendor  eg. VERITAS, HPLVM etc.
+        storage_volume_layers_type			YES		Type of layer in the volume metric eg. VOLUME,DISKSLICE,DISK etc.
+        storage_volume_layers_name			YES		Name 
+        storage_volume_layers_diskgroup	Disk Group	YES
+        storage_volume_layers_size			YES		Size 
+        storage_volume_layers_config					Configuration
+        storage_volume_layers_diskname			YES		Disk name for a DISKSLICE 
+	storage_volume_layers_volumename		YES		Volume name for a DISKSLICE	
+        storage_volume_layers_path			YES		OS path
+	storage_volume_layers_filetype			YES		File type for the path , BLOCK or CHARACTER
+	storage_volume_layers_inode			YES		Inode for the path
+	storage_volume_layers_state			YES		State of the Volume, Disk or Disk slice
+        storage_volume_layers_key			YES		Key 
+
+
+
+
+Metric Name	storage_filesystems
+
+       Metric Column				Required	Description						                          Use
+       -------------------------------------------------------------------------------------------------------------------------------------------------------------
+       storage_filesystems_fstype				Type of filesystem eg. ufs,vxfs,nfs etc.
+       storage_filesystems_filesystem		YES		Filesystem Name
+       storage_filesystems_inode		YES		Inode# of the file system on the host
+       storage_filesystems_mountpoint		YES		Mount Point
+       storage_filesystems_mountpointinode	YES		Inode# for the mountpoint
+       storage_filesystems_mount_options	YES		Mount options used for mountin gthe filesystem		                          Auditing purposes
+       storage_filesystems_size			YES		Size of the filesystem (bytes)
+       storage_filesystems_used			YES		Used (%) 
+       storage_filesystems_free			YES		Free space in the filesystem ( bytes )
+       storage_filesystems_mounttype		YES		Indicate if the filesystem is a regular file	
+       storage_filesystems_nfs_server		YES		NFS server for nfs
+       storage_filesystems_nfs_volume		YES		Volume name (ID) on the NFS server
+       storage_filesystems_nfs_vendor		YES		NFS server Vendor  eg. NETAPP, EMC
+       storage_filesystems_nfs_product		YES		NFS Product or Model eg. CELERA,F800
+       storage_filesystems_nfs_privilege	YES		Mount privilege for the NFS file system eg. READ, WRITE etc.
+       storage_filesystems_nfs_exclusive	YES		Count of the number of servers mounting this filesystem
+       storage_filesystems_key			YES		Key for the EMD agent/repository
+
+
+
+
+Metric Name	storage_applications
+
+       Metric Column					Required	Description						                          Use
+       -------------------------------------------------------------------------------------------------------------------------------------------------------------
+       storage_applications_type			YES		Type of application 	eg. ORACLE_DATABASE etc.
+       storage_applications_name					application Name 	eg. dbname for Oracle database
+       storage_applications_id				YES		application instance Id eg. Oracle sid 
+       storage_applications_file			YES		file name
+       storage_applications_inode			YES		Link Inode#
+       storage_applications_filetype			YES		Indicate if file is regular or special
+       storage_applications_size			YES		Size (bytes)
+       storage_applications_used			YES		Used (bytes)
+       storage_applications_free			YES		Free (bytes )
+       storage_applications_shared			YES		Clustered Application (Y/N)
+       storage_applications_oracle_database_tablespace			Tablespace name for a Oracle Database
+       storage_applications_oem_target_name				Database target name in the oem 9i repository
+       storage_applications_key				YES		Key for the EMD agent/repository
+
+
+
+
+Metric Name	storage_summary
+
+       Metric Column					Description						                          Use
+       -------------------------------------------------------------------------------------------------------------------------------------------------------------
+       storage_summary_cluster_id			Cluster id, if host belongs to a cluster
+       storage_summary_application_size			Space taken by the application 
+       storage_summary_application_free			Free space in the application 
+       storage_summary_oracle_database_size		Space taken by the Oracle database application 
+       storage_summary_oracle_database_free		Free space in the Oracle database application 
+       storage_summary_local_filesystem_size		Space alloted to local filesystems 
+       storage_summary_local_filesystem_free		Free space in local filesystems 
+       storage_summary_nfs_servers_size			size of NFS filesystems , from servers 
+       storage_summary_nfs_servers_free			Free space in NFS filesystems, from servers free 
+       storage_summary_nfs_others_size			size of NFS filesystems cross mounts 
+       storage_summary_nfs_others_free			free space in NFS filesystems cross mounts 
+       storage_summary_volumemanager_rawsize		DIsks space used by the volume manager 
+       storage_summary_volumemanager_size		Size of volumes provided by the volume manager 
+       storage_summary_volumemanager_free		Free space in Volume manager 
+       storage_summary_swraid_rawsize			Total disks used by the software raid manager
+       storage_summary_swraid_size			Disk size provided by the software raid manager
+       storage_summary_swraid_free			Free disks and partitions in the software raid manager
+       storage_summary_disk_rawsize			Raw disk storage taken by a host 	
+       storage_summary_disk_size			Size of all disks visible to the host as disk devices
+       storage_summary_disk_free			Unused disks and free OS partitions 
+       storage_summary_rawsize				Total raw storage taken by the host ( NFS + Disks)
+       storage_summary_size				Total storage visible to the host ( NFS + Disks) 
+       storage_summary_free				Total free  storage for the Host (NFS + Disks)
+       storage_summary_vendor_emc_size			EMC host side 
+       storage_summary_vendor_emc_rawsize		EMC storage side 
+       storage_summary_vendor_sun_size			SUN host side 
+       storage_summary_vendor_sun_rawsize		SUN storage side 
+       storage_summary_vendor_others_size		All other storage 
+       storage_summary_vendor_others_rawsize		All other storage 
+       storage_summary_vendor_nfs_netapp_size		NFS storage by Netapp 
+       storage_summary_vendor_nfs_emc_size		NFS storage by EMC 
+       storage_summary_vendor_nfs_sun_size		NFS storage by SUN 
+       storage_summary_vendor_nfs_others_size		NFS storage by Others
+       storage_summary_key				Key for the EMD agent/repository

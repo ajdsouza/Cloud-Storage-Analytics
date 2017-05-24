@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo $1
+
+indent -lps -nut -npsl -bl -bli0 -bls -ts2 -di16 -npcs -nbfda -i2 -c1 -lp -ppi1 -l79 -bbo $1 -o i$1

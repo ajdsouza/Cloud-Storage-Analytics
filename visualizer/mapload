@@ -1,0 +1,130 @@
+#!/usr/local/git/perl/bin/perl
+
+use strict;
+use warnings;
+
+use Monitor::Storage;
+use Monitor::Utilities;
+
+my $file = '/home/ajdsouza/stormon/mozart/mapfile.txt';
+
+# Test repository connection
+$ENV{'UPLOAD_DB_USER'}='em_4';
+$ENV{'UPLOAD_DB_PASSWORD'}='em_4';
+$ENV{'UPLOAD_DB_TNS'}="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=eagle1-pc.us.oracle.com)(Port=1521)))(CONNECT_DATA=(SID=iasem)))";
+
+my $sqldelg = "DELETE FROM MGMT_TARGET_COMPOSITE";
+my $sqldel0 = "DELETE FROM MGMT_TARGETS";
+my $sqldel1 = "DELETE FROM MGMT_STORAGE_KEYS";
+my $sqldel2 = "DELETE FROM MGMT_STORAGE_DATA";
+
+my $sqlg = "INSERT INTO MGMT_TARGET_COMPOSITE( COMPOSITE_NAME, COMPOSITE_TYPE, MEMBER_TARGET_NAME, MEMBER_TARGET_TYPE ) VALUES ( :1,:2,:3 ,:4)";
+my $sql0 = "INSERT INTO MGMT_TARGETS( TARGET_GUID, TARGET_NAME, COMMENTS ,TARGET_TYPE ) VALUES ( :1,:2,:3, :4)";
+my $sql1 = "INSERT INTO MGMT_STORAGE_KEYS( TARGET_GUID, KEY_VALUE, PARENT_KEY_VALUE ) VALUES ( :1,:2,:3 )";
+my $sql2 = "INSERT INTO MGMT_STORAGE_DATA( TARGET_GUID, KEY_VALUE, STORAGE_LAYER, ENTITY_TYPE, SIZEB, USEDB, FREEB , GLOBAL_UNIQUE_ID ,EM_QUERY_FLAG) VALUES ( :1,:2,:3,:4,:5,:6,:7,:8,:9 )";
+
+my %dbh = dbconnect( $ENV{UPLOAD_DB_USER}, $ENV{UPLOAD_DB_PASSWORD}, $ENV{UPLOAD_DB_TNS}, 10, 3, 30) or warn "\nERROR: Failed to get a connection to the repository. aborting job \n" ;
+
+$dbh{dbh}->prepare($sqldelg)->execute or die "Failed to delete from table MGMT_TARGET_COMPOSITE";
+$dbh{dbh}->prepare($sqldel0)->execute or die "Failed to delete from table MGMT_TARGETS";
+$dbh{dbh}->prepare($sqldel1)->execute or die "Failed to delete from table MGMT_STORAGE_KEYS";
+$dbh{dbh}->prepare($sqldel2)->execute or die "Failed to delete from table MGMT_STORAGE_USAGE";
+
+
+my $sthg = $dbh{dbh}->prepare($sqlg);
+my $sth0 = $dbh{dbh}->prepare($sql0);
+my $sth1 = $dbh{dbh}->prepare($sql1);
+my $sth2 = $dbh{dbh}->prepare($sql2);
+
+open(FH,$file) or die "Failed to open the mapfile $file \n";
+
+my $target_guid;
+my $target_name;
+my $target_comments;
+my $data_schema;
+
+$sth0->execute('1001','TEST_GROUP','This is a test Group','composite') or die "Failed to insert into MGMT_TARGETS the group target of type composite \n";
+
+
+while ( <FH> ){
+
+	chomp;
+
+	s/^\s+|\s+$//g;
+
+	s/^-+//g;
+
+	s/^\s+|\s+$//g;
+
+	next unless $_;
+
+	$data_schema = 'MGMT_STORAGE_KEYS' if $_ =~ /Physical mapping between the keys in the storage layers/i;
+
+	# Read the host name and id
+	if ( $_ =~ /^\#\s+HOST\s+\d+\s+-\s+/ and not $data_schema ){
+	 
+	    my @target_info  = split, $_;
+	    
+	    die " Unable to get the target information from $_ " unless @target_info > 3;
+
+	    $target_guid = $target_info[2];
+	    $target_name = $target_info[2];
+	    
+	    undef $target_comments;
+	    
+	    for my $word (  4..@target_info ){
+		$target_comments .= ' '.$target_info[$word] if $target_info[$word];
+	    }
+	    
+	    $sth0->execute($target_guid,$target_name,$target_comments,'host') or die "Failed to insert into MGMT_TARGETS values $target_guid,$target_name,$target_comments \n";
+	    $sthg->execute('TEST_GROUP','composite',$target_name,'host') or die "Failed to insert into MGMT_TARGETS values $target_guid,$target_name,$target_comments \n";
+	    
+	    next;
+
+	}
+
+	next if $_ =~ /^\#/;
+
+	my @results;
+	my @values = split, $_;	
+
+	for my $eachcol( @values ){
+
+		$eachcol =~ s/^\s+|\s+$//g;
+		$eachcol =~ s/^-+$//g;
+
+		$eachcol =~ s/-/ /g;
+
+		print "each col $eachcol \n";
+
+		push @results,$eachcol;
+
+		
+
+	}
+
+	$results[2] = $results[1] if @results == 3 and not $results[2];
+
+	$sth1->execute($results[0],$results[1],$results[2]) and next if @results == 3;
+	print "($results[0],$results[1],$results[2],$results[3],$results[4],$results[5],$results[6],$results[7])\n";
+	$sth2->execute($results[0],$results[1],$results[2],$results[3],$results[4],$results[5],$results[6],$results[8],$results[9]) and next if @results == 10;
+
+	for my $res ( @results ){
+	    print "$res\n";
+	}
+
+ 	$dbh{dbh}->rollback and $dbh{dbh}->disconnect and die "Results are nither 10 nor 3, dont fit both tables ";
+
+}
+
+close(FH);
+
+$sthg->finish;
+$sth0->finish;
+$sth1->finish;
+$sth2->finish;
+
+$dbh{dbh}->commit or die "ERROR: Failed while commiting to the database !!\n" ;
+
+$dbh{dbh}->disconnect or die "ERROR: Failed while disconnection from Maaster database !!\n" ;
+

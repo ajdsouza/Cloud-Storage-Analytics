@@ -1,0 +1,7 @@
+BEGIN
+execute immediate 'DROP TABLE xxx';
+EXCEPTION
+WHEN OTHERS THEN
+ NULL;
+END;
+/
